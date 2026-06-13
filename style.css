@@ -1807,3 +1807,26 @@ html.op-loading body {
 .small-btn { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 132px; padding: 12px 16px; color: #fff !important; background: #2563eb; border-radius: 18px; font-weight: 800; text-decoration: none; }
 .panel-head { gap: 12px; }
 @media (max-width: 720px){ .small-btn{min-width: 128px; padding: 10px 12px; font-size: 14px;} .panel-head{align-items:center;} }
+
+
+/* WHS v5 company theme overrides */
+.theme-dhl { --whs-theme-accent:#ffcc00; --whs-theme-second:#d40511; }
+.theme-amazon { --whs-theme-accent:#ff9900; --whs-theme-second:#232f3e; }
+.theme-gxo { --whs-theme-accent:#2f80ed; --whs-theme-second:#101828; }
+.theme-wincanton { --whs-theme-accent:#e31b23; --whs-theme-second:#23395d; }
+.theme-xpo { --whs-theme-accent:#ed1c24; --whs-theme-second:#111827; }
+.theme-evri { --whs-theme-accent:#7c3aed; --whs-theme-second:#111827; }
+.theme-royal-mail { --whs-theme-accent:#e4002b; --whs-theme-second:#ffcc00; }
+.theme-yodel { --whs-theme-accent:#f97316; --whs-theme-second:#4c1d95; }
+.theme-dpd { --whs-theme-accent:#dc2626; --whs-theme-second:#111827; }
+.theme-ceva { --whs-theme-accent:#ef4444; --whs-theme-second:#1f2937; }
+.theme-custom { --whs-theme-accent: var(--whs-custom-accent); --whs-theme-second:#111827; }
+body[class*="theme-"] .plan-chip,
+body[class*="theme-"] .nav-link.active,
+body[class*="theme-"] .btn.primary,
+body[class*="theme-"] .brand-icon,
+body[class*="theme-"] .holiday-summary-card.balance-remaining { background: linear-gradient(135deg, var(--whs-theme-accent, #f59e0b), var(--whs-theme-second, #111827)) !important; }
+body[class*="theme-"] .hero-card,
+body[class*="theme-"] .pro-hero { background: linear-gradient(135deg, var(--whs-theme-second, #111827), var(--whs-theme-accent, #f59e0b)) !important; }
+body[class*="theme-"] .topbar h2::after,
+body[class*="theme-"] .nav-group summary { border-color: var(--whs-theme-accent, #f59e0b) !important; }

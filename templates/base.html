@@ -61,7 +61,7 @@
     </div>
 </div>
 
-<body class="{{ "auth-page" if page in ['auth', 'login', 'register'] else "" }}">
+<body class="{{ "auth-page" if page in ['auth', 'login', 'register'] else "" }} theme-{{ (user.company_theme if user and user.company_theme else 'whs')|replace('_','-') }}" style="--whs-custom-accent: {{ user.brand_color if user and user.brand_color else '#f59e0b' }};">
 
 <div class="app-shell">
     {% if user %}
@@ -69,8 +69,8 @@
         <div class="brand">
             <div class="brand-icon whs-brand-icon">WHS</div>
             <div>
-                <h1>WHS</h1>
-                <p>Warehouse Support</p>
+                <h1>WHS{% if user and user.company_name %} · {{ user.company_name }}{% endif %}</h1>
+                <p>Warehouse Support{% if user and user.business_name %} · {{ user.business_name }}{% endif %}</p>
             </div>
         </div>
 
@@ -81,13 +81,12 @@
                 <span class="nav-ico">🏠</span><span>Dashboard</span>
             </a>
             <a class="{{ 'active' if page == 'morning_brief' else '' }} nav-link" href="{{ url_for('morning_brief') }}"><span class="nav-ico">☀️</span><span>Morning Brief</span></a>
+            <a class="{{ 'active' if page == 'yard_check' else '' }} nav-link" href="{{ url_for('yard_check') }}"><span class="nav-ico">🚛</span><span>Yard Check</span></a>
             <details class="nav-group" open>
                 <summary><span class="nav-ico">📅</span><span>Calendar</span></summary>
                 <a class="{{ 'active' if page == 'shift_calendar' else '' }} nav-link" href="{{ url_for('shift_calendar') }}"><span class="nav-ico">📆</span><span>My Calendar</span></a>
                 <a class="{{ 'active' if page == 'holiday_tracker' else '' }} nav-link" href="{{ url_for('holiday_tracker') }}"><span class="nav-ico">🏖️</span><span>Holiday Tracker</span></a>
             </details>
-            <a class="{{ 'active' if page == 'handover' else '' }} nav-link" href="{{ url_for('handover') }}"><span class="nav-ico">📋</span><span>Handover</span></a>
-            <a class="{{ 'active' if page == 'yard_check' else '' }} nav-link" href="{{ url_for('yard_check') }}"><span class="nav-ico">🚛</span><span>Yard Check</span></a>
             <a class="{{ 'active' if page == 'team' else '' }} nav-link" href="{{ url_for('team') }}"><span class="nav-ico">👥</span><span>Team</span></a>
 
             <details class="nav-group" open>
@@ -97,6 +96,7 @@
                 <a class="{{ 'active' if page == 'mileage' else '' }} nav-link" href="{{ url_for('mileage') }}"><span class="nav-ico">🚗</span><span>Mileage</span></a>
                 <a class="{{ 'active' if page == 'expenses' else '' }} nav-link" href="{{ url_for('expenses') }}"><span class="nav-ico">💷</span><span>Expenses</span></a>
                 <a class="{{ 'active' if page == 'notifications' else '' }} nav-link" href="{{ url_for('notifications_page') }}"><span class="nav-ico">🔔</span><span>Notifications</span></a>
+                <a class="{{ 'active' if page == 'handover' else '' }} nav-link" href="{{ url_for('handover') }}"><span class="nav-ico">📋</span><span>Handover</span></a>
                 {% if user and user.email == "admin@whs-app.com" %}
                 <a class="{{ 'active' if page == 'admin' else '' }} nav-link" href="{{ url_for('admin_dashboard') }}"><span class="nav-ico">🛡️</span><span>Admin</span></a>
                 {% endif %}

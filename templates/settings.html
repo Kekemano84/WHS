@@ -6,6 +6,7 @@
         <a href="#business-settings">{{ t("business_details") if t("business_details") != "business_details" else "Profile Details" }}</a>
         <a href="#language-settings">{{ t("language") if t("language") != "language" else "Language" }}</a>
         <a href="#favorite-settings">{{ t("favorites") if t("favorites") != "favorites" else "Favorites" }}</a>
+        <a href="#appearance-settings">Appearance / Themes</a>
         <a href="{{ url_for('holiday_settings') }}">{{ t("holiday_settings") if t("holiday_settings") != "holiday_settings" else "Holiday Settings" }}</a>
         <a href="#backup-settings">{{ t("backup_data") }}</a>
     </div>
@@ -15,7 +16,7 @@
     <h3>{{ t("business_details") if t("business_details") != "business_details" else "Profile Details" }}</h3>
     <form method="POST" class="form-grid">
         <div><label>{{ t("business_name") if t("business_name") != "business_name" else "Site / Department" }}</label><input name="business_name" value="{{ row.business_name or '' }}"></div>
-        <div><label>{{ t("company_site_name") if t("company_site_name") != "company_site_name" else "Company / Site" }}</label><input name="company_name" value="{{ row.company_name or '' }}"></div>
+        <div><label>{{ t("company_site_name") if t("company_site_name") != "company_site_name" else "Company / Site" }}</label><input name="company_name" placeholder="DHL, GXO, Amazon..." value="{{ row.company_name or '' }}"><small class="muted">This appears next to the WHS logo.</small></div>
         <div><label>{{ t("your_name") if t("your_name") != "your_name" else "Your Name" }}</label><input name="name" value="{{ row.name or '' }}"></div>
         <div><label>Email</label><input value="{{ row.email or '' }}" disabled></div>
         <div><label>{{ t("your_role") if t("your_role") != "your_role" else "Your Role" }}</label><select name="role"><option {{ "selected" if row.role == "Admin" else "" }}>Admin</option><option {{ "selected" if row.role == "Manager" else "" }}>Manager</option><option {{ "selected" if row.role == "FLM" else "" }}>FLM</option><option {{ "selected" if row.role == "User" else "" }}>User</option></select></div>
@@ -27,6 +28,15 @@
 
         <div id="language-settings"><label>{{ t("language") if t("language") != "language" else "Language" }}</label><select name="language">{% for code,label in available_languages %}<option value="{{ code }}" {% if row.language==code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
 
+
+        <div class="wide" id="appearance-settings">
+            <h3>Appearance / Company Theme</h3>
+            <p class="muted">Choose a UK logistics style, or use Custom and set your own colour. No company logos are used.</p>
+        </div>
+        <div><label>Company Theme</label><select name="company_theme">
+            {% for key,label in company_theme_options %}<option value="{{ key }}" {% if row.company_theme == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select></div>
+        <div><label>Custom Accent Colour</label><input type="color" name="brand_color" value="{{ row.brand_color or '#f59e0b' }}"></div>
         <div class="wide" id="favorite-settings">
             <h3>{{ t("dashboard_favorites") if t("dashboard_favorites") != "dashboard_favorites" else "Dashboard Favorites" }}</h3>
             <p class="muted">{{ t("dashboard_favorites_help") if t("dashboard_favorites_help") != "dashboard_favorites_help" else "Choose the four quick buttons shown on your mobile dashboard." }}</p>

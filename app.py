@@ -440,7 +440,8 @@ def init_db():
     safe_add_column("handovers", "extra_json", "TEXT")
     safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 28")
     safe_add_column("users", "language", "TEXT DEFAULT 'en'")
-    safe_add_column("users", "favorite_tools", "TEXT DEFAULT 'morning_brief,mileage,expenses,handover'")
+    safe_add_column("users", "favorite_tools", "TEXT DEFAULT 'morning_brief,shift_calendar,handover,yard_check'")
+    safe_add_column("users", "company_theme", "TEXT DEFAULT 'whs'")
     safe_add_column("users", "last_login_at", "TEXT")
     safe_add_column("users", "inactive_warning_at", "TEXT")
     safe_add_column("team_members", "licence_expiry", "TEXT")
@@ -477,7 +478,8 @@ def ensure_schema_updates():
             ("inactive_warning_at", "TEXT"),
             ("business_logo_filename", "TEXT"),
             ("brand_color", "TEXT DEFAULT '#2563eb'"),
-            ("default_site_id", "INTEGER")
+            ("default_site_id", "INTEGER"),
+            ("company_theme", "TEXT DEFAULT 'whs'")
         ],
         "team_members": [
             ("permissions", "TEXT DEFAULT 'View only'"),
@@ -551,12 +553,14 @@ def seed_admin_user():
     add_col("fence_start", "INTEGER DEFAULT 1")
     add_col("fence_end", "INTEGER DEFAULT 120")
     add_col("language", "TEXT DEFAULT 'en'")
-    add_col("favorite_tools", "TEXT DEFAULT 'morning_brief,mileage,expenses,handover'")
+    add_col("favorite_tools", "TEXT DEFAULT 'morning_brief,shift_calendar,handover,yard_check'")
     add_col("last_login_at", "TEXT")
     add_col("inactive_warning_at", "TEXT")
     add_col("password_changed_at", "TEXT")
-    add_col("default_site_id", "INTEGER")
-    add_col("brand_color", "TEXT DEFAULT '#2563eb'")
+    add_col("default_site_id", "INTEGER"),
+            ("company_theme", "TEXT DEFAULT 'whs'")
+    add_col("brand_color", "TEXT DEFAULT '#f59e0b'")
+    add_col("company_theme", "TEXT DEFAULT 'whs'")
     add_col("business_logo_filename", "TEXT")
     add_col("pro_expires_at", "TEXT")
     add_col("pro_reason", "TEXT")
@@ -770,6 +774,22 @@ FAVORITE_TOOL_OPTIONS = [
     ("index", "☁️", "Weather", "index"),
     ("yard_settings", "⚙️", "Yard Settings", "yard_settings"),
     ("admin", "🛡️", "Admin", "admin_dashboard"),
+]
+
+
+COMPANY_THEME_OPTIONS = [
+    ("whs", "WHS Default"),
+    ("dhl", "DHL style colours"),
+    ("amazon", "Amazon style colours"),
+    ("gxo", "GXO style colours"),
+    ("wincanton", "Wincanton style colours"),
+    ("xpo", "XPO style colours"),
+    ("evri", "Evri style colours"),
+    ("royal_mail", "Royal Mail style colours"),
+    ("yodel", "Yodel style colours"),
+    ("dpd", "DPD style colours"),
+    ("ceva", "CEVA style colours"),
+    ("custom", "Custom colour"),
 ]
 
 def get_favorite_tools(user):
@@ -5152,7 +5172,7 @@ def settings():
     if request.method == "POST":
         conn = get_db()
         conn.execute("""
-            UPDATE users SET business_name = ?, company_name = ?, name = ?, role = ?, phone = ?, address = ?, mileage_rate = ?, door_count = ?, fence_count = ?, language = ?, favorite_tools = ? WHERE id = ?
+            UPDATE users SET business_name = ?, company_name = ?, name = ?, role = ?, phone = ?, address = ?, mileage_rate = ?, door_count = ?, fence_count = ?, language = ?, favorite_tools = ?, company_theme = ?, brand_color = ? WHERE id = ?
         """, (
             request.form.get("business_name", "").strip(),
             request.form.get("company_name", "").strip(),
@@ -5165,13 +5185,15 @@ def settings():
             int(request.form.get("fence_count") or 120),
             request.form.get("language", "en"),
             ",".join([request.form.get(f"favorite_{i}", "") for i in range(1,5) if request.form.get(f"favorite_{i}", "")]),
+            request.form.get("company_theme", "whs"),
+            request.form.get("brand_color", "#f59e0b"),
             user["id"]
         ))
         conn.commit()
         conn.close()
         flash("Settings saved.", "success")
         return redirect(url_for("settings"))
-    return render_template("settings.html", row=user, page="settings", selected_favorites=[x[0] for x in get_favorite_tools(user)])
+    return render_template("settings.html", row=user, page="settings", selected_favorites=[x[0] for x in get_favorite_tools(user)], company_theme_options=COMPANY_THEME_OPTIONS)
 
 
 
