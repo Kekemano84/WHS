@@ -3221,3 +3221,31 @@ button:disabled {
 .yard-tools-strip span{font-size:12px;color:#64748b;font-weight:800;}
 .yard-tools-strip input{padding:8px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;}
 @media(max-width:760px){.live-metrics,.yard-tools-strip{grid-template-columns:1fr}.warehouse-scene{height:96px}.dock-door{width:44px}.warehouse-box{width:70px}.trailer-run{font-size:30px}}
+
+/* WHS v4 fix: show language selector inside the login/register card above Free Access */
+.auth-page .auth-card-modern .auth-language-form.right-language,
+.auth-page .whs-auth-card .auth-language-form.right-language{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:12px !important;
+  margin:0 0 14px 0 !important;
+  padding:12px 14px !important;
+  border-radius:18px !important;
+  background:#f8fafc !important;
+  border:1px solid #e5e7eb !important;
+}
+.auth-page .auth-card-modern .auth-language-form.right-language label,
+.auth-page .whs-auth-card .auth-language-form.right-language label{
+  margin:0 !important;
+  font-weight:950 !important;
+  color:#0f172a !important;
+  white-space:nowrap !important;
+}
+.auth-page .auth-card-modern .auth-language-form.right-language select,
+.auth-page .whs-auth-card .auth-language-form.right-language select{
+  margin-left:auto !important;
+  width:auto !important;
+  min-width:160px !important;
+  background:#fff !important;
+}
