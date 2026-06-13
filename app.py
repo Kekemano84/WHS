@@ -1220,35 +1220,45 @@ def next_invoice_number(user_id):
 
 
 
-def generate_morning_brief_text(date, shift, manager, role, volume, available_hc, late_trailers, safety_message, priorities, team_messages, break_reminder, equipment_reminder):
-    return f"""Good morning team,
+def generate_morning_brief_text(date, shift, manager, role, volume, available_hc, late_trailers, safety_message, priorities, team_messages, break_reminder, equipment_reminder, custom_sections=None):
+    lines = [
+        "Good morning team,",
+        "",
+        f"Today we are running {shift or 'Day'} shift.",
+        "",
+        f"Manager: {manager or 'Not specified'}",
+        f"Role: {role or 'Not specified'}",
+        "",
+        "Today's Plan:",
+        f"- Expected volume: {volume}",
+        f"- Available HC: {available_hc}",
+        "",
+    ]
 
-Today we are running {shift} shift.
+    if custom_sections:
+        for section in custom_sections:
+            header = (section.get('header') or '').strip()
+            value = (section.get('value') or '').strip()
+            if not header and not value:
+                continue
+            lines.append(f"{header or 'Section'}:")
+            lines.append(value or 'No message added.')
+            lines.append("")
+    else:
+        default_sections = [
+            ("Safety Message", safety_message or 'Keep the area safe, clean and controlled. Report hazards immediately.'),
+            ("Priorities", priorities or 'Focus on trailer control, clean handovers and completing work safely.'),
+            ("Team Messages", team_messages or 'Keep communication clear and support each other during the shift.'),
+            ("Break Reminder", break_reminder or 'Take breaks in a controlled way and make sure the operation is covered.'),
+            ("Equipment / MHE / Scanner / Key Reminder", equipment_reminder or 'Return all MHE keys, scanners and equipment at the end of the shift.'),
+        ]
+        for header, value in default_sections:
+            lines.append(f"{header}:")
+            lines.append(value)
+            lines.append("")
 
-Manager: {manager or 'Not specified'}
-Role: {role or 'Not specified'}
-
-Today's Plan:
-- Expected volume: {volume}
-- Available HC: {available_hc}
-
-Safety Message:
-{safety_message or 'Keep the area safe, clean and controlled. Report hazards immediately.'}
-
-Priorities:
-{priorities or 'Focus on trailer control, clean handovers and completing work safely.'}
-
-Team Messages:
-{team_messages or 'Keep communication clear and support each other during the shift.'}
-
-Break Reminder:
-{break_reminder or 'Take breaks in a controlled way and make sure the operation is covered.'}
-
-Equipment / MHE / Scanner / Key Reminder:
-{equipment_reminder or 'Return all MHE keys, scanners and equipment at the end of the shift.'}
-
-Let’s keep it safe, organised and productive.
-"""
+    lines.append("Let’s keep it safe, organised and productive.")
+    return "\n".join(lines) + "\n"
 
 def generate_handover_text(date, shift, manager, volume, planned_hc, actual_hc, late_trailers, issues, actions, extra=None):
     extra = extra or {}
@@ -2997,15 +3007,26 @@ def morning_brief():
         volume = int(request.form.get("volume") or 0)
         available_hc = int(request.form.get("available_hc") or 0)
         late_trailers = 0
-        safety_message = request.form.get("safety_message", "").strip()
-        priorities = request.form.get("priorities", "").strip()
-        team_messages = request.form.get("team_messages", "").strip()
-        break_reminder = request.form.get("break_reminder", "").strip()
-        equipment_reminder = request.form.get("equipment_reminder", "").strip()
+        headers = request.form.getlist("section_header[]")
+        values = request.form.getlist("section_value[]")
+        custom_sections = []
+        for i in range(max(len(headers), len(values))):
+            header = (headers[i] if i < len(headers) else "").strip()
+            value = (values[i] if i < len(values) else "").strip()
+            if header or value:
+                custom_sections.append({"header": header, "value": value})
+
+        # Keep these columns populated for compatibility with older saved records.
+        safety_message = custom_sections[0]["value"] if len(custom_sections) > 0 else ""
+        priorities = custom_sections[1]["value"] if len(custom_sections) > 1 else ""
+        team_messages = custom_sections[2]["value"] if len(custom_sections) > 2 else ""
+        break_reminder = custom_sections[3]["value"] if len(custom_sections) > 3 else ""
+        equipment_reminder = custom_sections[4]["value"] if len(custom_sections) > 4 else ""
 
         generated = generate_morning_brief_text(
             date, shift, manager, role, volume, available_hc, late_trailers,
-            safety_message, priorities, team_messages, break_reminder, equipment_reminder
+            safety_message, priorities, team_messages, break_reminder, equipment_reminder,
+            custom_sections=custom_sections
         )
 
         conn = get_db()

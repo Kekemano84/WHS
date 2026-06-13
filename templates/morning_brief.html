@@ -13,22 +13,50 @@
     <div class="panel-head">
         <div>
             <h3>Create Morning Brief</h3>
-            <p class="muted">Use this before the shift starts. Keep it short, clear and practical.</p>
+            <p class="muted">Edit the section headers, add new sections, or remove sections you do not need.</p>
         </div>
     </div>
 
-    <form method="POST" class="form-grid">
+    <form method="POST" class="form-grid" id="morningBriefForm">
         <div><label>Date</label><input type="date" name="date"></div>
         <div><label>Shift</label><input name="shift" placeholder="D2 / Day / Night"></div>
         <div><label>Manager</label><input name="manager" placeholder="Laszlo"></div>
         <div><label>Your Role</label><input name="role" placeholder="FLM / Bay Manager / Shift Lead"></div>
         <div><label>Volume</label><input type="number" name="volume" placeholder="12000"></div>
         <div><label>Available HC</label><input type="number" name="available_hc" placeholder="22"></div>
-        <div class="wide"><label>Safety Message</label><input name="safety_message" placeholder="MHE keys, housekeeping, no blocked walkways"></div>
-        <div class="wide"><label>Priorities</label><input name="priorities" placeholder="Late trailers, yard control, SLAM, clean handover"></div>
-        <div class="wide"><label>Team Messages</label><input name="team_messages" placeholder="Communication, support each other, report issues early"></div>
-        <div class="wide"><label>Break Reminder</label><input name="break_reminder" placeholder="No breaks after 16:00 unless work is under control"></div>
-        <div class="wide"><label>Equipment Reminder</label><input name="equipment_reminder" placeholder="Return scanners, MHE keys and radios"></div>
+
+        <div class="wide">
+            <h3>Brief Sections</h3>
+            <p class="muted">Change any header name, add extra sections, or delete what you do not need.</p>
+        </div>
+
+        <div class="brief-section-builder" id="briefSectionBuilder">
+            {% set default_sections = [
+                ('Safety Message', 'MHE keys, housekeeping, no blocked walkways'),
+                ('Priorities', 'Late trailers, yard control, SLAM, clean handover'),
+                ('Team Messages', 'Communication, support each other, report issues early'),
+                ('Break Reminder', 'No breaks after 16:00 unless work is under control'),
+                ('Equipment Reminder', 'Return scanners, MHE keys and radios')
+            ] %}
+            {% for header, placeholder in default_sections %}
+            <div class="brief-section-row">
+                <div>
+                    <label>Header</label>
+                    <input name="section_header[]" value="{{ header }}" placeholder="Section header">
+                </div>
+                <div>
+                    <label>Message</label>
+                    <input name="section_value[]" placeholder="{{ placeholder }}">
+                </div>
+                <button type="button" class="remove-brief-section">Delete</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="wide">
+            <button type="button" class="btn ghost add-brief-section" id="addBriefSection">+ Add Section</button>
+        </div>
+
         <div class="form-actions"><button class="btn primary" type="submit">Generate Brief</button></div>
     </form>
 </section>
@@ -47,5 +75,38 @@
     <p class="empty">No morning briefs yet.</p>
     {% endfor %}
 </section>
+
+<script>
+(function(){
+  const builder = document.getElementById('briefSectionBuilder');
+  const addBtn = document.getElementById('addBriefSection');
+  if(!builder || !addBtn) return;
+  function wire(row){
+    const btn = row.querySelector('.remove-brief-section');
+    if(btn){
+      btn.addEventListener('click', function(){
+        if(builder.querySelectorAll('.brief-section-row').length > 1){
+          row.remove();
+        } else {
+          const inputs = row.querySelectorAll('input');
+          inputs.forEach(i => i.value = '');
+        }
+      });
+    }
+  }
+  function createRow(){
+    const row = document.createElement('div');
+    row.className = 'brief-section-row';
+    row.innerHTML = `
+      <div><label>Header</label><input name="section_header[]" placeholder="Section header"></div>
+      <div><label>Message</label><input name="section_value[]" placeholder="Message for the team"></div>
+      <button type="button" class="remove-brief-section">Delete</button>`;
+    wire(row);
+    builder.appendChild(row);
+  }
+  builder.querySelectorAll('.brief-section-row').forEach(wire);
+  addBtn.addEventListener('click', createRow);
+})();
+</script>
 
 {% endblock %}

@@ -49,7 +49,16 @@
         </div>
 
         <div><label>Custom Accent Colour</label><input type="color" name="brand_color" id="customAccentColour" value="{{ row.brand_color or '#f59e0b' }}"></div>
-        <div class="wide toggle-row"><label class="checkline"><input type="checkbox" name="show_theme_label" id="showThemeLabel" {% if row.show_theme_label is not defined or row.show_theme_label %}checked{% endif %}> Show company theme name under WHS logo</label><small class="muted">Turn this off if you want only the colours to change.</small></div>
+        <div class="wide theme-toggle-line">
+            <div>
+                <strong>Show company theme name under WHS logo</strong>
+                <small class="muted">Turn this off if you want only the colours to change.</small>
+            </div>
+            <label class="switch-toggle" for="showThemeLabel">
+                <input type="checkbox" name="show_theme_label" id="showThemeLabel" {% if row.show_theme_label is not defined or row.show_theme_label %}checked{% endif %}>
+                <span class="switch-track"><span class="switch-knob"></span><b class="switch-on">ON</b><b class="switch-off">OFF</b></span>
+            </label>
+        </div>
         <div class="wide" id="favorite-settings">
             <h3>{{ t("dashboard_favorites") if t("dashboard_favorites") != "dashboard_favorites" else "Dashboard Favorites" }}</h3>
             <p class="muted">{{ t("dashboard_favorites_help") if t("dashboard_favorites_help") != "dashboard_favorites_help" else "Choose the four quick buttons shown on your mobile dashboard." }}</p>
