@@ -791,6 +791,28 @@ COMPANY_THEME_OPTIONS = [
     ("custom", "Custom colour"),
 ]
 
+COMPANY_THEME_META = {
+    "whs": {"label": "WHS", "accent": "#06b6d4", "second": "#0f172a"},
+    "dhl": {"label": "DHL", "accent": "#ffcc00", "second": "#d40511"},
+    "amazon": {"label": "Amazon", "accent": "#ff9900", "second": "#232f3e"},
+    "gxo": {"label": "GXO", "accent": "#2f80ed", "second": "#0b1f3a"},
+    "wincanton": {"label": "Wincanton", "accent": "#e31b23", "second": "#23395d"},
+    "xpo": {"label": "XPO", "accent": "#ed1c24", "second": "#111827"},
+    "evri": {"label": "Evri", "accent": "#7c3aed", "second": "#111827"},
+    "royal_mail": {"label": "Royal Mail", "accent": "#e4002b", "second": "#ffcc00"},
+    "yodel": {"label": "Yodel", "accent": "#f97316", "second": "#4c1d95"},
+    "dpd": {"label": "DPD", "accent": "#dc2626", "second": "#111827"},
+    "ceva": {"label": "CEVA", "accent": "#ef4444", "second": "#1f2937"},
+    "custom": {"label": "Custom", "accent": "#f59e0b", "second": "#111827"},
+}
+
+def theme_meta_for(user):
+    key = row_get(user, "company_theme", "whs") if user else "whs"
+    meta = dict(COMPANY_THEME_META.get(key, COMPANY_THEME_META["whs"]))
+    if key == "custom" and user and row_get(user, "brand_color", None):
+        meta["accent"] = row_get(user, "brand_color")
+    return meta
+
 def get_favorite_tools(user):
     default = "morning_brief,shift_calendar,handover,yard_check"
     raw = row_get(user, "favorite_tools", default) or default
@@ -862,6 +884,8 @@ def inject_context():
         "available_languages": [("en","English"),("hu","Magyar"),("pl","Polski"),("ro","Română"),("es","Español"),("de","Deutsch")],
         "current_language": current_language(),
         "favorite_options": FAVORITE_TOOL_OPTIONS,
+        "company_theme_meta": theme_meta_for(user),
+        "company_theme_meta_map": COMPANY_THEME_META,
         "notifications": get_notifications(user["id"]) if user else []
     }
 

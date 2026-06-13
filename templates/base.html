@@ -44,6 +44,7 @@
 </head>
 
 
+<body class="{{ "auth-page" if page in ['auth', 'login', 'register'] else "" }} theme-{{ (user.company_theme if user and user.company_theme else 'whs')|replace('_','-') }}" style="--whs-custom-accent: {{ user.brand_color if user and user.brand_color else '#f59e0b' }}; --whs-live-accent: {{ company_theme_meta.accent if company_theme_meta else '#06b6d4' }}; --whs-live-second: {{ company_theme_meta.second if company_theme_meta else '#0f172a' }};">
 <div id="op-splash-screen" class="op-splash-screen">
     <div class="op-splash-glow op-glow-one"></div>
     <div class="op-splash-glow op-glow-two"></div>
@@ -52,7 +53,7 @@
             <img class="op-splash-logo" src="{{ url_for('static', filename='icons/whs-logo.svg') }}" alt="WHS">
         </div>
         <div class="op-splash-title">WHS</div>
-        <div class="op-splash-subtitle">Warehouse Support</div>
+        <div class="op-splash-subtitle">Warehouse Support{% if company_theme_meta and company_theme_meta.label != 'WHS' %} · {{ company_theme_meta.label }} theme{% endif %}</div>
         <div class="op-splash-loader">
             <span></span>
             <span></span>
@@ -61,7 +62,7 @@
     </div>
 </div>
 
-<body class="{{ "auth-page" if page in ['auth', 'login', 'register'] else "" }} theme-{{ (user.company_theme if user and user.company_theme else 'whs')|replace('_','-') }}" style="--whs-custom-accent: {{ user.brand_color if user and user.brand_color else '#f59e0b' }};">
+
 
 <div class="app-shell">
     {% if user %}
@@ -71,6 +72,7 @@
             <div>
                 <h1>WHS{% if user and user.company_name %} · {{ user.company_name }}{% endif %}</h1>
                 <p>Warehouse Support{% if user and user.business_name %} · {{ user.business_name }}{% endif %}</p>
+                <span class="theme-pill" id="activeThemePill">{{ company_theme_meta.label if company_theme_meta else 'WHS' }} theme</span>
             </div>
         </div>
 

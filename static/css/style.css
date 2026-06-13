@@ -3249,3 +3249,80 @@ button:disabled {
   min-width:160px !important;
   background:#fff !important;
 }
+
+/* WHS v7 live company themes - stronger full-app colour system */
+:root { --whs-theme-accent:#06b6d4; --whs-theme-second:#0f172a; }
+.theme-whs { --whs-theme-accent:#06b6d4; --whs-theme-second:#0f172a; }
+.theme-dhl { --whs-theme-accent:#ffcc00; --whs-theme-second:#d40511; }
+.theme-amazon { --whs-theme-accent:#ff9900; --whs-theme-second:#232f3e; }
+.theme-gxo { --whs-theme-accent:#2f80ed; --whs-theme-second:#0b1f3a; }
+.theme-wincanton { --whs-theme-accent:#e31b23; --whs-theme-second:#23395d; }
+.theme-xpo { --whs-theme-accent:#ed1c24; --whs-theme-second:#111827; }
+.theme-evri { --whs-theme-accent:#7c3aed; --whs-theme-second:#111827; }
+.theme-royal-mail { --whs-theme-accent:#e4002b; --whs-theme-second:#ffcc00; }
+.theme-yodel { --whs-theme-accent:#f97316; --whs-theme-second:#4c1d95; }
+.theme-dpd { --whs-theme-accent:#dc2626; --whs-theme-second:#111827; }
+.theme-ceva { --whs-theme-accent:#ef4444; --whs-theme-second:#1f2937; }
+.theme-custom { --whs-theme-accent:var(--whs-custom-accent); --whs-theme-second:#111827; }
+body[class*="theme-"] {
+  --accent: var(--whs-theme-accent) !important;
+  --primary: var(--whs-theme-accent) !important;
+  --brand: var(--whs-theme-accent) !important;
+}
+body[class*="theme-"] .sidebar {
+  background: radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--whs-theme-accent) 32%, transparent), transparent 28%), linear-gradient(180deg, var(--whs-theme-second), #07111f) !important;
+}
+body[class*="theme-"] .brand-icon,
+body[class*="theme-"] .whs-brand-icon,
+body[class*="theme-"] .plan-chip,
+body[class*="theme-"] .nav-link.active,
+body[class*="theme-"] .btn.primary,
+body[class*="theme-"] button.primary,
+body[class*="theme-"] .small-btn,
+body[class*="theme-"] .mobile-bottom-nav a.active,
+body[class*="theme-"] .holiday-summary-card.balance-remaining {
+  background: linear-gradient(135deg, var(--whs-theme-accent), var(--whs-theme-second)) !important;
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--whs-theme-accent) 65%, #ffffff 20%) !important;
+}
+.theme-dhl .brand-icon,
+.theme-dhl .whs-brand-icon,
+.theme-dhl .plan-chip,
+.theme-dhl .nav-link.active,
+.theme-dhl .btn.primary,
+.theme-dhl button.primary,
+.theme-dhl .small-btn,
+.theme-dhl .holiday-summary-card.balance-remaining,
+.theme-royal-mail .brand-icon,
+.theme-royal-mail .whs-brand-icon,
+.theme-royal-mail .plan-chip,
+.theme-royal-mail .nav-link.active,
+.theme-royal-mail .btn.primary,
+.theme-royal-mail button.primary,
+.theme-royal-mail .small-btn,
+.theme-royal-mail .holiday-summary-card.balance-remaining { color:#111827 !important; }
+body[class*="theme-"] .hero-card,
+body[class*="theme-"] .pro-hero,
+body[class*="theme-"] .auth-hero-card {
+  background: radial-gradient(circle at 80% 8%, color-mix(in srgb, var(--whs-theme-accent) 26%, transparent), transparent 34%), linear-gradient(135deg, var(--whs-theme-second), color-mix(in srgb, var(--whs-theme-second) 75%, var(--whs-theme-accent) 25%)) !important;
+}
+body[class*="theme-"] .panel h3,
+body[class*="theme-"] .topbar h2,
+body[class*="theme-"] .settings-tab-links a,
+body[class*="theme-"] a { accent-color: var(--whs-theme-accent); }
+body[class*="theme-"] .topbar h2::after,
+body[class*="theme-"] .nav-group summary,
+body[class*="theme-"] input:focus,
+body[class*="theme-"] select:focus,
+body[class*="theme-"] textarea:focus { border-color: var(--whs-theme-accent) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--whs-theme-accent) 18%, transparent) !important; }
+body[class*="theme-"] .theme-pill { display:inline-flex; margin-top:4px; padding:4px 9px; border-radius:999px; font-size:11px; font-weight:900; letter-spacing:.04em; color:#fff; background:linear-gradient(135deg,var(--whs-theme-accent),var(--whs-theme-second)); }
+.theme-dhl .theme-pill,.theme-royal-mail .theme-pill{color:#111827;}
+body[class*="theme-"] .op-splash-screen { background: radial-gradient(circle at 20% 18%, color-mix(in srgb, var(--whs-theme-accent) 32%, transparent), transparent 30%), linear-gradient(135deg, var(--whs-theme-second), #020617) !important; }
+body[class*="theme-"] .op-splash-card { border-color: color-mix(in srgb, var(--whs-theme-accent) 50%, #ffffff 10%) !important; box-shadow: 0 30px 90px color-mix(in srgb, var(--whs-theme-accent) 24%, transparent) !important; }
+body[class*="theme-"] .op-splash-logo-wrap,
+body[class*="theme-"] .op-splash-loader span { background: linear-gradient(135deg, var(--whs-theme-accent), var(--whs-theme-second)) !important; }
+body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !important; }
+
+.company-theme-preview { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:12px; }
+.theme-swatch { border-radius:18px; padding:14px; color:#fff; font-weight:900; box-shadow:0 12px 26px rgba(15,23,42,.12); }
+.theme-swatch small { display:block; opacity:.82; margin-top:4px; font-size:11px; }
