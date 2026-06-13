@@ -81,7 +81,11 @@
                 <span class="nav-ico">🏠</span><span>Dashboard</span>
             </a>
             <a class="{{ 'active' if page == 'morning_brief' else '' }} nav-link" href="{{ url_for('morning_brief') }}"><span class="nav-ico">☀️</span><span>Morning Brief</span></a>
-            <a class="{{ 'active' if page == 'shift_calendar' else '' }} nav-link" href="{{ url_for('shift_calendar') }}"><span class="nav-ico">📅</span><span>Calendar</span></a>
+            <details class="nav-group" open>
+                <summary><span class="nav-ico">📅</span><span>Calendar</span></summary>
+                <a class="{{ 'active' if page == 'shift_calendar' else '' }} nav-link" href="{{ url_for('shift_calendar') }}"><span class="nav-ico">📆</span><span>My Calendar</span></a>
+                <a class="{{ 'active' if page == 'holiday_tracker' else '' }} nav-link" href="{{ url_for('holiday_tracker') }}"><span class="nav-ico">🏖️</span><span>Holiday Tracker</span></a>
+            </details>
             <a class="{{ 'active' if page == 'handover' else '' }} nav-link" href="{{ url_for('handover') }}"><span class="nav-ico">📋</span><span>Handover</span></a>
             <a class="{{ 'active' if page == 'yard_check' else '' }} nav-link" href="{{ url_for('yard_check') }}"><span class="nav-ico">🚛</span><span>Yard Check</span></a>
             <a class="{{ 'active' if page == 'team' else '' }} nav-link" href="{{ url_for('team') }}"><span class="nav-ico">👥</span><span>Team</span></a>
@@ -92,7 +96,8 @@
                 <a class="{{ 'active' if page == 'yard_settings' else '' }} nav-link" href="{{ url_for('yard_settings') }}"><span class="nav-ico">📍</span><span>Yard Setup</span></a>
                 <a class="{{ 'active' if page == 'mileage' else '' }} nav-link" href="{{ url_for('mileage') }}"><span class="nav-ico">🚗</span><span>Mileage</span></a>
                 <a class="{{ 'active' if page == 'expenses' else '' }} nav-link" href="{{ url_for('expenses') }}"><span class="nav-ico">💷</span><span>Expenses</span></a>
-                {% if user and user.email == "admin@whs.ai" %}
+                <a class="{{ 'active' if page == 'notifications' else '' }} nav-link" href="{{ url_for('notifications_page') }}"><span class="nav-ico">🔔</span><span>Notifications</span></a>
+                {% if user and user.email == "admin@whs-app.com" %}
                 <a class="{{ 'active' if page == 'admin' else '' }} nav-link" href="{{ url_for('admin_dashboard') }}"><span class="nav-ico">🛡️</span><span>Admin</span></a>
                 {% endif %}
                 <a class="nav-link" href="{{ url_for('logout') }}"><span class="nav-ico">🚪</span><span>Logout</span></a>
@@ -130,7 +135,7 @@
             {% endif %}
         {% endwith %}
 
-        {% if not user %}
+        {% if not user and page not in ['auth', 'login', 'register'] %}
         <form class="public-language-form" method="POST" action="{{ url_for('set_language') }}">
             <input type="hidden" name="next" value="{{ request.path }}">
             <label>🌍 Language</label>

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<section class="mobile-more-hero">
+  <p class="eyebrow">Account</p>
+  <h1>Notifications</h1>
+  <p class="muted">Control reminders and alerts for your WHS workspace.</p>
+</section>
+<section class="panel notifications-panel">
+  <div class="panel-head"><div><h3>Notification Centre</h3><p class="muted">Basic notifications are enabled. More options can be added later for paid plans.</p></div></div>
+  <div class="settings-grid">
+    <label class="remember-line"><input type="checkbox" checked><span>Welcome and account emails</span></label>
+    <label class="remember-line"><input type="checkbox" checked><span>Holiday and calendar reminders</span></label>
+    <label class="remember-line"><input type="checkbox" checked><span>Yard check reminders</span></label>
+    <label class="remember-line"><input type="checkbox"><span>Daily morning brief reminder</span></label>
+  </div>
+</section>
+<section class="panel">
+  <h3>Recent Alerts</h3>
+  {% if notifications %}
+    {% for n in notifications %}<div class="notice-row blue"><strong>{{ n.title }}</strong><p>{{ n.message }}</p></div>{% endfor %}
+  {% else %}<p class="muted">No notifications yet.</p>{% endif %}
+</section>
+{% endblock %}

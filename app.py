@@ -562,7 +562,7 @@ def seed_admin_user():
     add_col("pro_reason", "TEXT")
     conn.commit()
 
-    existing = conn.execute("SELECT id FROM users WHERE email = ?", ("admin@whs.ai",)).fetchone()
+    existing = conn.execute("SELECT id FROM users WHERE email = ?", ("admin@whs-app.com",)).fetchone()
 
     if not existing:
         conn.execute("""
@@ -571,7 +571,7 @@ def seed_admin_user():
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             "WHS Admin",
-            "admin@whs.ai",
+            "admin@whs-app.com",
             generate_password_hash("admin123"),
             "pro",
             "WHS",
@@ -593,13 +593,13 @@ def seed_admin_user():
             fence_start = 1,
             fence_end = 120
         WHERE email = ?
-    """, ("admin@whs.ai",))
+    """, ("admin@whs-app.com",))
     conn.commit()
     conn.close()
 
 def is_admin(user=None):
     user = user or current_user()
-    return bool(user and (row_get(user, "email") == "admin@whs.ai" or row_get(user, "role") == "Admin"))
+    return bool(user and (row_get(user, "email") == "admin@whs-app.com" or row_get(user, "role") == "Admin"))
 
 
 def current_user():
@@ -774,7 +774,7 @@ def get_favorite_tools(user):
     selected = [x.strip() for x in raw.split(",") if x.strip()]
     option_map = {x[0]: x for x in FAVORITE_TOOL_OPTIONS}
     out = []
-    is_admin_user = bool(user and row_get(user, "email", "") == "admin@whs.ai")
+    is_admin_user = bool(user and row_get(user, "email", "") == "admin@whs-app.com")
     for key in selected:
         if key == "admin" and not is_admin_user:
             continue
@@ -788,7 +788,7 @@ def get_favorite_tools(user):
     return out[:4]
 
 def available_favorite_options(user):
-    is_admin_user = bool(user and row_get(user, "email", "") == "admin@whs.ai")
+    is_admin_user = bool(user and row_get(user, "email", "") == "admin@whs-app.com")
     return [x for x in FAVORITE_TOOL_OPTIONS if x[0] != "admin" or is_admin_user]
 
 
@@ -964,7 +964,7 @@ def refresh_user_plan(user):
         email = row_get(user, "email")
         expires_at = row_get(user, "pro_expires_at")
 
-        if email == "admin@whs.ai":
+        if email == "admin@whs-app.com":
             return user
 
         if expires_at:
@@ -1688,7 +1688,7 @@ def allowed_image(filename):
 
 
 def ensure_holiday_schema_updates():
-    safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 20")
+    safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 28")
     safe_add_column("users", "annual_leave_unit", "TEXT DEFAULT 'days'")
     safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
@@ -1699,7 +1699,7 @@ def ensure_holiday_schema_updates():
 
 
 def ensure_holiday_user_columns():
-    safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 20")
+    safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 28")
     safe_add_column("users", "annual_leave_unit", "TEXT DEFAULT 'days'")
     safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
@@ -1708,7 +1708,7 @@ def ensure_holiday_user_columns():
 
 
 def ensure_holiday_schema_all():
-    safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 20")
+    safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 28")
     safe_add_column("users", "annual_leave_unit", "TEXT DEFAULT 'days'")
     safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
@@ -1790,7 +1790,7 @@ def op_safe_add_column(table, column, definition):
 
 
 def op_ensure_holiday_schema():
-    op_safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 20")
+    op_safe_add_column("users", "annual_leave_entitlement", "REAL DEFAULT 28")
     op_safe_add_column("users", "annual_leave_unit", "TEXT DEFAULT 'days'")
     op_safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     op_safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
@@ -1831,9 +1831,9 @@ def annual_leave_summary(user_id):
     user = current_user()
 
     try:
-        entitlement = float(row_get(user, "annual_leave_entitlement") or 20)
+        entitlement = float(row_get(user, "annual_leave_entitlement") or 28)
     except Exception:
-        entitlement = 20
+        entitlement = 28
 
     unit = str(row_get(user, "annual_leave_unit") or "days").lower()
     if unit not in ["days", "hours"]:
@@ -2030,9 +2030,9 @@ def save_annual_leave_settings():
     user = current_user()
 
     try:
-        entitlement = float(request.form.get("annual_leave_entitlement", "20") or 20)
+        entitlement = float(request.form.get("annual_leave_entitlement", "28") or 28)
     except Exception:
-        entitlement = 20
+        entitlement = 28
 
     unit = (request.form.get("annual_leave_unit", "days") or "days").lower()
     if unit not in ["days", "hours"]:
@@ -2329,8 +2329,8 @@ def register():
         conn = get_db()
         try:
             cur = conn.execute("""
-                INSERT INTO users (name, email, password_hash, plan, business_name, created_at, language, favorite_tools)
-                VALUES (?, ?, ?, 'free', ?, ?, ?, ?)
+                INSERT INTO users (name, email, password_hash, plan, business_name, created_at, language, favorite_tools, annual_leave_entitlement)
+                VALUES (?, ?, ?, 'free', ?, ?, ?, ?, 28)
             """, (name, email, generate_password_hash(password), "Warehouse / Site", datetime.now().isoformat(), session.get("language", "en"), "morning_brief,shift_calendar,handover,yard_check"))
             conn.commit()
             session["user_id"] = cur.lastrowid
@@ -3035,6 +3035,13 @@ def yard_check():
         conn = get_db()
 
         if entry_mode == "matrix":
+            yard_photo_filename = None
+            yard_photo = request.files.get("photo") or request.files.get("camera_photo")
+            if yard_photo and yard_photo.filename and allowed_image(yard_photo.filename):
+                safe = secure_filename(yard_photo.filename)
+                yard_photo_filename = f"{uuid.uuid4().hex}_{safe}"
+                yard_photo.save(os.path.join(UPLOAD_DIR, yard_photo_filename))
+
             row_locations = request.form.getlist("row_location[]")
             trailer_ids = request.form.getlist("row_trailer_id[]")
             row_notes = request.form.getlist("row_notes[]")
@@ -3071,9 +3078,9 @@ def yard_check():
 
                 conn.execute("""
                     INSERT INTO yard_checks
-                    (user_id, date, trailer_id, location_type, location_detail, status, notes, source, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (user["id"], date, trailer_id, location_type, location_text, "Recorded", combined_notes, row_source, datetime.now().isoformat()))
+                    (user_id, date, trailer_id, location_type, location_detail, status, notes, source, photo_filename, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (user["id"], date, trailer_id, location_type, location_text, "Recorded", combined_notes, row_source, yard_photo_filename, datetime.now().isoformat()))
                 saved_count += 1
 
         elif entry_mode == "batch":
@@ -4217,8 +4224,8 @@ def admin_inactivity_check():
     admin=current_user()
     if not is_admin(admin): flash("Admin access only.","error"); return redirect(url_for("index"))
     now=datetime.now(); warn_before=(now-timedelta(days=180)).isoformat(); delete_before=(now-timedelta(days=365)).isoformat(); conn=get_db()
-    conn.execute("UPDATE users SET inactive_warning_at=? WHERE email!='admin@whs.ai' AND COALESCE(last_login_at,created_at) < ? AND inactive_warning_at IS NULL", (now.isoformat(timespec="seconds"), warn_before))
-    stale=conn.execute("SELECT id FROM users WHERE email!='admin@whs.ai' AND COALESCE(last_login_at,created_at) < ?", (delete_before,)).fetchall()
+    conn.execute("UPDATE users SET inactive_warning_at=? WHERE email!='admin@whs-app.com' AND COALESCE(last_login_at,created_at) < ? AND inactive_warning_at IS NULL", (now.isoformat(timespec="seconds"), warn_before))
+    stale=conn.execute("SELECT id FROM users WHERE email!='admin@whs-app.com' AND COALESCE(last_login_at,created_at) < ?", (delete_before,)).fetchall()
     for u in stale:
         for table in ["mileage","expenses","invoices","yard_checks","kpi_records","handovers","team_members","shift_calendar","morning_briefs","photo_records","daily_shift_logs","action_tracker","absence_records","remember_tokens"]:
             try: conn.execute(f"DELETE FROM {table} WHERE user_id=?", (u["id"],))
@@ -5163,6 +5170,12 @@ def settings():
     return render_template("settings.html", row=user, page="settings", selected_favorites=[x[0] for x in get_favorite_tools(user)])
 
 
+
+@app.route("/notifications")
+@login_required
+def notifications_page():
+    user = current_user()
+    return render_template("notifications.html", page="notifications", user=user, notifications=get_notifications(user["id"]))
 
 @app.route("/manifest.json")
 def manifest_json():

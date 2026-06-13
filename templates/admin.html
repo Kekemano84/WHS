@@ -169,7 +169,7 @@
                         <a class="small-btn ghost-small" href="{{ url_for('admin_set_user_trial_business30', user_id=u.id) }}">30 Day Business</a>
                         <a class="small-btn ghost-small" href="{{ url_for('admin_set_user_gift_business', user_id=u.id) }}">Gift Business</a>
                     </div></td>
-                    <td>{% if u.email != 'admin@whs.ai' %}<form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" onsubmit="return confirm('Delete this account and all data?')"><button class="small-btn danger-btn" type="submit">Delete Account</button></form>{% endif %}</td>
+                    <td>{% if u.email != 'admin@whs-app.com' %}<form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" onsubmit="return confirm('Delete this account and all data?')"><button class="small-btn danger-btn" type="submit">Delete Account</button></form>{% endif %}</td>
                 </tr>
                 {% else %}<tr><td colspan="9" class="empty">No users yet.</td></tr>{% endfor %}
             </tbody>

@@ -3199,3 +3199,25 @@ button:disabled {
   border-color: rgba(34,197,94,.22) !important;
 }
 .plan-chip { background: rgba(34,197,94,.16) !important; color: #dcfce7 !important; }
+
+
+/* WHS login polish: language on login card + dynamic logistics visual */
+.auth-page .public-language-form{display:none!important;}
+.auth-card-modern .right-language{justify-content:flex-start;margin:0 0 14px 0;padding:12px 14px;border-radius:18px;background:#f8fafc;border:1px solid #e5e7eb;}
+.auth-card-modern .right-language label{font-weight:950;color:#0f172a;}
+.auth-card-modern .right-language select{margin-left:auto;background:#fff;}
+.auth-hero-line{position:relative;color:#bfdbfe;font-weight:900;margin:10px 0 0;font-size:16px;}
+.logistics-live-card{position:relative;margin:22px 0 4px;padding:18px;border-radius:24px;background:rgba(2,6,23,.34);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);overflow:hidden;}
+.warehouse-scene{height:122px;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.04));display:flex;align-items:flex-end;gap:10px;padding:16px;position:relative;}
+.warehouse-box{align-self:stretch;display:flex;align-items:center;justify-content:center;width:95px;border-radius:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);font-weight:1000;font-size:28px;}
+.dock-door{width:58px;height:70px;display:flex;align-items:center;justify-content:center;border-radius:12px 12px 4px 4px;background:rgba(15,23,42,.52);border:1px solid rgba(255,255,255,.2);font-weight:1000;}
+.trailer-run{position:absolute;right:20px;bottom:15px;font-size:38px;animation:whsTruck 4s ease-in-out infinite;}
+@keyframes whsTruck{0%{transform:translateX(-18px)}50%{transform:translateX(8px)}100%{transform:translateX(-18px)}}
+.live-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+.live-metrics span{padding:10px;border-radius:14px;background:rgba(255,255,255,.1);font-size:12px;font-weight:850;color:#dbeafe;}
+.live-metrics strong{display:block;color:#fff;font-size:22px;}
+.yard-tools-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0;padding:12px;border-radius:18px;background:#f8fafc;border:1px solid #e5e7eb;}
+.yard-tools-strip div{display:flex;flex-direction:column;gap:4px;font-weight:900;}
+.yard-tools-strip span{font-size:12px;color:#64748b;font-weight:800;}
+.yard-tools-strip input{padding:8px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;}
+@media(max-width:760px){.live-metrics,.yard-tools-strip{grid-template-columns:1fr}.warehouse-scene{height:96px}.dock-door{width:44px}.warehouse-box{width:70px}.trailer-run{font-size:30px}}

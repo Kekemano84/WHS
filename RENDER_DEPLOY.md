@@ -44,7 +44,7 @@ http://YOUR-PC-IP:5000
 
 Admin:
 ```text
-admin@whs.ai
+admin@whs-app.com
 admin123
 ```
 

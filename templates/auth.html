@@ -2,9 +2,24 @@
 {% block content %}
 <div class="auth-desktop-shell whs-auth-shell">
     <section class="auth-hero-card whs-hero-card">
-        <div class="auth-hero-badge">Warehouse Support</div>
+        <div class="auth-hero-badge">Warehouse • Transport • Logistics</div>
         <h1>WHS</h1>
-        <p class="auth-hero-subtitle">A simple free logistics app for daily warehouse control, yard checks, handovers and team records.</p>
+        <p class="auth-hero-subtitle">Daily warehouse operations made simple.</p>
+        <p class="auth-hero-line">Morning Briefs • Calendar • Yard Checks • Handovers • Team Management</p>
+        <div class="logistics-live-card">
+            <div class="warehouse-scene">
+                <span class="warehouse-box">WH</span>
+                <span class="dock-door">D1</span>
+                <span class="dock-door">D2</span>
+                <span class="dock-door">D3</span>
+                <span class="trailer-run">🚛</span>
+            </div>
+            <div class="live-metrics">
+                <span><strong>24</strong> trailers logged</span>
+                <span><strong>6</strong> doors active</span>
+                <span><strong>3</strong> handovers ready</span>
+            </div>
+        </div>
         <div class="auth-feature-grid">
             <div><strong>☀️ Morning Brief</strong><span>Prepare daily shift messages.</span></div>
             <div><strong>📅 Calendar</strong><span>Full shift calendar access.</span></div>
@@ -22,6 +37,13 @@
     </section>
 
     <section class="auth-card auth-card-modern whs-auth-card">
+        <form class="auth-language-form right-language" method="POST" action="{{ url_for('set_language') }}">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <label>🌍 Language</label>
+            <select name="language" onchange="this.form.submit()">
+                {% for code,label in available_languages %}<option value="{{ code }}" {% if current_language==code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </form>
         <div class="free-plan-auth-note">
             <strong>Free access for now</strong>
             <span>Register and use all WHS tools immediately.</span>

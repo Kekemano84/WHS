@@ -156,7 +156,7 @@ Pro saves Yard Check records and exports Excel.
 
 An admin/testing account is created automatically:
 
-Email: admin@whs.ai
+Email: admin@whs-app.com
 Password: admin123
 
 Admin has Business access and can test all Pro and Business pages.
@@ -285,7 +285,7 @@ Pro users:
 This package is prepared for GitHub + Render deployment.
 
 Admin login:
-- Email: admin@whs.ai
+- Email: admin@whs-app.com
 - Password: admin123
 
 Render:
