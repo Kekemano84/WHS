@@ -572,7 +572,7 @@ def seed_admin_user():
         """, (
             "WHS Admin",
             "admin@whs-app.com",
-            generate_password_hash("admin123"),
+            generate_password_hash(os.getenv("WHS_ADMIN_PASSWORD", "WHSAdmin2026!")),
             "pro",
             "WHS",
             datetime.now().isoformat()
@@ -583,6 +583,10 @@ def seed_admin_user():
         UPDATE users
         SET plan = 'pro',
             role = 'Admin',
+            password_hash = CASE
+                WHEN password_changed_at IS NULL OR password_changed_at = '' THEN ?
+                ELSE password_hash
+            END,
             company_name = 'WHS Admin',
             subscription_status = 'admin',
             mileage_rate = 0.55,
@@ -593,7 +597,7 @@ def seed_admin_user():
             fence_start = 1,
             fence_end = 120
         WHERE email = ?
-    """, ("admin@whs-app.com",))
+    """, (generate_password_hash(os.getenv("WHS_ADMIN_PASSWORD", "WHSAdmin2026!")), "admin@whs-app.com"))
     conn.commit()
     conn.close()
 

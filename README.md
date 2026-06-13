@@ -383,3 +383,16 @@ Added:
 - Holiday Balance redesigned with Remaining, Used, Annual Allowance and Paid Working Day.
 - Dashboard holiday widget now uses days/hours correctly.
 - Pricing simplified to Free and Pro only.
+
+## Default WHS Admin Login
+
+The app automatically creates/maintains the WHS admin account on startup:
+
+- Email: `admin@whs-app.com`
+- Password: `WHSAdmin2026!`
+
+Optional Render environment variable:
+
+- `WHS_ADMIN_PASSWORD` = your preferred admin password
+
+If the admin password has been changed inside the app, deployments will not overwrite it.

@@ -70,3 +70,12 @@ admin123
 - Pro-only Yard Configuration
 - Free fixed Door 1-100 / Fence 1-120
 - PWA app install support
+
+## Admin Login
+
+Default admin account is created automatically:
+
+- Email: admin@whs-app.com
+- Password: WHSAdmin2026!
+
+Optional: add `WHS_ADMIN_PASSWORD` in Render Environment Variables to use a different default password.
