@@ -6,19 +6,19 @@
     <!-- WhatsApp / Facebook / LinkedIn social preview -->
     <meta property="og:title" content="WHS - Operations Management Platform">
     <meta property="og:description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
-    <meta property="og:image" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
-    <meta property="og:image:secure_url" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
+    <meta property="og:image" content="{{ url_for('static', filename='images/whs-share.png', _external=True) }}">
+    <meta property="og:image:secure_url" content="{{ url_for('static', filename='images/whs-share.png', _external=True) }}">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="https://whs-ai-t1ip.onrender.com/">
+    <meta property="og:url" content="{{ request.url_root.rstrip('/') }}/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="WHS">
     <meta name="description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="WHS - Operations Management Platform">
     <meta name="twitter:description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
-    <meta name="twitter:image" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/whs-share.png', _external=True) }}">
 
     <title>WHS - Operations Management Platform</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
