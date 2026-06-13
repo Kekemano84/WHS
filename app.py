@@ -442,6 +442,7 @@ def init_db():
     safe_add_column("users", "language", "TEXT DEFAULT 'en'")
     safe_add_column("users", "favorite_tools", "TEXT DEFAULT 'morning_brief,shift_calendar,handover,yard_check'")
     safe_add_column("users", "company_theme", "TEXT DEFAULT 'whs'")
+    safe_add_column("users", "show_theme_label", "INTEGER DEFAULT 1")
     safe_add_column("users", "last_login_at", "TEXT")
     safe_add_column("users", "inactive_warning_at", "TEXT")
     safe_add_column("team_members", "licence_expiry", "TEXT")
@@ -479,7 +480,8 @@ def ensure_schema_updates():
             ("business_logo_filename", "TEXT"),
             ("brand_color", "TEXT DEFAULT '#2563eb'"),
             ("default_site_id", "INTEGER"),
-            ("company_theme", "TEXT DEFAULT 'whs'")
+            ("company_theme", "TEXT DEFAULT 'whs'"),
+            ("show_theme_label", "INTEGER DEFAULT 1")
         ],
         "team_members": [
             ("permissions", "TEXT DEFAULT 'View only'"),
@@ -792,18 +794,19 @@ COMPANY_THEME_OPTIONS = [
 ]
 
 COMPANY_THEME_META = {
-    "whs": {"label": "WHS", "accent": "#06b6d4", "second": "#0f172a"},
-    "dhl": {"label": "DHL", "accent": "#ffcc00", "second": "#d40511"},
-    "amazon": {"label": "Amazon", "accent": "#ff9900", "second": "#232f3e"},
-    "gxo": {"label": "GXO", "accent": "#2f80ed", "second": "#0b1f3a"},
-    "wincanton": {"label": "Wincanton", "accent": "#e31b23", "second": "#23395d"},
-    "xpo": {"label": "XPO", "accent": "#ed1c24", "second": "#111827"},
-    "evri": {"label": "Evri", "accent": "#7c3aed", "second": "#111827"},
-    "royal_mail": {"label": "Royal Mail", "accent": "#e4002b", "second": "#ffcc00"},
-    "yodel": {"label": "Yodel", "accent": "#f97316", "second": "#4c1d95"},
-    "dpd": {"label": "DPD", "accent": "#dc2626", "second": "#111827"},
-    "ceva": {"label": "CEVA", "accent": "#ef4444", "second": "#1f2937"},
-    "custom": {"label": "Custom", "accent": "#f59e0b", "second": "#111827"},
+    # Colours are inspired by public brand-style colour palettes/screenshots. No official company logos are used.
+    "whs": {"label": "WHS", "accent": "#06b6d4", "second": "#0f172a", "third": "#ffffff"},
+    "dhl": {"label": "DHL", "accent": "#ffcc00", "second": "#d40511", "third": "#c9c9c9"},
+    "amazon": {"label": "Amazon", "accent": "#ff9900", "second": "#232f3e", "third": "#146eb4"},
+    "gxo": {"label": "GXO", "accent": "#ff3a00", "second": "#111111", "third": "#ffffff"},
+    "wincanton": {"label": "Wincanton", "accent": "#005baa", "second": "#00aeef", "third": "#ffffff"},
+    "xpo": {"label": "XPO", "accent": "#cc0000", "second": "#000000", "third": "#ffffff"},
+    "evri": {"label": "Evri", "accent": "#009bdf", "second": "#10105a", "third": "#bfe7f7"},
+    "royal_mail": {"label": "Royal Mail", "accent": "#e84142", "second": "#ffd200", "third": "#ffffff"},
+    "yodel": {"label": "Yodel", "accent": "#8dc63f", "second": "#374151", "third": "#ffffff"},
+    "dpd": {"label": "DPD", "accent": "#dc0032", "second": "#414042", "third": "#ffffff"},
+    "ceva": {"label": "CEVA", "accent": "#1f2a44", "second": "#e30613", "third": "#a50034"},
+    "custom": {"label": "Custom", "accent": "#f59e0b", "second": "#111827", "third": "#ffffff"},
 }
 
 def theme_meta_for(user):
@@ -5195,7 +5198,7 @@ def settings():
     if request.method == "POST":
         conn = get_db()
         conn.execute("""
-            UPDATE users SET business_name = ?, company_name = ?, name = ?, role = ?, phone = ?, address = ?, mileage_rate = ?, door_count = ?, fence_count = ?, language = ?, favorite_tools = ?, company_theme = ?, brand_color = ? WHERE id = ?
+            UPDATE users SET business_name = ?, company_name = ?, name = ?, role = ?, phone = ?, address = ?, mileage_rate = ?, door_count = ?, fence_count = ?, language = ?, favorite_tools = ?, company_theme = ?, brand_color = ?, show_theme_label = ? WHERE id = ?
         """, (
             request.form.get("business_name", "").strip(),
             request.form.get("company_name", "").strip(),
@@ -5210,6 +5213,7 @@ def settings():
             ",".join([request.form.get(f"favorite_{i}", "") for i in range(1,5) if request.form.get(f"favorite_{i}", "")]),
             request.form.get("company_theme", "whs"),
             request.form.get("brand_color", "#f59e0b"),
+            1 if request.form.get("show_theme_label") == "on" else 0,
             user["id"]
         ))
         conn.commit()

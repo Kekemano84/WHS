@@ -40,7 +40,7 @@
             <div class="company-theme-preview">
                 {% for key,label in company_theme_options if key != 'custom' %}
                 {% set m = company_theme_meta_map.get(key) %}
-                <div class="theme-swatch" style="background:linear-gradient(135deg, {{ m.accent }}, {{ m.second }}); color:{% if key in ['dhl','royal_mail'] %}#111827{% else %}#fff{% endif %};">
+                <div class="theme-swatch" style="background:linear-gradient(135deg, {{ m.accent }}, {{ m.second }}, {{ m.third or '#ffffff' }}); color:{% if key in ['dhl','royal_mail'] %}#111827{% else %}#fff{% endif %};">
                     {{ m.label }}
                     <small>{{ label }}</small>
                 </div>
@@ -49,6 +49,7 @@
         </div>
 
         <div><label>Custom Accent Colour</label><input type="color" name="brand_color" id="customAccentColour" value="{{ row.brand_color or '#f59e0b' }}"></div>
+        <div class="wide toggle-row"><label class="checkline"><input type="checkbox" name="show_theme_label" id="showThemeLabel" {% if row.show_theme_label is not defined or row.show_theme_label %}checked{% endif %}> Show company theme name under WHS logo</label><small class="muted">Turn this off if you want only the colours to change.</small></div>
         <div class="wide" id="favorite-settings">
             <h3>{{ t("dashboard_favorites") if t("dashboard_favorites") != "dashboard_favorites" else "Dashboard Favorites" }}</h3>
             <p class="muted">{{ t("dashboard_favorites_help") if t("dashboard_favorites_help") != "dashboard_favorites_help" else "Choose the four quick buttons shown on your mobile dashboard." }}</p>
@@ -73,6 +74,7 @@
   const select = document.getElementById('companyThemeSelect');
   const colour = document.getElementById('customAccentColour');
   const pill = document.getElementById('activeThemePill');
+  const showThemeLabel = document.getElementById('showThemeLabel');
   const themes = {{ company_theme_meta_map|tojson }};
   function cls(k){ return 'theme-' + String(k || 'whs').replace(/_/g,'-'); }
   function applyTheme(){
@@ -85,10 +87,15 @@
     document.body.style.setProperty('--whs-custom-accent', accent);
     document.body.style.setProperty('--whs-live-accent', accent);
     document.body.style.setProperty('--whs-live-second', meta.second || '#111827');
-    if(pill) pill.textContent = (meta.label || 'WHS') + ' theme';
+    document.body.style.setProperty('--whs-live-third', meta.third || '#ffffff');
+    if(pill){
+      pill.textContent = (meta.label || 'WHS') + ' theme';
+      pill.style.display = (!showThemeLabel || showThemeLabel.checked) ? 'inline-flex' : 'none';
+    }
   }
   if(select) select.addEventListener('change', applyTheme);
   if(colour) colour.addEventListener('input', applyTheme);
+  if(showThemeLabel) showThemeLabel.addEventListener('change', applyTheme);
   applyTheme();
 })();
 </script>

@@ -3326,3 +3326,51 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
 .company-theme-preview { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:12px; }
 .theme-swatch { border-radius:18px; padding:14px; color:#fff; font-weight:900; box-shadow:0 12px 26px rgba(15,23,42,.12); }
 .theme-swatch small { display:block; opacity:.82; margin-top:4px; font-size:11px; }
+
+
+/* WHS v8: stronger company theme colour application */
+body[class*="theme-"] .sidebar {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--whs-live-second) 86%, #020617), color-mix(in srgb, var(--whs-live-accent) 28%, #020617));
+}
+body[class*="theme-"] .brand-icon,
+body[class*="theme-"] .whs-brand-icon {
+  background: linear-gradient(135deg, var(--whs-live-accent), var(--whs-live-second));
+  color: color-mix(in srgb, var(--whs-live-third) 85%, #ffffff);
+}
+body[class*="theme-"] .plan-chip,
+body[class*="theme-"] .nav a.active,
+body[class*="theme-"] .btn.primary,
+body[class*="theme-"] button.primary,
+body[class*="theme-"] .primary {
+  background: linear-gradient(135deg, var(--whs-live-accent), var(--whs-live-second)) !important;
+  border-color: color-mix(in srgb, var(--whs-live-accent) 70%, #ffffff) !important;
+}
+body[class*="theme-"] .section-title::after,
+body[class*="theme-"] h1::after,
+body[class*="theme-"] .page-title::after {
+  background: var(--whs-live-accent) !important;
+}
+body[class*="theme-"] .op-splash-screen {
+  background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--whs-live-accent) 45%, transparent), transparent 30%),
+              linear-gradient(135deg, var(--whs-live-second), #020617 62%, color-mix(in srgb, var(--whs-live-accent) 42%, #020617));
+}
+body[class*="theme-"] .op-splash-card {
+  border-color: color-mix(in srgb, var(--whs-live-accent) 45%, rgba(255,255,255,.25));
+  box-shadow: 0 30px 90px color-mix(in srgb, var(--whs-live-accent) 24%, rgba(0,0,0,.35));
+}
+body[class*="theme-"] .op-splash-logo-wrap,
+body[class*="theme-"] .op-splash-loader span {
+  background: linear-gradient(135deg, var(--whs-live-accent), var(--whs-live-second));
+}
+body[class*="theme-"] .theme-pill {
+  background: color-mix(in srgb, var(--whs-live-accent) 20%, #ffffff);
+  color: color-mix(in srgb, var(--whs-live-second) 80%, #000000);
+  border: 1px solid color-mix(in srgb, var(--whs-live-accent) 45%, #ffffff);
+}
+.theme-swatch {
+  border: 1px solid rgba(15,23,42,.12);
+}
+.toggle-row .checkline {
+  display:flex; align-items:center; gap:.65rem; font-weight:800;
+}
+.toggle-row input[type="checkbox"] { width:20px; height:20px; }
