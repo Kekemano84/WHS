@@ -119,7 +119,7 @@
             <div>
                 <h2>{% block title %}{% endblock %}</h2>
             </div>
-            {% if page not in ['auth', 'login', 'register', 'dashboard', 'more'] %}
+            {% if page not in ['auth', 'login', 'register', 'dashboard', 'more', 'notifications'] %}
             <div class="top-actions">
                 <a class="btn primary" href="{{ url_for('yard_check') }}">+ Yard Check</a>
             </div>

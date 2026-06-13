@@ -270,7 +270,13 @@
         <div><label>Date</label><input type="date" name="date"></div>
         <div><label>Shift</label><input name="shift" placeholder="D1 / D2 / Night / 06:00-18:00"></div>
         <div><label>Manager</label><input name="manager" placeholder="Laszlo"></div>
-        <div class="wide checkbox-row save-headers-row"><label><input type="checkbox" name="save_handover_headers"> Save changed section names as default for next time</label></div>
+        <div class="wide theme-toggle-line save-headers-row">
+            <div><strong>Save changed section names as default for next time</strong></div>
+            <label class="switch-toggle" for="saveHandoverHeadersToggle">
+                <input id="saveHandoverHeadersToggle" type="checkbox" name="save_handover_headers" value="yes">
+                <span class="switch-track"><span class="switch-knob"></span><b class="switch-on">ON</b><b class="switch-off">OFF</b></span>
+            </label>
+        </div>
 
         {% if enabled_section(section_names, "attendance") %}<div class="wide editable-section-title"><label>Section name</label><input name="handover_section_attendance" value="{{ section_names.attendance }}"></div>{% endif %}
         <div><label>Planned HC</label><input type="number" name="planned_hc" placeholder="25"></div>

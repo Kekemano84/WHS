@@ -2349,31 +2349,148 @@ def export_account_data():
 
 
 def send_welcome_email(name, email):
-    """Send a friendly WHS welcome email when SMTP is configured. Fails silently if email is not configured."""
+    """Send a WHS multilingual welcome email after registration.
+    Uses SMTP environment variables when configured; fails safely so registration still works.
+    """
     if not all([SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM]):
+        print("WHS welcome email skipped: SMTP is not configured.")
         return False
+
+    safe_name = (name or "there").strip() or "there"
     try:
-        msg = EmailMessage()
-        msg["Subject"] = "Welcome to WHS - Warehouse Support"
-        msg["From"] = SMTP_FROM
-        msg["To"] = email
-        msg.set_content(f"""Hi {name},
+        app_url = os.environ.get("APP_URL") or request.url_root.rstrip("/")
+    except Exception:
+        app_url = os.environ.get("APP_URL", "")
 
-Welcome to WHS (Warehouse Support).
+    subject = "Welcome to WHS – Warehouse Support"
 
-Your account is ready and you currently have full access to Dashboard, Morning Brief, Calendar, Handover, Yard Check, Team and Account tools.
+    plain_text = f"""Hi {safe_name},
 
-I hope WHS helps with your daily warehouse and logistics work.
+Welcome to WHS – Warehouse Support.
+
+Your account has been successfully created and you can now access the platform.
+
+WHS helps warehouse managers and supervisors with:
+- Morning Briefs
+- Yard Checks
+- Shift Handovers
+- Holiday Tracking
+- Team Management
+- Calendar & Planning
+- Company Themes & Personalisation
+
+To get started:
+1. Complete your Account settings.
+2. Select your preferred company theme.
+3. Configure your Holiday Tracker.
+4. Add your Team Members.
+5. Create your first Morning Brief and Handover.
+
+Open WHS: {app_url}
+
+Thank you for being part of WHS.
 
 Kind regards,
-WHS Team
-""")
+The WHS Team
+Warehouse Support
+
+---
+
+HU: Üdvözlünk a WHS-ben. A fiókod elkészült, és már használhatod a napi raktári munkához szükséges eszközöket.
+PL: Witamy w WHS. Twoje konto zostało utworzone i możesz korzystać z narzędzi do codziennej pracy magazynowej.
+RO: Bun venit la WHS. Contul tău a fost creat și poți folosi instrumentele pentru activitatea zilnică din depozit.
+ES: Bienvenido a WHS. Tu cuenta se ha creado correctamente y ya puedes usar las herramientas para operaciones diarias de almacén.
+DE: Willkommen bei WHS. Dein Konto wurde erstellt und du kannst die Tools für den täglichen Lagerbetrieb nutzen.
+"""
+
+    language_sections = [
+        ("English", f"Hi {safe_name}, welcome to WHS – Warehouse Support. Your account is active and ready to use."),
+        ("Magyar", f"Szia {safe_name}, üdvözlünk a WHS – Warehouse Support alkalmazásban. A fiókod aktív és használatra kész."),
+        ("Polski", f"Cześć {safe_name}, witamy w WHS – Warehouse Support. Twoje konto jest aktywne i gotowe do użycia."),
+        ("Română", f"Salut {safe_name}, bun venit la WHS – Warehouse Support. Contul tău este activ și gata de utilizare."),
+        ("Español", f"Hola {safe_name}, bienvenido a WHS – Warehouse Support. Tu cuenta está activa y lista para usar."),
+        ("Deutsch", f"Hallo {safe_name}, willkommen bei WHS – Warehouse Support. Dein Konto ist aktiv und einsatzbereit."),
+    ]
+
+    tools = [
+        "Morning Briefs", "Yard Checks", "Shift Handovers", "Holiday Tracking",
+        "Team Management", "Calendar & Planning", "Company Themes & Personalisation"
+    ]
+    steps = [
+        "Complete your Account settings.",
+        "Select your preferred company theme.",
+        "Configure your Holiday Tracker.",
+        "Add your Team Members.",
+        "Create your first Morning Brief and Handover."
+    ]
+
+    html_sections = "".join(
+        f"""
+        <div style=\"padding:14px 16px;border:1px solid #dbe7f3;border-radius:14px;margin:10px 0;background:#ffffff;\">
+          <strong style=\"display:block;color:#0f172a;font-size:15px;margin-bottom:6px;\">{lang}</strong>
+          <span style=\"color:#475569;font-size:14px;line-height:1.5;\">{text}</span>
+        </div>
+        """ for lang, text in language_sections
+    )
+    tools_html = "".join(f"<li style='margin:7px 0;'>✅ {tool}</li>" for tool in tools)
+    steps_html = "".join(f"<li style='margin:7px 0;'>{step}</li>" for step in steps)
+
+    html_body = f"""
+<!doctype html>
+<html>
+  <body style=\"margin:0;padding:0;background:#eef4fb;font-family:Arial,Helvetica,sans-serif;color:#0f172a;\">
+    <div style=\"max-width:720px;margin:0 auto;padding:28px 14px;\">
+      <div style=\"background:linear-gradient(135deg,#071827,#009fb7);border-radius:28px;padding:28px;color:#ffffff;box-shadow:0 18px 40px rgba(15,23,42,.18);\">
+        <div style=\"display:flex;align-items:center;gap:14px;margin-bottom:22px;\">
+          <div style=\"width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#18d3c2,#2563eb);display:flex;align-items:center;justify-content:center;font-weight:900;letter-spacing:.5px;\">WHS</div>
+          <div>
+            <div style=\"font-size:24px;font-weight:900;line-height:1.1;\">Welcome to WHS</div>
+            <div style=\"opacity:.85;font-size:14px;margin-top:4px;\">Warehouse Support</div>
+          </div>
+        </div>
+        <h1 style=\"font-size:34px;line-height:1.1;margin:0 0 12px 0;\">Your account is ready</h1>
+        <p style=\"font-size:16px;line-height:1.6;margin:0;color:#dbeafe;\">Thank you for registering. WHS is built to help warehouse and logistics leaders manage daily work faster, cleaner and more consistently.</p>
+        <div style=\"margin-top:24px;\">
+          <a href=\"{app_url}\" style=\"background:#ffffff;color:#0f172a;text-decoration:none;font-weight:900;padding:14px 22px;border-radius:14px;display:inline-block;\">Open WHS</a>
+        </div>
+      </div>
+
+      <div style=\"background:#ffffff;border-radius:24px;padding:26px;margin-top:18px;border:1px solid #dbe7f3;\">
+        <h2 style=\"margin:0 0 10px 0;font-size:22px;\">Hi {safe_name},</h2>
+        <p style=\"color:#475569;line-height:1.7;margin:0 0 14px 0;\">Your account has been successfully created and you currently have access to the WHS tools.</p>
+        <h3 style=\"margin:20px 0 8px 0;font-size:17px;\">What you can use</h3>
+        <ul style=\"padding-left:20px;color:#334155;line-height:1.6;margin-top:8px;\">{tools_html}</ul>
+        <h3 style=\"margin:20px 0 8px 0;font-size:17px;\">Recommended first steps</h3>
+        <ol style=\"padding-left:22px;color:#334155;line-height:1.6;margin-top:8px;\">{steps_html}</ol>
+      </div>
+
+      <div style=\"background:#f8fafc;border-radius:24px;padding:22px;margin-top:18px;border:1px solid #dbe7f3;\">
+        <h2 style=\"font-size:20px;margin:0 0 10px 0;\">Welcome in all supported languages</h2>
+        {html_sections}
+      </div>
+
+      <p style=\"text-align:center;color:#64748b;font-size:13px;line-height:1.6;margin:20px 0 0 0;\">
+        Kind regards,<br><strong>The WHS Team</strong><br>Warehouse Support
+      </p>
+    </div>
+  </body>
+</html>
+"""
+
+    try:
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"] = SMTP_FROM
+        msg["To"] = email
+        msg.set_content(plain_text)
+        msg.add_alternative(html_body, subtype="html")
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
             server.starttls(context=ssl.create_default_context())
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.send_message(msg)
         return True
-    except Exception:
+    except Exception as exc:
+        print(f"WHS welcome email failed: {exc}")
         return False
 
 @app.route("/register", methods=["GET", "POST"])
@@ -5245,10 +5362,13 @@ def settings():
 
 
 
-@app.route("/notifications")
+@app.route("/notifications", methods=["GET", "POST"])
 @login_required
 def notifications_page():
     user = current_user()
+    if request.method == "POST":
+        flash("Notification settings saved.", "success")
+        return redirect(url_for("notifications_page"))
     return render_template("notifications.html", page="notifications", user=user, notifications=get_notifications(user["id"]))
 
 @app.route("/manifest.json")

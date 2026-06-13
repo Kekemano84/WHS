@@ -31,8 +31,9 @@
 
 <section class="panel compact-panel">
     <div class="panel-head"><h3>Team Members</h3><a class="small-btn export-btn" href="{{ url_for('export_team') }}">[📊 Export Excel]</a></div>
+    <div class="team-search-row"><label>Search Team</label><input id="teamSearchInput" type="search" placeholder="Search by name, role, status, training, notes..." autocomplete="off"></div>
     {% for row in rows %}
-    <form method="POST" action="{{ url_for('update_team_member', member_id=row.id) }}" class="team-edit-card form-grid compact-form">
+    <form method="POST" action="{{ url_for('update_team_member', member_id=row.id) }}" class="team-edit-card form-grid compact-form" data-team-card>
         <div><label>Name</label><input name="name" value="{{ row.name }}"></div>
         <div><label>Role</label><input name="role" value="{{ row.role }}"></div>
         <div><label>Email</label><input name="email" value="{{ row.email or '' }}"></div>
@@ -56,4 +57,21 @@
     </form>
     {% else %}<p class="empty">No team members yet.</p>{% endfor %}
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const input = document.getElementById('teamSearchInput');
+  if(!input) return;
+  const cards = Array.from(document.querySelectorAll('[data-team-card]'));
+  input.addEventListener('input', function(){
+    const q = input.value.toLowerCase().trim();
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase() + ' ' + Array.from(card.querySelectorAll('input, select')).map(el => el.value || '').join(' ').toLowerCase();
+      card.style.display = !q || text.includes(q) ? '' : 'none';
+    });
+  });
+});
+</script>
 {% endblock %}

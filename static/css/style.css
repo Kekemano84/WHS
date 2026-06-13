@@ -3351,3 +3351,10 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
 .remove-brief-section{border:0;border-radius:14px;padding:14px 16px;background:#fee2e2;color:#991b1b;font-weight:900;cursor:pointer;}
 .add-brief-section{width:max-content;margin-top:4px;}
 @media(max-width:850px){.brief-section-row{grid-template-columns:1fr}.remove-brief-section{width:100%;}}
+
+/* WHS v10 refinements */
+.team-search-row{margin:14px 0 18px;}
+.team-search-row label{display:block;font-weight:900;margin-bottom:8px;color:#0f172a;}
+.team-search-row input{width:100%;padding:14px 16px;border:1px solid #dbe3ef;border-radius:16px;font-size:16px;}
+.save-headers-row{border:1px dashed #8ec5ff;border-radius:16px;padding:14px 16px;background:#f8fbff;}
+.notifications-panel .form-actions{margin-top:18px;}

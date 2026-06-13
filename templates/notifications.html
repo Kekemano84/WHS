@@ -6,7 +6,7 @@
   <h1>Notifications</h1>
   <p class="muted">Control reminders and alerts for your WHS workspace.</p>
 </section>
-<section class="panel notifications-panel">
+<form method="POST" class="panel notifications-panel">
   <div class="panel-head"><div><h3>Notification Centre</h3><p class="muted">Basic notifications are enabled. More options can be added later for paid plans.</p></div></div>
   <div class="settings-grid">
     <label class="remember-line"><input type="checkbox" checked><span>Welcome and account emails</span></label>
@@ -14,7 +14,8 @@
     <label class="remember-line"><input type="checkbox" checked><span>Yard check reminders</span></label>
     <label class="remember-line"><input type="checkbox"><span>Daily morning brief reminder</span></label>
   </div>
-</section>
+<div class="form-actions"><button class="btn primary" type="submit">Save Notifications</button></div>
+</form>
 <section class="panel">
   <h3>Recent Alerts</h3>
   {% if notifications %}

@@ -383,3 +383,21 @@ Added:
 - Holiday Balance redesigned with Remaining, Used, Annual Allowance and Paid Working Day.
 - Dashboard holiday widget now uses days/hours correctly.
 - Pricing simplified to Free and Pro only.
+
+
+## Welcome email
+
+When a new user registers, WHS sends a professional multilingual welcome email automatically if SMTP is configured.
+
+Required environment variables on Render:
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=your-email@gmail.com
+APP_URL=https://your-whs-app.onrender.com
+```
+
+If SMTP is not configured, registration still works and the email is skipped safely.
