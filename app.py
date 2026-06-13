@@ -85,42 +85,11 @@ STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PRO_PRICE_ID = os.environ.get("STRIPE_PRO_PRICE_ID")
 STRIPE_BUSINESS_PRICE_ID = os.environ.get("STRIPE_BUSINESS_PRICE_ID")
 APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://127.0.0.1:5000")
-# Email / SMTP configuration.
-# Supports both WHS-style variables and common Flask-Mail/Gmail variable names.
-SMTP_HOST = (
-    os.environ.get("SMTP_HOST")
-    or os.environ.get("SMTP_SERVER")
-    or os.environ.get("MAIL_SERVER")
-    or os.environ.get("EMAIL_HOST")
-    or "smtp.gmail.com"
-)
-SMTP_PORT = int(
-    os.environ.get("SMTP_PORT")
-    or os.environ.get("MAIL_PORT")
-    or os.environ.get("EMAIL_PORT")
-    or "587"
-)
-SMTP_USER = (
-    os.environ.get("SMTP_USER")
-    or os.environ.get("SMTP_EMAIL")
-    or os.environ.get("MAIL_USERNAME")
-    or os.environ.get("EMAIL_HOST_USER")
-)
-SMTP_PASSWORD = (
-    os.environ.get("SMTP_PASSWORD")
-    or os.environ.get("SMTP_APP_PASSWORD")
-    or os.environ.get("MAIL_PASSWORD")
-    or os.environ.get("EMAIL_HOST_PASSWORD")
-)
-SMTP_FROM = (
-    os.environ.get("SMTP_FROM")
-    or os.environ.get("MAIL_DEFAULT_SENDER")
-    or os.environ.get("DEFAULT_FROM_EMAIL")
-    or SMTP_USER
-    or ""
-)
-SMTP_USE_TLS = str(os.environ.get("SMTP_USE_TLS") or os.environ.get("MAIL_USE_TLS") or "true").lower() in ("1", "true", "yes", "on")
-SMTP_USE_SSL = str(os.environ.get("SMTP_USE_SSL") or os.environ.get("MAIL_USE_SSL") or "false").lower() in ("1", "true", "yes", "on")
+SMTP_HOST = os.environ.get("SMTP_HOST") or os.environ.get("SMTP_SERVER") or "smtp.gmail.com"
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER") or os.environ.get("SMTP_EMAIL")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD") or os.environ.get("SMTP_APP_PASSWORD")
+SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER or "")
 GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
 
 
@@ -1070,16 +1039,10 @@ def send_excel_to_self(workbook, filename, export_title):
         filename=filename,
     )
 
-    if SMTP_USE_SSL:
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ssl.create_default_context()) as server:
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.send_message(msg)
-    else:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as server:
-            if SMTP_USE_TLS:
-                server.starttls(context=ssl.create_default_context())
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.send_message(msg)
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        server.starttls(context=ssl.create_default_context())
+        server.login(SMTP_USER, SMTP_PASSWORD)
+        server.send_message(msg)
     return True, f"Excel sent to {recipient}."
 
 
@@ -2700,17 +2663,10 @@ DE: Willkommen bei WHS. Dein Konto wurde erstellt und du kannst die Tools für d
         msg["To"] = email
         msg.set_content(plain_text)
         msg.add_alternative(html_body, subtype="html")
-        if SMTP_USE_SSL:
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ssl.create_default_context()) as server:
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.send_message(msg)
-        else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as server:
-                if SMTP_USE_TLS:
-                    server.starttls(context=ssl.create_default_context())
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.send_message(msg)
-        print(f"WHS welcome email sent to {email}")
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls(context=ssl.create_default_context())
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
         return True
     except Exception as exc:
         print(f"WHS welcome email failed: {exc}")
@@ -2736,11 +2692,7 @@ def register():
             session["user_id"] = cur.lastrowid
             conn.execute("UPDATE users SET last_login_at=? WHERE id=?", (datetime.now().isoformat(timespec="seconds"), cur.lastrowid))
             conn.commit()
-            welcome_sent = send_welcome_email(name, email)
-            if welcome_sent:
-                flash("Account created. Welcome email sent.", "success")
-            else:
-                flash("Account created. Email sending is not configured yet or failed. Please check Render Environment variables.", "info")
+            send_welcome_email(name, email)
         except sqlite3.IntegrityError:
             flash("Email already registered.", "error")
             conn.close()
