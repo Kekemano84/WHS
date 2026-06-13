@@ -2714,18 +2714,18 @@ def og_test():
 <title>WHS - Operations Management Platform</title>
 <meta property="og:title" content="WHS - Operations Management Platform">
 <meta property="og:description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
-<meta property="og:image" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
-<meta property="og:image:secure_url" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
+<meta property="og:image" content="https://whs-6ozo.onrender.com/static/images/whs-share.png?v=16">
+<meta property="og:image:secure_url" content="https://whs-6ozo.onrender.com/static/images/whs-share.png?v=16">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="https://whs-ai-t1ip.onrender.com/">
+<meta property="og:url" content="https://whs-6ozo.onrender.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="WHS">
 </head>
 <body>
 <h1>WHS</h1>
-<img src="/static/images/whs-share.png?v=37" style="max-width:600px;width:100%;">
+<img src="/static/images/whs-share.png?v=16" style="max-width:600px;width:100%;">
 </body>
 </html>
 """

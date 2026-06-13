@@ -6,19 +6,20 @@
     <!-- WhatsApp / Facebook / LinkedIn social preview -->
     <meta property="og:title" content="WHS - Operations Management Platform">
     <meta property="og:description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
-    <meta property="og:image" content="{{ url_for('static', filename='images/whs-share.png', _external=True) }}">
-    <meta property="og:image:secure_url" content="{{ url_for('static', filename='images/whs-share.png', _external=True) }}">
+    <meta property="og:image" content="{{ request.url_root.replace('http://', 'https://').rstrip('/') }}/static/images/whs-share.png?v=16">
+    <meta property="og:image:secure_url" content="{{ request.url_root.replace('http://', 'https://').rstrip('/') }}/static/images/whs-share.png?v=16">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:url" content="{{ request.url_root.rstrip('/') }}/">
+    <meta property="og:image:alt" content="WHS - Warehouse Support app preview">
+    <meta property="og:url" content="{{ request.url_root.replace('http://', 'https://').rstrip('/') }}/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="WHS">
     <meta name="description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="WHS - Operations Management Platform">
     <meta name="twitter:description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
-    <meta name="twitter:image" content="{{ url_for('static', filename='images/whs-share.png', _external=True) }}">
+    <meta name="twitter:image" content="{{ request.url_root.replace('http://', 'https://').rstrip('/') }}/static/images/whs-share.png?v=16">
 
     <title>WHS - Operations Management Platform</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
