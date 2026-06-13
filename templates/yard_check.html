@@ -66,7 +66,7 @@ function startYardVoiceRecord(btn) {
     </div>
     <div class="hero-actions">
         <span class="btn light">Today: {{ today_count }}</span>
-        <a class="btn light" href="{{ url_for('export_yard_check') }}">Export Excel</a>
+        <a class="btn light" href="{{ url_for('export_yard_check') }}">Export Excel</a> <a class="btn light" href="{{ url_for('email_excel', kind='yard_check') }}">📧 Email Excel</a>
     </div>
 </section>
 
@@ -200,7 +200,7 @@ function startYardVoiceRecord(btn) {
 <section class="panel">
     <div class="panel-head">
         <h3>Yard Check History</h3>
-        <a class="small-btn" href="{{ url_for('export_yard_check') }}">Download Excel</a>
+        <a class="small-btn" href="{{ url_for('export_yard_check') }}">Download Excel</a> <a class="small-btn" href="{{ url_for('email_excel', kind='yard_check') }}">📧 Email Excel</a>
     </div>
 
     <div class="table-wrap">

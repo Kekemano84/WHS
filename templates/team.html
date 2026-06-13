@@ -30,7 +30,7 @@
 </section>
 
 <section class="panel compact-panel">
-    <div class="panel-head"><h3>Team Members</h3><a class="small-btn export-btn" href="{{ url_for('export_team') }}">[📊 Export Excel]</a></div>
+    <div class="panel-head"><h3>Team Members</h3><a class="small-btn export-btn" href="{{ url_for('export_team') }}">[📊 Export Excel]</a> <a class="small-btn" href="{{ url_for('email_excel', kind='team') }}">📧 Email Excel</a></div>
     <div class="team-search-row"><label>Search Team</label><input id="teamSearchInput" type="search" placeholder="Search by name, role, status, training, notes..." autocomplete="off"></div>
     {% for row in rows %}
     <form method="POST" action="{{ url_for('update_team_member', member_id=row.id) }}" class="team-edit-card form-grid compact-form" data-team-card>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Daily Shift Log{% endblock %}
 {% block content %}
-<section class="hero-card pro-hero"><div><p class="eyebrow">Warehouse Support</p><h3>Daily Shift Log</h3><p>One complete record for volume, headcount, safety, issues, actions and photos.</p></div><a class="btn light export-btn" href="{{ url_for('export_daily_shift_log') }}">[📊 Export Excel]</a></section>
+<section class="hero-card pro-hero"><div><p class="eyebrow">Warehouse Support</p><h3>Daily Shift Log</h3><p>One complete record for volume, headcount, safety, issues, actions and photos.</p></div><a class="btn light export-btn" href="{{ url_for('export_daily_shift_log') }}">[📊 Export Excel]</a> <a class="btn light export-btn" href="{{ url_for('email_excel', kind='daily_shift_log') }}">📧 Email Excel</a></section>
 <section class="panel compact-panel"><div class="panel-head"><h3>Add Shift Log</h3></div>
 <form method="POST" enctype="multipart/form-data" class="form-grid compact-form">
 <div><label>Date</label><input type="date" name="date"></div><div><label>Shift</label><input name="shift" placeholder="D2 / Day / Night"></div><div><label>Manager</label><input name="manager" value="{{ user.name }}"></div><div><label>Volume</label><input type="number" name="volume"></div><div><label>Planned HC</label><input type="number" name="planned_hc"></div><div><label>Actual HC</label><input type="number" name="actual_hc"></div><div><label>Late Trailers</label><input type="number" name="late_trailers"></div><div><label>Photo</label><input type="file" name="photo" accept="image/*" capture="environment"></div>

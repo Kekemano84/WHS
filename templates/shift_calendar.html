@@ -7,7 +7,7 @@
         <p class="eyebrow">Shift Calendar</p>
         <h3>Generate your work pattern automatically for the next year and manually mark Holiday, Sick, Training or Overtime days.</h3>
     </div>
-    <a class="btn light" href="{{ url_for('export_shift_calendar') }}">[📊 Export Excel]</a>
+    <a class="btn light" href="{{ url_for('export_shift_calendar') }}">[📊 Export Excel]</a> <a class="btn light" href="{{ url_for('email_excel', kind='shift_calendar') }}">📧 Email Excel</a>
 </section>
 
 <section class="shift-mobile-stack">

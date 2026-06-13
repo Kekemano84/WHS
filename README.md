@@ -401,3 +401,29 @@ APP_URL=https://your-whs-app.onrender.com
 ```
 
 If SMTP is not configured, registration still works and the email is skipped safely.
+
+## v12 - Email Excel exports
+
+Where WHS shows an Excel export, users can also click **Email Excel** to send the same report to their own registered email address.
+
+Supported exports include Yard Check, Handover, Team, Calendar, Holiday Tracker, Mileage, Expenses, Daily Shift Log, Actions and Absence.
+
+Render environment variables for email:
+
+```text
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your@email.com
+SMTP_PASSWORD=your_app_password
+SMTP_FROM=your@email.com
+```
+
+Alternative names also work:
+
+```text
+SMTP_SERVER=smtp.gmail.com
+SMTP_EMAIL=your@email.com
+SMTP_APP_PASSWORD=your_app_password
+```
+
+If SMTP is not configured, the app will not crash. It will show: Email sending is not configured yet.

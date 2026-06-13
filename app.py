@@ -85,10 +85,10 @@ STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_PRO_PRICE_ID = os.environ.get("STRIPE_PRO_PRICE_ID")
 STRIPE_BUSINESS_PRICE_ID = os.environ.get("STRIPE_BUSINESS_PRICE_ID")
 APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://127.0.0.1:5000")
-SMTP_HOST = os.environ.get("SMTP_HOST")
+SMTP_HOST = os.environ.get("SMTP_HOST") or os.environ.get("SMTP_SERVER") or "smtp.gmail.com"
 SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
+SMTP_USER = os.environ.get("SMTP_USER") or os.environ.get("SMTP_EMAIL")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD") or os.environ.get("SMTP_APP_PASSWORD")
 SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER or "")
 GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
 
@@ -971,6 +971,164 @@ def style_excel_header(ws):
         cell.alignment = Alignment(horizontal="center")
     for col in ws.columns:
         ws.column_dimensions[col[0].column_letter].width = max(16, min(35, max(len(str(c.value or "")) for c in col) + 2))
+
+
+
+def workbook_to_bytes(workbook):
+    buffer = BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+
+def send_excel_to_self(workbook, filename, export_title):
+    """Email an Excel workbook to the logged-in user's registered email.
+    Fails safely when SMTP is not configured.
+    """
+    user = current_user()
+    recipient = row_get(user, "email", "")
+    if not recipient:
+        return False, "No registered email address found for your account."
+    if not all([SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM]):
+        return False, "Email sending is not configured yet. Add SMTP_HOST/SMTP_SERVER, SMTP_USER/SMTP_EMAIL, SMTP_PASSWORD/SMTP_APP_PASSWORD and SMTP_FROM in Render Environment Variables."
+
+    msg = EmailMessage()
+    msg["Subject"] = f"WHS Export – {export_title}"
+    msg["From"] = SMTP_FROM
+    msg["To"] = recipient
+    msg.set_content(
+        f"Hi {row_get(user, 'name', 'there')},\n\n"
+        f"Your WHS {export_title} Excel export is attached.\n\n"
+        "Kind regards,\nWHS Team"
+    )
+    html = f"""
+    <div style=\"font-family:Arial,sans-serif;line-height:1.5;color:#0f172a\">
+      <h2 style=\"margin:0 0 10px\">WHS Export</h2>
+      <p>Hi {row_get(user, 'name', 'there')},</p>
+      <p>Your <strong>{export_title}</strong> Excel export is attached.</p>
+      <p style=\"color:#64748b\">This email was sent automatically from WHS – Warehouse Support.</p>
+      <p>Kind regards,<br><strong>WHS Team</strong></p>
+    </div>
+    """
+    msg.add_alternative(html, subtype="html")
+    msg.add_attachment(
+        workbook_to_bytes(workbook),
+        maintype="application",
+        subtype="vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=filename,
+    )
+
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        server.starttls(context=ssl.create_default_context())
+        server.login(SMTP_USER, SMTP_PASSWORD)
+        server.send_message(msg)
+    return True, f"Excel sent to {recipient}."
+
+
+def simple_table_workbook(title, headers, rows):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = title[:31]
+    ws.append(headers)
+    for row in rows:
+        ws.append(row)
+    style_excel_header(ws)
+    return wb
+
+
+EMAIL_EXPORT_CONFIG = {
+    "mileage": {
+        "title": "Mileage",
+        "filename": "whs-mileage.xlsx",
+        "sql": "SELECT date, start_location, end_location, purpose, miles, rate, created_at FROM mileage WHERE user_id = ? ORDER BY date DESC, id DESC",
+        "headers": ["Date", "From", "To", "Purpose", "Miles", "Rate", "Recorded At"],
+        "return": "mileage",
+    },
+    "expenses": {
+        "title": "Expenses",
+        "filename": "whs-expenses.xlsx",
+        "sql": "SELECT date, category, description, amount, created_at FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC",
+        "headers": ["Date", "Category", "Description", "Amount", "Recorded At"],
+        "return": "expenses",
+    },
+    "yard_check": {
+        "title": "Yard Check",
+        "filename": "whs-yard-check.xlsx",
+        "sql": "SELECT date, location_type, location_detail, trailer_id, notes, source, created_at FROM yard_checks WHERE user_id = ? ORDER BY date DESC, id DESC",
+        "headers": ["Date", "Location Type", "Location", "Trailer ID", "Notes", "Source", "Recorded At"],
+        "return": "yard_check",
+    },
+    "handover": {
+        "title": "Handover",
+        "filename": "whs-handovers.xlsx",
+        "sql": "SELECT date, shift, manager, attendance, safety, operations, issues, actions, created_at FROM handovers WHERE user_id = ? ORDER BY date DESC, id DESC",
+        "headers": ["Date", "Shift", "Manager", "Attendance", "Safety", "Operations", "Issues", "Actions", "Recorded At"],
+        "return": "handover",
+    },
+    "team": {
+        "title": "Team Members",
+        "filename": "whs-team-members.xlsx",
+        "sql": "SELECT name, role, email, phone, status, probation_start, probation_end, probation_status, notes, created_at FROM team_members WHERE user_id = ? ORDER BY name ASC",
+        "headers": ["Name", "Role", "Email", "Phone", "Status", "Probation Start", "Probation End", "Probation Status", "Notes", "Created At"],
+        "return": "team",
+    },
+    "shift_calendar": {
+        "title": "Calendar",
+        "filename": "whs-calendar.xlsx",
+        "sql": "SELECT date, status, shift_name, start_time, end_time, notes, holiday_hours, holiday_days, created_at FROM shift_calendar WHERE user_id = ? ORDER BY date DESC, id DESC",
+        "headers": ["Date", "Status", "Shift", "Start", "End", "Notes", "Holiday Hours", "Holiday Days", "Recorded At"],
+        "return": "shift_calendar",
+    },
+    "holiday_tracker": {
+        "title": "Holiday Tracker",
+        "filename": "whs-holiday-tracker.xlsx",
+        "sql": "SELECT date, status, shift_name, notes, holiday_hours, holiday_days, created_at FROM shift_calendar WHERE user_id = ? AND (status = 'Holiday' OR holiday_hours > 0 OR holiday_days > 0) ORDER BY date DESC, id DESC",
+        "headers": ["Date", "Status", "Shift", "Notes", "Holiday Hours", "Holiday Days", "Recorded At"],
+        "return": "holiday_tracker",
+    },
+    "daily_shift_log": {
+        "title": "Daily Shift Log",
+        "filename": "whs-daily-shift-log.xlsx",
+        "sql": "SELECT date, shift, manager, volume, planned_hc, actual_hc, safety, issues, actions, created_at FROM daily_shift_logs WHERE user_id = ? ORDER BY date DESC, id DESC",
+        "headers": ["Date", "Shift", "Manager", "Volume", "Planned HC", "Actual HC", "Safety", "Issues", "Actions", "Recorded At"],
+        "return": "daily_shift_log",
+    },
+    "actions": {
+        "title": "Actions",
+        "filename": "whs-actions.xlsx",
+        "sql": "SELECT title, owner, due_date, priority, status, notes, created_at FROM action_tracker WHERE user_id = ? ORDER BY due_date ASC, id DESC",
+        "headers": ["Action", "Owner", "Due Date", "Priority", "Status", "Notes", "Recorded At"],
+        "return": "actions",
+    },
+    "absence": {
+        "title": "Absence",
+        "filename": "whs-absence.xlsx",
+        "sql": "SELECT member_name, absence_type, start_date, end_date, notes, created_at FROM absence_records WHERE user_id = ? ORDER BY start_date DESC, id DESC",
+        "headers": ["Person", "Type", "Start", "End", "Notes", "Recorded At"],
+        "return": "absence",
+    },
+}
+
+
+@app.route("/email-excel/<kind>")
+@login_required
+def email_excel(kind):
+    cfg = EMAIL_EXPORT_CONFIG.get(kind)
+    if not cfg:
+        flash("Unknown Excel export.", "error")
+        return redirect(url_for("dashboard"))
+    user = current_user()
+    try:
+        conn = get_db()
+        rows = conn.execute(cfg["sql"], (user["id"],)).fetchall()
+        conn.close()
+        values = [[row[i] for i in range(len(row))] for row in rows]
+        wb = simple_table_workbook(cfg["title"], cfg["headers"], values)
+        ok, message = send_excel_to_self(wb, cfg["filename"], cfg["title"])
+        flash(message, "success" if ok else "error")
+    except Exception as exc:
+        flash(f"Could not send Excel email: {exc}", "error")
+    return redirect(url_for(cfg["return"]))
 
 
 
