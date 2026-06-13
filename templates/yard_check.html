@@ -139,8 +139,8 @@ function startYardVoiceRecord(btn) {
         <input type="hidden" name="source" value="Manual">
 
         <div class="voice-hint" id="yardVoiceHint" style="display:none;">
-            <strong>Voice record available</strong>
-            <span>Click the mic to record trailer details, or press X and type manually.</span>
+            <strong>Voice ready</strong>
+            <span>Tap the mic between Location and Trailer ID to record, or press X and type manually.</span>
             <button type="button" onclick="hideYardVoiceHint()">×</button>
         </div>
 
@@ -149,31 +149,31 @@ function startYardVoiceRecord(btn) {
                 <thead>
                     <tr>
                         <th>Location</th>
+                        <th>Voice</th>
                         <th>Trailer ID</th>
                         <th>Notes</th>
                         <th>Custom Marker</th>
-                        <th>Voice</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody id="yardMatrixBody">
                     {% for i in range(fence_start, fence_end + 1) %}
                     <tr>
-                        <td><input name="row_location[]" value="Fence {{ i }}" required placeholder="Fence {{ i }}"></td>
-                        <td><input name="row_trailer_id[]" required placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
+                        <td><input class="yard-location-input" name="row_location[]" value="Fence {{ i }}" required placeholder="Fence {{ i }}"></td>
+                        <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
+                        <td><input class="yard-trailer-input" name="row_trailer_id[]" required placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
                         <td><input name="row_notes[]" placeholder="Optional notes"></td>
                         <td><input name="row_marker[]" placeholder="Loaded / Empty / Seal / Bay note"></td>
-                        <td><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)">🎙️</button></td>
                         <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>
                     </tr>
                     {% endfor %}
                     {% for i in range(door_start, door_end + 1) %}
                     <tr>
-                        <td><input name="row_location[]" value="Door {{ i }}" required placeholder="Door {{ i }}"></td>
-                        <td><input name="row_trailer_id[]" required placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
+                        <td><input class="yard-location-input" name="row_location[]" value="Door {{ i }}" required placeholder="Door {{ i }}"></td>
+                        <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
+                        <td><input class="yard-trailer-input" name="row_trailer_id[]" required placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
                         <td><input name="row_notes[]" placeholder="Optional notes"></td>
                         <td><input name="row_marker[]" placeholder="Loaded / Empty / Seal / Bay note"></td>
-                        <td><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)">🎙️</button></td>
                         <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>
                     </tr>
                     {% endfor %}
@@ -182,7 +182,7 @@ function startYardVoiceRecord(btn) {
         </div>
 
         <div class="yard-tools-strip">
-            <div><strong>Voice Input</strong><span>Use the mic beside Trailer ID.</span></div>
+            <div><strong>Voice Input</strong><span>Use the mic between Location and Trailer ID.</span></div>
             <div><strong>Excel Export</strong><span>Download Yard Check history.</span></div>
             <div><strong>Photo Upload</strong><input type="file" name="photo" accept="image/*" capture="environment"></div>
         </div>

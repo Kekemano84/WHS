@@ -427,3 +427,24 @@ SMTP_APP_PASSWORD=your_app_password
 ```
 
 If SMTP is not configured, the app will not crash. It will show: Email sending is not configured yet.
+
+
+## Email setup for welcome emails and Email Excel
+
+WHS can send automatic welcome emails after registration and send Excel exports to the registered user's own email address.
+
+Add these Environment Variables in Render:
+
+```env
+APP_URL=https://your-render-url.onrender.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USE_TLS=true
+SMTP_USER=your-gmail-address@gmail.com
+SMTP_PASSWORD=your_16_character_google_app_password
+SMTP_FROM=your-gmail-address@gmail.com
+```
+
+For Gmail, use a Google App Password. Your normal Gmail password will not work.
+
+The app also supports `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, and `MAIL_DEFAULT_SENDER` if you prefer those names.
