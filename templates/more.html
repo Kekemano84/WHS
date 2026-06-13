@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Account</h1>
+
+<section class="panel more-panel whs-account-panel">
+  <h2>Account Options</h2>
+  <p class="muted">Profile, yard setup and personal work records.</p>
+
+  <div class="more-menu-grid">
+    <a class="more-option-card" href="{{ url_for('settings') }}">
+      <span class="more-option-icon">👤</span>
+      <span class="more-option-text"><strong>Profile</strong><small>Name, site, role and language</small></span>
+    </a>
+    <a class="more-option-card" href="{{ url_for('yard_settings') }}">
+      <span class="more-option-icon">📍</span>
+      <span class="more-option-text"><strong>Yard Setup</strong><small>Doors, fences and locations</small></span>
+    </a>
+    <a class="more-option-card" href="{{ url_for('mileage') }}">
+      <span class="more-option-icon">🚗</span>
+      <span class="more-option-text"><strong>Mileage</strong><small>HMRC mileage records</small></span>
+    </a>
+    <a class="more-option-card" href="{{ url_for('expenses') }}">
+      <span class="more-option-icon">💷</span>
+      <span class="more-option-text"><strong>Expenses</strong><small>Business costs</small></span>
+    </a>
+    <a class="more-option-card danger-soft" href="{{ url_for('logout') }}">
+      <span class="more-option-icon">🚪</span>
+      <span class="more-option-text"><strong>Logout</strong><small>Sign out</small></span>
+    </a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<section class="panel compact-panel"><div class="panel-head"><h3>Account Maintenance</h3><a class="small-btn danger-btn" href="{{ url_for('admin_inactivity_check') }}" onclick="return confirm('Run inactivity check? 6 month warning / 12 month delete.')">Run Inactivity Check</a></div><p class="muted">6 months inactive = warning flag. 12 months inactive = automatic deletion during this check.</p></section>
+
+<section class="hero-card pro-hero compact-hero">
+    <div>
+        <p class="eyebrow">Admin / testing account</p>
+        <h3>Control users, plans and testing access from one place.</h3>
+    </div>
+    <a class="btn light" href="{{ url_for('export_admin_users') }}">Download Excel</a>
+</section>
+
+<section class="stats-grid compact-stats">
+    <div class="stat-card"><span>Total Users</span><strong>{{ stats.users }}</strong><small>Registered accounts</small></div>
+    <div class="stat-card"><span>Free</span><strong>{{ stats.free }}</strong><small>Free users</small></div>
+    <div class="stat-card"><span>Pro</span><strong>{{ stats.pro }}</strong><small>Pro users</small></div>
+    <div class="stat-card highlight"><span>Business</span><strong>{{ stats.business }}</strong><small>Business users</small></div>
+</section>
+
+<section class="stats-grid compact-stats">
+    <div class="stat-card"><span>Yard Checks</span><strong>{{ stats.yard }}</strong><small>All records</small></div>
+    <div class="stat-card"><span>Handovers</span><strong>{{ stats.handovers }}</strong><small>All reports</small></div>
+    <div class="stat-card"><span>Team Members</span><strong>{{ stats.team }}</strong><small>All team records</small></div>
+</section>
+
+<section class="panel compact-panel">
+    <div class="panel-head"><h3>Admin Account Details</h3><span class="pill">Change login</span></div>
+    <form method="POST" action="{{ url_for('admin_account_update') }}" class="form-grid password-safe-form" id="adminPasswordForm">
+        <div><label>Name</label><input name="name" value="{{ user.name }}"></div>
+        <div><label>Email</label><input type="email" name="email" value="{{ user.email }}"></div>
+        <div><label>Current Password</label><input type="password" name="current_password" placeholder="Required only if changing password"></div>
+        <div><label>New Password</label><input type="password" id="newAdminPassword" name="password" placeholder="Leave blank to keep current password"></div>
+        <div><label>Confirm New Password</label><input type="password" id="confirmAdminPassword" name="confirm_password" placeholder="Type the new password again"></div>
+        <div class="password-strength-card">
+            <strong id="passwordStrengthLabel">Password strength: Not set</strong>
+            <ul>
+                <li id="ruleLength">Minimum 8 characters</li>
+                <li id="ruleLower">Lowercase letter</li>
+                <li id="ruleUpper">Uppercase letter</li>
+                <li id="ruleNumber">Number</li>
+                <li id="ruleSpecial">Special character</li>
+                <li id="ruleMatch">Passwords match</li>
+            </ul>
+        </div>
+        <div class="wide"><small class="muted">Last password change: {{ user.password_changed_at[:16].replace("T", " ") if user.password_changed_at else "Not recorded yet" }}</small></div>
+        <div class="form-actions"><button class="btn primary" id="updateAdminLoginBtn" type="submit">Update Admin Login</button></div>
+    </form>
+
+<script>
+(function () {
+    const password = document.getElementById("newAdminPassword");
+    const confirm = document.getElementById("confirmAdminPassword");
+    const button = document.getElementById("updateAdminLoginBtn");
+    const label = document.getElementById("passwordStrengthLabel");
+    if (!password || !confirm || !button || !label) return;
+
+    const rules = {
+        length: document.getElementById("ruleLength"),
+        lower: document.getElementById("ruleLower"),
+        upper: document.getElementById("ruleUpper"),
+        number: document.getElementById("ruleNumber"),
+        special: document.getElementById("ruleSpecial"),
+        match: document.getElementById("ruleMatch")
+    };
+
+    function setRule(el, ok) {
+        if (!el) return;
+        el.classList.toggle("ok", ok);
+        el.classList.toggle("bad", !ok);
+    }
+
+    function check() {
+        const p = password.value || "";
+        const c = confirm.value || "";
+
+        if (!p && !c) {
+            label.textContent = "Password strength: Not set";
+            label.className = "";
+            Object.values(rules).forEach(function (el) { if (el) { el.classList.remove("ok", "bad"); } });
+            button.disabled = false;
+            return;
+        }
+
+        const checks = {
+            length: p.length >= 8,
+            lower: /[a-z]/.test(p),
+            upper: /[A-Z]/.test(p),
+            number: /[0-9]/.test(p),
+            special: /[^A-Za-z0-9]/.test(p),
+            match: p && c && p === c
+        };
+
+        setRule(rules.length, checks.length);
+        setRule(rules.lower, checks.lower);
+        setRule(rules.upper, checks.upper);
+        setRule(rules.number, checks.number);
+        setRule(rules.special, checks.special);
+        setRule(rules.match, checks.match);
+
+        const score = ["length", "lower", "upper", "number", "special"].filter(function (k) { return checks[k]; }).length;
+
+        if (score <= 2) {
+            label.textContent = "Password strength: Weak";
+            label.className = "strength-weak";
+        } else if (score <= 4) {
+            label.textContent = "Password strength: Medium";
+            label.className = "strength-medium";
+        } else {
+            label.textContent = "Password strength: Strong";
+            label.className = "strength-strong";
+        }
+
+        button.disabled = !(score >= 3 && checks.match);
+    }
+
+    password.addEventListener("input", check);
+    confirm.addEventListener("input", check);
+    check();
+})();
+</script>
+</section>
+
+
+<section class="panel compact-panel">
+    <div class="panel-head">
+        <div>
+            <h3>Demo Business Accounts</h3>
+            <p class="muted">Creates 5 Business test accounts with full app access, but no Admin panel or revenue dashboard.</p>
+        </div>
+        <span class="pill">Password: WHS2026!</span>
+    </div>
+    <div class="mini-actions">
+        <form method="POST" action="{{ url_for('admin_create_demo_users') }}">
+            <button class="small-btn" type="submit">Create / Reset Demo Users</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin_delete_demo_users') }}" onsubmit="return confirm('Delete all demo users?')">
+            <button class="small-btn danger-btn" type="submit">Delete Demo Users</button>
+        </form>
+    </div>
+    <p class="muted">Emails: demo1@whs.ai, demo2@whs.ai, demo3@whs.ai, demo4@whs.ai, demo5@whs.ai</p>
+</section>
+
+<section class="panel compact-panel">
+    <div class="panel-head">
+        <h3>Users</h3>
+        <div class="mini-actions"><a class="small-btn" href="{{ url_for('export_admin_users') }}">Download Excel</a><span class="pill">Admin control</span></div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Access</th><th>Role</th><th>Created</th><th>Valid Until</th><th>Status</th><th>Plan Options</th><th>Delete</th></tr></thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td><strong>{{ u.name }}</strong></td>
+                    <td>{{ u.email }}</td>
+                    <td><span class="status yard">{{ display_plan_name(u) }}</span></td>
+                    <td>{{ u.role or "-" }}</td>
+                    <td>{{ u.created_at[:10] }}</td>
+                    <td>{{ u.pro_expires_at[:10] if u.pro_expires_at else "No expiry" }}</td>
+                    <td>{{ u.subscription_status or "-" }}{% if u.pro_reason %}<br><small>{{ u.pro_reason }}</small>{% endif %}</td>
+                    <td><div class="mini-actions plan-admin-actions">
+                        <a class="small-btn ghost-small" href="{{ url_for('admin_set_user_plan', user_id=u.id, plan='free') }}">Free</a>
+                        <a class="small-btn" href="{{ url_for('admin_set_user_plan', user_id=u.id, plan='pro') }}">Manual Pro</a>
+                        <a class="small-btn ghost-small" href="{{ url_for('admin_set_user_trial_pro30', user_id=u.id) }}">30 Day Pro</a>
+                        <a class="small-btn ghost-small" href="{{ url_for('admin_set_user_gift_pro', user_id=u.id) }}">Gift Pro</a>
+                        <a class="small-btn" href="{{ url_for('admin_set_user_plan', user_id=u.id, plan='business') }}">Manual Business</a>
+                        <a class="small-btn ghost-small" href="{{ url_for('admin_set_user_trial_business30', user_id=u.id) }}">30 Day Business</a>
+                        <a class="small-btn ghost-small" href="{{ url_for('admin_set_user_gift_business', user_id=u.id) }}">Gift Business</a>
+                    </div></td>
+                    <td>{% if u.email != 'admin@whs.ai' %}<form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" onsubmit="return confirm('Delete this account and all data?')"><button class="small-btn danger-btn" type="submit">Delete Account</button></form>{% endif %}</td>
+                </tr>
+                {% else %}<tr><td colspan="9" class="empty">No users yet.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% endblock %}

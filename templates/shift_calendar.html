@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Shift Calendar{% endblock %}
+{% block content %}
+
+<section class="hero-card pro-hero">
+    <div>
+        <p class="eyebrow">Shift Calendar</p>
+        <h3>Generate your work pattern automatically for the next year and manually mark Holiday, Sick, Training or Overtime days.</h3>
+    </div>
+    <a class="btn light" href="{{ url_for('export_shift_calendar') }}">[📊 Export Excel]</a>
+</section>
+
+<section class="shift-mobile-stack">
+    <section class="panel shift-card">
+        <div class="panel-head">
+            <div>
+                <h3>Auto Generate Calendar</h3>
+                <p class="muted">Choose a standard pattern or create your own.</p>
+            </div>
+            <span class="pill">FREE</span>
+        </div>
+
+        <form method="POST" class="shift-form">
+            <input type="hidden" name="action" value="generate">
+
+            <div>
+                <label>Pattern</label>
+                <select name="pattern" id="patternSelect" onchange="toggleCustomPattern()">
+                    {% for value, label in patterns %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div id="customPatternBox" class="custom-pattern-box" style="display:none;">
+                <label>Custom Pattern</label>
+                <input name="custom_pattern" placeholder="Example: 3 on 4 off 4 on 3 off">
+                <small>Use any repeating pattern, e.g. 4 on 4 off, 3 on 4 off 4 on 3 off, 2 on 2 off.</small>
+            </div>
+
+            <div class="shift-form-grid">
+                <div>
+                    <label>Start Date</label>
+                    <input type="date" name="start_date">
+                </div>
+                <div>
+                    <label>Generate For</label>
+                    <select name="months">
+                        <option value="3">3 months</option>
+                        <option value="6">6 months</option>
+                        <option value="12" selected>12 months</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Shift Name</label>
+                    <input name="shift_name" placeholder="D2 / Day / Night / Early">
+                </div>
+                <div>
+                    <label>Start Time</label>
+                    <input type="time" name="start_time" value="06:00">
+                </div>
+                <div>
+                    <label>End Time</label>
+                    <input type="time" name="end_time" value="18:00">
+                </div>
+            </div>
+
+            <label class="check-line">
+                <input type="checkbox" name="replace_existing" value="yes">
+                Replace existing generated days from start date
+            </label>
+
+            <button class="btn primary full" type="submit">Generate Calendar</button>
+        </form>
+    </section>
+
+    <section class="panel shift-card">
+        <div class="panel-head">
+            <div>
+                <h3>Manual Day Update</h3><a class="small-btn ghost-small" href="{{ url_for('holiday_tracker') }}">Holiday Tracker</a>
+                <p class="muted">Override one day as Holiday, Sick, Training, Overtime or Custom.</p>
+            </div>
+        </div>
+
+        <form method="POST" class="shift-form">
+            <input type="hidden" name="action" value="manual">
+
+            <div class="shift-form-grid">
+                <div>
+                    <label>Date</label>
+                    <input type="date" name="manual_date">
+                </div>
+                <div>
+                    <label>Status</label>
+                    <select name="manual_status">
+                        {% for status in statuses %}
+                        <option>{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Shift Name</label>
+                    <input name="manual_shift_name" placeholder="Optional">
+                </div>
+                <div>
+                    <label>Start</label>
+                    <input type="time" name="manual_start_time">
+                </div>
+                <div>
+                    <label>End</label>
+                    <input type="time" name="manual_end_time">
+                </div>
+            </div>
+
+            <div>
+                <label>Notes</label>
+                <input name="manual_notes" placeholder="Meeting 09:00, Pete probation ends, audit, training etc.">
+            <div class="holiday-manual-grid">
+                <div>
+                    <label>Holiday Hours</label>
+                    <input type="number" step="0.25" name="manual_holiday_hours" placeholder="e.g. 11.25">
+                </div>
+                <div>
+                    <label>Holiday Days</label>
+                    <input type="number" step="0.25" name="manual_holiday_days" placeholder="e.g. 1">
+                </div>
+            </div>
+            </div>
+
+            <button class="btn primary full" type="submit">Save Day</button>
+        </form>
+    </section>
+</section>
+
+<script>
+function toggleCustomPattern() {
+    const select = document.getElementById("patternSelect");
+    const box = document.getElementById("customPatternBox");
+    if (!select || !box) return;
+    box.style.display = select.value === "custom" ? "block" : "none";
+}
+document.addEventListener("DOMContentLoaded", toggleCustomPattern);
+</script>
+
+<section class="panel">
+    <div class="panel-head calendar-view-head">
+        <div>
+            <h3>Calendar View</h3>
+            {% if view == "month" %}
+            <p class="muted">{{ current_month }}</p>
+            {% else %}
+            <p class="muted">28 day list view</p>
+            {% endif %}
+        </div>
+        <div class="mini-actions calendar-actions">
+            {% if view == "month" %}
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month', month=prev_start) }}">Previous Month</a>
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month') }}">This Month</a>
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month', month=next_start) }}">Next Month</a>
+            <a class="small-btn" href="{{ url_for('shift_calendar', view='list', start=rows[0].date if rows else '') }}">List View</a>
+            {% else %}
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='list', start=prev_start) }}">Previous</a>
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='list', start=next_start) }}">Next</a>
+            <a class="small-btn" href="{{ url_for('shift_calendar', view='month', month=current_month_value) }}">Month View</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if view == "month" %}
+    <div class="month-calendar">
+        <div class="month-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        {% for week in month_weeks %}
+        <div class="month-week">
+            {% for row in week %}
+            <div class="month-day {% if not row.in_month %}outside-month{% endif %} status-{{ row.status|lower|replace(' ', '-') }}">
+                <div class="month-date">{{ row.date[-2:] }}</div>
+                <strong>{{ row.status }}</strong>
+                {% if row.shift_name %}<small>{{ row.shift_name }}</small>{% endif %}
+                {% if row.start_time or row.end_time %}<small>{{ row.start_time }} - {{ row.end_time }}</small>{% endif %}
+                {% if row.notes %}<em>{{ row.notes }}</em>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="calendar-grid">
+        {% for row in rows %}
+        <div class="calendar-day status-{{ row.status|lower|replace(' ', '-') }}">
+            <span>{{ row.date|dateuk }}</span>
+            <strong>{{ row.status }}</strong>
+            {% if row.shift_name %}<small>{{ row.shift_name }}</small>{% endif %}
+            {% if row.start_time or row.end_time %}<small>{{ row.start_time }} - {{ row.end_time }}</small>{% endif %}
+            {% if row.notes %}<em>{{ row.notes }}</em>{% endif %}
+            <form method="POST" action="{{ url_for('save_calendar_note') }}" class="day-note-form">
+                <input type="hidden" name="date" value="{{ row.date }}">
+                <input type="hidden" name="return_to" value="{{ request.full_path }}">
+                <input name="notes" value="{{ row.notes or '' }}" placeholder="Add note...">
+                <button class="small-btn" type="submit">Save Note</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
+<section class="panel legend-panel">
+    <h3>Legend</h3>
+    <div class="legend-row">
+        {% for status in statuses %}
+        <span class="legend status-{{ status|lower|replace(' ', '-') }}">{{ status }}</span>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

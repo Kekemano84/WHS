@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <!-- WhatsApp / Facebook / LinkedIn social preview -->
+    <meta property="og:title" content="WHS - Operations Management Platform">
+    <meta property="og:description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
+    <meta property="og:image" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
+    <meta property="og:image:secure_url" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://whs-ai-t1ip.onrender.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="WHS">
+    <meta name="description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="WHS - Operations Management Platform">
+    <meta name="twitter:description" content="Warehouse Support for shifts, handovers, mileage, expenses, yard checks and team records.">
+    <meta name="twitter:image" content="https://whs-ai-t1ip.onrender.com/static/images/whs-share.png?v=37">
+
+    <title>WHS - Operations Management Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/voice.js') }}"></script>
+    <link rel="manifest" href="{{ url_for('manifest_json') }}">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/service-worker.js').catch(function() {});
+        });
+      }
+    </script>
+
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/whs-logo.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/whs-logo.svg') }}">
+
+</head>
+
+
+<div id="op-splash-screen" class="op-splash-screen">
+    <div class="op-splash-glow op-glow-one"></div>
+    <div class="op-splash-glow op-glow-two"></div>
+    <div class="op-splash-card">
+        <div class="op-splash-logo-wrap">
+            <img class="op-splash-logo" src="{{ url_for('static', filename='icons/whs-logo.svg') }}" alt="WHS">
+        </div>
+        <div class="op-splash-title">WHS</div>
+        <div class="op-splash-subtitle">Warehouse Support</div>
+        <div class="op-splash-loader">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
+
+<body class="{{ "auth-page" if page in ['auth', 'login', 'register'] else "" }}">
+
+<div class="app-shell">
+    {% if user %}
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon whs-brand-icon">WHS</div>
+            <div>
+                <h1>WHS</h1>
+                <p>Warehouse Support</p>
+            </div>
+        </div>
+
+        <div class="plan-chip">Free access</div>
+
+        <nav class="nav grouped-nav tidy-sidebar final-sidebar whs-simple-nav">
+            <a class="{{ 'active' if page == 'dashboard' else '' }} nav-link nav-primary" href="{{ url_for('index') }}">
+                <span class="nav-ico">🏠</span><span>Dashboard</span>
+            </a>
+            <a class="{{ 'active' if page == 'morning_brief' else '' }} nav-link" href="{{ url_for('morning_brief') }}"><span class="nav-ico">☀️</span><span>Morning Brief</span></a>
+            <a class="{{ 'active' if page == 'shift_calendar' else '' }} nav-link" href="{{ url_for('shift_calendar') }}"><span class="nav-ico">📅</span><span>Calendar</span></a>
+            <a class="{{ 'active' if page == 'handover' else '' }} nav-link" href="{{ url_for('handover') }}"><span class="nav-ico">📋</span><span>Handover</span></a>
+            <a class="{{ 'active' if page == 'yard_check' else '' }} nav-link" href="{{ url_for('yard_check') }}"><span class="nav-ico">🚛</span><span>Yard Check</span></a>
+            <a class="{{ 'active' if page == 'team' else '' }} nav-link" href="{{ url_for('team') }}"><span class="nav-ico">👥</span><span>Team</span></a>
+
+            <details class="nav-group" open>
+                <summary><span class="nav-ico">⚙️</span><span>Account</span></summary>
+                <a class="{{ 'active' if page == 'settings' else '' }} nav-link" href="{{ url_for('settings') }}"><span class="nav-ico">👤</span><span>Profile</span></a>
+                <a class="{{ 'active' if page == 'yard_settings' else '' }} nav-link" href="{{ url_for('yard_settings') }}"><span class="nav-ico">📍</span><span>Yard Setup</span></a>
+                <a class="{{ 'active' if page == 'mileage' else '' }} nav-link" href="{{ url_for('mileage') }}"><span class="nav-ico">🚗</span><span>Mileage</span></a>
+                <a class="{{ 'active' if page == 'expenses' else '' }} nav-link" href="{{ url_for('expenses') }}"><span class="nav-ico">💷</span><span>Expenses</span></a>
+                {% if user and user.email == "admin@whs.ai" %}
+                <a class="{{ 'active' if page == 'admin' else '' }} nav-link" href="{{ url_for('admin_dashboard') }}"><span class="nav-ico">🛡️</span><span>Admin</span></a>
+                {% endif %}
+                <a class="nav-link" href="{{ url_for('logout') }}"><span class="nav-ico">🚪</span><span>Logout</span></a>
+            </details>
+        </nav>
+
+        <div class="sidebar-note">
+            <strong>Warehouse Support</strong>
+            <span>Built for logistics, yard checks and shift control.</span>
+        </div>
+    </aside>
+    {% endif %}
+
+    <main class="main {{ 'auth-main' if not user else '' }}">
+        {% if user %}
+        <header class="topbar">
+            <div>
+                <h2>{% block title %}{% endblock %}</h2>
+            </div>
+            {% if page not in ['auth', 'login', 'register', 'dashboard', 'more'] %}
+            <div class="top-actions">
+                <a class="btn primary" href="{{ url_for('yard_check') }}">+ Yard Check</a>
+            </div>
+            {% endif %}
+        </header>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-wrap">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if not user %}
+        <form class="public-language-form" method="POST" action="{{ url_for('set_language') }}">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <label>🌍 Language</label>
+            <select name="language" onchange="this.form.submit()">
+                {% for code,label in available_languages %}<option value="{{ code }}" {% if current_language==code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </form>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+        {% if user %}
+        <footer class="footer">
+            WHS © {{ current_year }} · Warehouse Support
+        </footer>
+        {% endif %}
+    </main>
+</div>
+
+
+
+
+
+<script>
+(function () {
+    var splash = document.getElementById("op-splash-screen");
+    if (!splash) return;
+
+    document.documentElement.classList.add("op-loading");
+
+    function hideSplash() {
+        if (!splash) return;
+        splash.classList.add("op-splash-hide");
+        document.documentElement.classList.remove("op-loading");
+        setTimeout(function () {
+            if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+        }, 700);
+    }
+
+    window.addEventListener("load", function () {
+        setTimeout(hideSplash, 700);
+    });
+
+    setTimeout(hideSplash, 1000);
+})();
+</script>
+
+
+        {% if user %}
+        <nav class="mobile-bottom-nav">
+    <a class="{{ 'active' if page == 'dashboard' else '' }}" href="{{ url_for('dashboard') }}"><span>⌂</span><b>Home</b></a>
+    <a class="{{ 'active' if page == 'shift_calendar' else '' }}" href="{{ url_for('shift_calendar') }}"><span>📅</span><b>Calendar</b></a>
+    <a class="{{ 'active' if page == 'handover' else '' }}" href="{{ url_for('handover') }}"><span>📋</span><b>Handover</b></a>
+    <a class="{{ 'active' if page == 'yard_check' else '' }}" href="{{ url_for('yard_check') }}"><span>🚛</span><b>Yard</b></a>
+    <a class="{{ 'active' if page == 'more' else '' }}" href="{{ url_for('more') }}"><span>☰</span><b>More</b></a>
+</nav>
+        {% endif %}
+
+
+
+
+
+
+
+
+<script>
+let deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", function (event) {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+});
+document.addEventListener("DOMContentLoaded", function () {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/service-worker.js").catch(function () {});
+    }
+    const btns = document.querySelectorAll("#installAppBtn");
+    btns.forEach(function(btn) {
+        btn.addEventListener("click", async function () {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+                return;
+            }
+            alert("To install WHS: open your browser menu and choose 'Add to Home screen' or 'Install app'.");
+        });
+    });
+});
+</script>
+
+
+
+<script>
+(function () {
+  const lang = "{{ current_language }}";
+  if (!lang || lang === "en") return;
+  const I18N = {"hu": {"Free": "Ingyenes", "FREE": "INGYENES", "Pro plan": "Pro csomag", "Admin": "Admin", "Billing": "Számlázás", "+ Yard Check": "+ Yard ellenőrzés", "Plans": "Csomagok", "Settings": "Beállítások", "Logout": "Kijelentkezés", "Dashboard": "Vezérlőpult", "Morning Brief": "Reggeli brief", "Mileage": "Mérföldek", "Expenses": "Kiadások", "Yard Check": "Yard ellenőrzés", "Calendar": "Naptár", "Yard Settings": "Yard beállítások", "Handover": "Átadás", "Team": "Csapat", "Daily Log": "Napi napló", "Actions": "Feladatok", "Absence": "Hiányzás", "Evidence": "Bizonyíték", "Search": "Keresés", "Checks": "Ellenőrzések", "Home": "Főoldal", "More": "Több", "Manager tool": "Manager eszköz", "MANAGER TOOL": "MANAGER ESZKÖZ", "Build a clear morning brief for your team in less than one minute.": "Készíts tiszta reggeli briefet a csapatodnak kevesebb mint egy perc alatt.", "Create Morning Brief": "Reggeli brief készítése", "Use this before the shift starts. Keep it short, clear and practical.": "Használd műszak előtt. Legyen rövid, tiszta és praktikus.", "Date": "Dátum", "Shift": "Műszak", "Manager": "Manager", "Your Role": "Szerepköröd", "Volume": "Volumen", "Available HC": "Elérhető létszám", "Late Trailers": "Késő trailerek", "Priorities": "Prioritások", "Safety Message": "Biztonsági üzenet", "Break Reminder": "Szünet emlékeztető", "Equipment Reminder": "Eszköz emlékeztető", "Team Messages": "Csapat üzenetek", "Generate Brief": "Brief generálása", "Saved Morning Briefs": "Mentett reggeli briefek", "No morning briefs yet.": "Még nincs reggeli brief.", "Download TXT": "TXT letöltés", "Add Mileage": "Mérföld hozzáadása", "Enter postcode or address. Google Maps can calculate driving miles automatically.": "Adj meg irányítószámot vagy címet. A Google Maps automatikusan kiszámolhatja a mérföldet.", "Rate editable": "Díj módosítható", "From Postcode / Address": "Indulási irányítószám / cím", "To Postcode / Address": "Érkezési irányítószám / cím", "Miles": "Mérföld", "Rate (£ / mile)": "Díj (£ / mérföld)", "Claim": "Igénylés", "Calculate Miles": "Mérföld számítása", "Purpose": "Cél", "Delivery, client visit, job": "Kiszállítás, ügyféllátogatás, munka", "Auto calculated or manual": "Automatikus vagy kézi", "Add Google Maps API key on Render/local environment to calculate mileage automatically.": "Adj hozzá Google Maps API kulcsot Render/local környezetben az automatikus számításhoz.", "Mileage History": "Mérföld előzmények", "Route": "Útvonal", "No mileage yet.": "Még nincs mérföld adat.", "Please enter From and To postcode/address.": "Add meg az indulási és érkezési irányítószámot/címet.", "Calculating mileage with Google Maps...": "Mérföld számítása Google Maps alapján...", "Could not calculate mileage: ": "Nem sikerült kiszámítani a mérföldet: ", "Add Expense": "Kiadás hozzáadása", "Expense History": "Kiadás előzmények", "Category": "Kategória", "Amount": "Összeg", "Description": "Leírás", "Fuel, parking, equipment": "Üzemanyag, parkolás, eszközök", "No expenses yet.": "Még nincs kiadás.", "Fuel": "Üzemanyag", "[📊 Export Excel]": "[📊 Excel export]", "Export Excel": "Excel export", "[📄 Export PDF]": "[📄 PDF export]", "PDF": "PDF", "TXT": "TXT", "Open": "Nyitott", "Save": "Mentés", "Delete": "Törlés", "Download Excel": "Excel letöltés", "Team Members": "Csapattagok", "Add Team Member": "Csapattag hozzáadása", "Keep a simple team list for daily operations.": "Egyszerű csapatlista napi műveletekhez.", "Name": "Név", "Role": "Szerepkör", "Custom Role": "Egyedi szerepkör", "Email": "Email", "Phone": "Telefon", "Status": "Státusz", "Active": "Aktív", "Inactive": "Inaktív", "Notes": "Jegyzetek", "Skills, restrictions, licence expiry, training expiry": "Képességek, korlátozások, licence lejárat, training lejárat", "Add Member": "Hozzáadás", "No team members yet.": "Még nincs csapattag.", "Probation Start": "Próbaidő kezdete", "Probation End": "Próbaidő vége", "Probation Status": "Próbaidő státusz", "Not set": "Nincs beállítva", "Passed": "Megfelelt", "Extended": "Hosszabbítva", "Terminated": "Megszüntetve", "Licence Expiry": "Licence lejárat", "Training Type": "Training típusa", "Training Expiry": "Training lejárat", "Shift Calendar": "Műszaknaptár", "Pro Shift Calendar": "Pro műszaknaptár", "Generate your work pattern automatically for the next year and manually mark Holiday, Sick, Training or Overtime days.": "Generáld automatikusan a munkarendedet a következő évre, és jelöld kézzel a szabadságot, betegséget, traininget vagy túlórát.", "Auto Generate Calendar": "Naptár automatikus generálása", "Choose a standard pattern or create your own.": "Válassz alap mintát vagy hozz létre sajátot.", "Pattern": "Minta", "Start Date": "Kezdés dátuma", "Generate For": "Időtartam", "Shift Name": "Műszak neve", "Generate Calendar": "Naptár generálása", "Calendar View": "Naptár nézet", "Previous": "Előző", "Next": "Következő", "Manual Day Update": "Nap kézi módosítása", "Override one day as Holiday, Sick, Training, Overtime or Custom.": "Egy nap módosítása szabadságra, betegre, trainingre, túlórára vagy egyedire.", "Start": "Kezdés", "End": "Vége", "Start Time": "Kezdés időpontja", "End Time": "Befejezés időpontja", "Holiday Days": "Szabadság napok", "Holiday Hours": "Szabadság órák", "Add note...": "Jegyzet hozzáadása...", "Meeting 09:00, Pete probation ends, audit, training etc.": "Meeting 09:00, Pete próbaideje lejár, audit, training stb.", "Save Day": "Nap mentése", "Save Note": "Jegyzet mentése", "Add Note": "Jegyzet hozzáadása", "Work": "Munka", "Off": "Szabadnap", "Holiday": "Szabadság", "Sick": "Beteg", "Training": "Training", "Overtime": "Túlóra", "Custom": "Egyedi", "12 months": "12 hónap", "6 months": "6 hónap", "3 months": "3 hónap", "Generate Handover": "Átadás generálása", "Shift Handover": "Műszak átadás", "Build a proper end-of-shift handover. Every section is editable.": "Készíts rendes műszakvégi átadást. Minden rész módosítható.", "Designed like the DHL-style handover sheet: Safety, Operations Pick, Sort Centre, Dispatch, Suntory and AOB.": "DHL-stílusú átadási lap: Safety, Operations Pick, Sort Centre, Dispatch, Suntory és AOB.", "Saved Handovers": "Mentett átadások", "No handovers yet.": "Még nincs átadás.", "Safety": "Biztonság", "Operations Pick": "Operations Pick", "Sort Centre": "Sort Centre", "Dispatch": "Dispatch", "Suntory / AOB": "Suntory / AOB", "AOB": "Egyéb", "Attendance": "Jelenlét", "Actual HC": "Tényleges HC", "Planned HC": "Tervezett HC", "Issues": "Problémák", "Actions / Follow-up": "Feladatok / utánkövetés", "Take Photo": "Fotó készítése", "Upload Photo": "Fotó feltöltése", "Optional extra issue notes": "Opcionális probléma jegyzetek", "Optional extra next-shift actions": "Opcionális következő műszak feladatok", "Daily Shift Log": "Napi műszaknapló", "One complete record for volume, headcount, safety, issues, actions and photos.": "Egy teljes napi rekord volumenhez, létszámhoz, safetyhez, problémákhoz, feladatokhoz és fotókhoz.", "Add Shift Log": "Műszaknapló hozzáadása", "Save Shift Log": "Műszaknapló mentése", "History": "Előzmények", "Email Text": "Email szöveg", "Photo": "Fotó", "Safety messages, racking issues, MHE, near misses": "Safety üzenetek, racking hibák, MHE, majdnem balesetek", "Operational issues, late trailers, staffing, damages": "Operációs problémák, késő trailerek, létszám, sérülések", "Follow-up actions. This also creates an action tracker item.": "Utánkövetési feladatok. Ez action tracker tételt is létrehoz.", "Action Tracker": "Feladatkövető", "Track issue, owner, due date and status.": "Kövesd a problémát, felelőst, határidőt és státuszt.", "Add Action": "Feladat hozzáadása", "Action / Issue": "Feladat / probléma", "Owner": "Felelős", "Due Date": "Határidő", "Due": "Határidő", "Priority": "Prioritás", "Low": "Alacsony", "Medium": "Közepes", "High": "Magas", "In Progress": "Folyamatban", "Closed": "Lezárt", "No actions yet.": "Még nincs feladat.", "Absence Tracker": "Hiányzás követő", "Sick, holiday, training, unpaid and overtime records.": "Beteg, szabadság, training, unpaid és túlóra rekordok.", "People": "Emberek", "Type": "Típus", "Save Absence": "Hiányzás mentése", "No absence records yet.": "Még nincs hiányzás rekord.", "Other": "Egyéb", "Unpaid": "Fizetés nélküli", "Photo Evidence Library": "Fotó bizonyítékok", "Store damage, racking, trailer, yard and safety evidence.": "Tárold a damage, racking, trailer, yard és safety bizonyítékokat.", "Save Evidence": "Bizonyíték mentése", "Damage / Issue Notes": "Sérülés / probléma jegyzetek", "Trailer / Ref": "Trailer / ref", "Location": "Helyszín", "Comment": "Megjegyzés", "No evidence yet.": "Még nincs bizonyíték.", "Search evidence...": "Bizonyíték keresése...", "Damage": "Sérülés", "Racking": "Racking", "Trailer": "Trailer", "Yard": "Yard", "Global Search": "Globális keresés", "Search name, date, trailer, issue, note...": "Név, dátum, trailer, probléma, jegyzet keresése...", "No results yet.": "Még nincs találat.", "Notifications": "Értesítések", "Business Details": "Céges adatok", "Business Name": "Cég neve", "Company / Site Name": "Cég / telephely neve", "Your Name": "Neved", "Default Mileage Rate (£/mile)": "Alap mérföld díj (£/mile)", "Door Count": "Door darabszám", "Fence Count": "Fence darabszám", "Address": "Cím", "Language": "Nyelv", "Save Settings": "Beállítások mentése", "Annual Leave Settings": "Szabadság beállítások", "Holiday Tracker Settings": "Holiday Tracker beállítások", "Save Holiday Settings": "Szabadság beállítások mentése", "Contracted Shift Hours": "Szerződéses műszakórák", "Break Minutes": "Szünet percek", "Break is paid": "Fizetett szünet", "Entitlement Unit": "Jogosultság egysége", "Days": "Napok", "Hours": "Órák", "Save Leave Settings": "Szabadság mentése", "Login": "Bejelentkezés", "Create Account": "Fiók létrehozása", "Create account": "Fiók létrehozása", "Already have an account?": "Van már fiókod?", "No account yet?": "Nincs még fiókod?", "Create one": "Hozz létre egyet", "Password": "Jelszó", "At least 6 characters": "Legalább 6 karakter", "Remember this device for 30 days": "Emlékezzen erre az eszközre 30 napig", "Download App": "App letöltése", "Download WHS App": "WHS app letöltése", "Install on phone, tablet or desktop.": "Telepítés telefonra, tabletre vagy desktopra.", "Register or please login first.": "Regisztrálj vagy jelentkezz be először.", "Please login first.": "Regisztrálj vagy jelentkezz be először.", "Quick Actions": "Gyors műveletek", "Welcome back": "Üdv újra", "Operations dashboard for shifts, checks, mileage, expenses and handovers.": "Operációs dashboard műszakokhoz, ellenőrzésekhez, mérföldekhez, kiadásokhoz és átadásokhoz.", "Today": "Ma", "This Week": "Ezen a héten", "Open Actions": "Nyitott feladatok", "Recent records": "Legutóbbi rekordok", "No yard checks yet.": "Még nincs yard check.", "Holiday Tracker": "Holiday Tracker", "Open Calendar": "Naptár megnyitása", "Daily Handover": "Napi átadás", "Generate shift handover reports": "Műszakátadási riportok készítése", "Mileage Claim": "Mérföld igénylés", "Business costs": "Üzleti költségek", "Follow-up": "Utánkövetés", "Full daily record": "Teljes napi rekord", "Build a clear daily message": "Készíts tiszta napi üzenetet", "Record trailers and locations": "Trailerek és helyek rögzítése", "Owner, due date, status": "Felelős, határidő, státusz"}, "pl": {"Mileage": "Kilometrówka", "Add Mileage": "Dodaj przebieg", "Mileage History": "Historia przebiegu", "Enter postcode or address. Google Maps can calculate driving miles automatically.": "Wpisz kod pocztowy lub adres. Google Maps może automatycznie obliczyć trasę.", "From Postcode / Address": "Od: kod/adres", "To Postcode / Address": "Do: kod/adres", "Miles": "Mile", "Rate (£ / mile)": "Stawka (£ / mila)", "Claim": "Zwrot", "Calculate Miles": "Oblicz mile", "Purpose": "Cel", "No mileage yet.": "Brak przebiegu.", "Expenses": "Wydatki", "Add Expense": "Dodaj wydatek", "Expense History": "Historia wydatków", "Amount": "Kwota", "Description": "Opis", "Category": "Kategoria", "No expenses yet.": "Brak wydatków.", "[📊 Export Excel]": "[📊 Eksport Excel]", "Export Excel": "Eksport Excel", "Morning Brief": "Poranny briefing", "MANAGER TOOL": "NARZĘDZIE MANAGERA", "Build a clear morning brief for your team in less than one minute.": "Stwórz jasny poranny briefing dla zespołu w mniej niż minutę.", "Create Morning Brief": "Utwórz briefing", "Date": "Data", "Shift": "Zmiana", "Manager": "Manager", "Your Role": "Twoja rola", "Volume": "Wolumen", "Available HC": "Dostępna obsada", "Team Members": "Członkowie zespołu", "Add Team Member": "Dodaj członka zespołu", "Name": "Imię", "Role": "Rola", "Status": "Status", "Notes": "Notatki", "Add Member": "Dodaj", "No team members yet.": "Brak członków zespołu.", "Probation Start": "Początek okresu próbnego", "Probation End": "Koniec okresu próbnego", "Probation Status": "Status okresu próbnego", "Shift Calendar": "Kalendarz zmian", "Calendar View": "Widok kalendarza", "Previous": "Poprzedni", "Next": "Następny", "Add Note": "Dodaj notatkę", "Save Day": "Zapisz dzień", "Handover": "Przekazanie zmiany", "Generate Handover": "Generuj przekazanie", "Saved Handovers": "Zapisane przekazania", "No handovers yet.": "Brak przekazań.", "Daily Shift Log": "Dziennik zmiany", "Action Tracker": "Śledzenie zadań", "Absence Tracker": "Nieobecności", "Photo Evidence Library": "Biblioteka zdjęć", "Global Search": "Wyszukiwanie", "Notifications": "Powiadomienia", "Open": "Otwórz", "Save": "Zapisz", "Delete": "Usuń", "Settings": "Ustawienia", "Business Details": "Dane firmy", "Save Settings": "Zapisz ustawienia", "Language": "Język", "[📊 [📊 Export Excel]]": "[📊 Eksport Excel]", "Route": "Route", "Rate": "Rate", "Email": "Email", "Phone": "Phone", "Address": "Address", "Business Name": "Business Name", "Company / Site Name": "Company / Site Name", "Your Name": "Your Name"}, "ro": {"Mileage": "Mileaj", "Add Mileage": "Adaugă mileaj", "Mileage History": "Istoric mileaj", "From Postcode / Address": "De la cod/adres", "To Postcode / Address": "La cod/adres", "Miles": "Mile", "Claim": "Cerere", "Calculate Miles": "Calculează mile", "Purpose": "Scop", "No mileage yet.": "Nu există mileaj.", "Expenses": "Cheltuieli", "Add Expense": "Adaugă cheltuială", "Expense History": "Istoric cheltuieli", "Amount": "Sumă", "Description": "Descriere", "Category": "Categorie", "No expenses yet.": "Nu există cheltuieli.", "[📊 Export Excel]": "[📊 Export Excel]", "Morning Brief": "Briefing de dimineață", "MANAGER TOOL": "INSTRUMENT MANAGER", "Build a clear morning brief for your team in less than one minute.": "Creează un briefing clar pentru echipă în mai puțin de un minut.", "Create Morning Brief": "Creează briefing", "Date": "Data", "Shift": "Tură", "Manager": "Manager", "Your Role": "Rolul tău", "Volume": "Volum", "Available HC": "Personal disponibil", "Team Members": "Membri echipă", "Add Team Member": "Adaugă membru", "Name": "Nume", "Role": "Rol", "Status": "Status", "Notes": "Notițe", "Add Member": "Adaugă", "No team members yet.": "Nu există membri încă.", "Probation Start": "Început probă", "Probation End": "Sfârșit probă", "Probation Status": "Status probă", "Shift Calendar": "Calendar ture", "Calendar View": "Vizualizare calendar", "Previous": "Anterior", "Next": "Următor", "Add Note": "Adaugă notiță", "Save Day": "Salvează ziua", "Handover": "Predare tură", "Generate Handover": "Generează predare", "Saved Handovers": "Predări salvate", "Daily Shift Log": "Jurnal tură", "Action Tracker": "Urmărire acțiuni", "Absence Tracker": "Absențe", "Photo Evidence Library": "Bibliotecă foto", "Global Search": "Căutare globală", "Notifications": "Notificări", "Open": "Deschide", "Save": "Salvează", "Delete": "Șterge", "Settings": "Setări", "Business Details": "Detalii firmă", "Save Settings": "Salvează setările", "Language": "Limbă", "[📊 [📊 Export Excel]]": "[📊 Export Excel]", "Export Excel": "Export Excel", "Rate (£ / mile)": "Rate (£ / mile)", "Route": "Route", "Rate": "Rate", "Email": "Email", "Phone": "Phone", "Address": "Address", "Business Name": "Business Name", "Company / Site Name": "Company / Site Name", "Your Name": "Your Name"}, "es": {"Mileage": "Millas", "Add Mileage": "Añadir millas", "Mileage History": "Historial de millas", "From Postcode / Address": "Desde código/dirección", "To Postcode / Address": "Hasta código/dirección", "Miles": "Millas", "Claim": "Reclamo", "Calculate Miles": "Calcular millas", "Purpose": "Propósito", "No mileage yet.": "Aún no hay millas.", "Expenses": "Gastos", "Add Expense": "Añadir gasto", "Expense History": "Historial de gastos", "Amount": "Importe", "Description": "Descripción", "Category": "Categoría", "No expenses yet.": "Aún no hay gastos.", "[📊 Export Excel]": "[📊 Exportar Excel]", "Morning Brief": "Briefing de mañana", "MANAGER TOOL": "HERRAMIENTA MANAGER", "Build a clear morning brief for your team in less than one minute.": "Crea un briefing claro para tu equipo en menos de un minuto.", "Create Morning Brief": "Crear briefing", "Date": "Fecha", "Shift": "Turno", "Manager": "Manager", "Your Role": "Tu rol", "Volume": "Volumen", "Available HC": "HC disponible", "Team Members": "Miembros del equipo", "Add Team Member": "Añadir miembro", "Name": "Nombre", "Role": "Rol", "Status": "Estado", "Notes": "Notas", "Add Member": "Añadir", "No team members yet.": "Aún no hay miembros.", "Probation Start": "Inicio de prueba", "Probation End": "Fin de prueba", "Probation Status": "Estado de prueba", "Shift Calendar": "Calendario de turnos", "Calendar View": "Vista calendario", "Previous": "Anterior", "Next": "Siguiente", "Add Note": "Añadir nota", "Save Day": "Guardar día", "Handover": "Traspaso", "Generate Handover": "Generar traspaso", "Saved Handovers": "Traspasos guardados", "Daily Shift Log": "Registro diario", "Action Tracker": "Seguimiento de acciones", "Absence Tracker": "Ausencias", "Photo Evidence Library": "Biblioteca de fotos", "Global Search": "Búsqueda global", "Notifications": "Notificaciones", "Open": "Abrir", "Save": "Guardar", "Delete": "Eliminar", "Settings": "Ajustes", "Business Details": "Datos de empresa", "Save Settings": "Guardar ajustes", "Language": "Idioma", "[📊 [📊 Export Excel]]": "[📊 Exportar Excel]", "Export Excel": "Export Excel", "Rate (£ / mile)": "Rate (£ / mile)", "Route": "Route", "Rate": "Rate", "Email": "Email", "Phone": "Phone", "Address": "Address", "Business Name": "Business Name", "Company / Site Name": "Company / Site Name", "Your Name": "Your Name"}, "de": {"Mileage": "Fahrten", "Add Mileage": "Fahrt hinzufügen", "Mileage History": "Fahrten-Historie", "From Postcode / Address": "Von PLZ / Adresse", "To Postcode / Address": "Nach PLZ / Adresse", "Miles": "Meilen", "Claim": "Erstattung", "Calculate Miles": "Meilen berechnen", "Purpose": "Zweck", "No mileage yet.": "Noch keine Fahrten.", "Expenses": "Ausgaben", "Add Expense": "Ausgabe hinzufügen", "Expense History": "Ausgaben-Historie", "Amount": "Betrag", "Description": "Beschreibung", "Category": "Kategorie", "No expenses yet.": "Noch keine Ausgaben.", "[📊 Export Excel]": "[📊 Excel exportieren]", "Morning Brief": "Morgenbriefing", "MANAGER TOOL": "MANAGER TOOL", "Build a clear morning brief for your team in less than one minute.": "Erstelle in weniger als einer Minute ein klares Morgenbriefing für dein Team.", "Create Morning Brief": "Briefing erstellen", "Date": "Datum", "Shift": "Schicht", "Manager": "Manager", "Your Role": "Deine Rolle", "Volume": "Volumen", "Available HC": "Verfügbare MA", "Team Members": "Teammitglieder", "Add Team Member": "Teammitglied hinzufügen", "Name": "Name", "Role": "Rolle", "Status": "Status", "Notes": "Notizen", "Add Member": "Hinzufügen", "No team members yet.": "Noch keine Teammitglieder.", "Probation Start": "Probezeit Start", "Probation End": "Probezeit Ende", "Probation Status": "Probezeit Status", "Shift Calendar": "Schichtkalender", "Calendar View": "Kalenderansicht", "Previous": "Zurück", "Next": "Weiter", "Add Note": "Notiz hinzufügen", "Save Day": "Tag speichern", "Handover": "Übergabe", "Generate Handover": "Übergabe erstellen", "Saved Handovers": "Gespeicherte Übergaben", "Daily Shift Log": "Tägliches Schichtlog", "Action Tracker": "Aufgabenverfolgung", "Absence Tracker": "Abwesenheiten", "Photo Evidence Library": "Fotobibliothek", "Global Search": "Globale Suche", "Notifications": "Benachrichtigungen", "Open": "Öffnen", "Save": "Speichern", "Delete": "Löschen", "Settings": "Einstellungen", "Business Details": "Firmendaten", "Save Settings": "Einstellungen speichern", "Language": "Sprache", "[📊 [📊 Export Excel]]": "[📊 Excel exportieren]", "Export Excel": "Export Excel", "Rate (£ / mile)": "Rate (£ / mile)", "Route": "Route", "Rate": "Rate", "Email": "Email", "Phone": "Phone", "Address": "Address", "Business Name": "Business Name", "Company / Site Name": "Company / Site Name", "Your Name": "Your Name"}};
+  const dict = I18N[lang] || {};
+  const clean = s => (s || "").replace(/\s+/g, " ").trim();
+  function translateText(s) { const v = clean(s); return dict[v] || null; }
+  function translateNode(node) {
+    const v = clean(node.nodeValue);
+    if (dict[v]) node.nodeValue = node.nodeValue.replace(v, dict[v]);
+  }
+  function runTranslation() {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(node) {
+        const p = node.parentElement;
+        if (!p || ["SCRIPT","STYLE","TEXTAREA"].includes(p.tagName)) return NodeFilter.FILTER_REJECT;
+        return clean(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(translateNode);
+    document.querySelectorAll("input[placeholder], textarea[placeholder]").forEach(el => {
+      const out = translateText(el.getAttribute("placeholder")); if (out) el.setAttribute("placeholder", out);
+    });
+    document.querySelectorAll("input[type='submit'][value], button[value]").forEach(el => {
+      const out = translateText(el.value); if (out) el.value = out;
+    });
+    // Fix duplicate/overflow export labels
+    document.querySelectorAll('a,button').forEach(el => {
+      const tx = clean(el.textContent);
+      if (tx.includes('Export Excel') || tx.includes('Excel export') || tx.includes('Eksport Excel') || tx.includes('Exportar Excel') || tx.includes('Excel exportieren')) {
+        el.textContent = dict['[📊 Export Excel]'] || '[📊 Export Excel]';
+      }
+      if (tx.includes('Export PDF')) {
+        el.textContent = dict['[📄 Export PDF]'] || '[📄 Export PDF]';
+      }
+    });
+    // Brand must stay consistent
+    document.querySelectorAll('.brand p, .op-splash-subtitle').forEach(el => { el.textContent = 'Warehouse Support'; });
+  }
+  document.addEventListener("DOMContentLoaded", runTranslation);
+  window.addEventListener("load", runTranslation);
+})();
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<section class="hero-card dashboard-hero-compact">
+    <div>
+        <p class="eyebrow">{{ t("welcome_back") if t("welcome_back") != "welcome_back" else "Welcome back" }}</p>
+        <h3>{{ t("dashboard_intro") if t("dashboard_intro") != "dashboard_intro" else "Operations dashboard for shifts, checks, mileage, expenses and handovers." }}</h3>
+    </div>
+</section>
+
+
+<section class="panel open-handover-panel" id="openHandoverPanel" style="display:none;">
+  <div class="panel-head">
+    <div>
+      <h3>📝 Open Handover</h3>
+      <p class="muted">Continue the handover draft you started during the shift.</p>
+    </div>
+    <a class="small-btn" href="{{ url_for('handover') }}">Continue Editing</a>
+  </div>
+  <div class="open-handover-card">
+    <div>
+      <span>Current draft</span>
+      <strong id="openHandoverTitle">Draft found</strong>
+      <small id="openHandoverMeta">Last edited on this device</small>
+    </div>
+    <a class="btn primary" href="{{ url_for('handover') }}">Open Handover</a>
+  </div>
+</section>
+
+
+<section class="panel compact-panel weather-widget-free weather-pro-widget">
+  <div class="panel-head">
+    <div>
+      <h3>☁️ {{ t("weather") }}</h3>
+      <p class="muted">Live yard weather, hourly forecast and WHS yard risk.</p>
+    </div>
+    <div class="weather-actions">
+      <button type="button" class="small-btn ghost-small" id="weatherRefreshBtn">🔄 Refresh</button>
+    </div>
+  </div>
+
+  <div class="weather-hero-card">
+    <div>
+      <span class="weather-location" id="weatherSource">Checking location…</span>
+      <div class="weather-main-row">
+        <strong id="weatherTemp">--°C</strong>
+        <div>
+          <b id="weatherDesc">Loading weather…</b>
+          <small id="weatherRange">Live forecast</small>
+        </div>
+      </div>
+    </div>
+    <div class="weather-rain-pill">
+      <span id="weatherRain">--</span>
+      <small>Rain now</small>
+    </div>
+  </div>
+
+  <div class="weather-sun-row">
+    <div><span>🌅 Sunrise</span><strong id="weatherSunrise">--</strong></div>
+    <div><span>🌇 Sunset</span><strong id="weatherSunset">--</strong></div>
+  </div>
+
+
+  <div class="weather-alert-card weather-alert-low" id="weatherAlertCard">
+    <div>
+      <span>Weather Alert</span>
+      <strong id="weatherAlertTitle">Checking yard risk…</strong>
+      <small id="weatherAlertText">Live alert for yard work conditions.</small>
+    </div>
+  </div>
+
+
+  <details class="weather-more-details">
+    <summary id="weatherDetailsToggle">More Details ▼</summary>
+
+  <div class="weather-grid-cards">
+    <div class="weather-mini-card"><span>💨 Wind</span><strong id="weatherWind">--</strong></div>
+    <div class="weather-mini-card"><span>💧 Humidity</span><strong id="weatherHumidity">--</strong></div>
+    <div class="weather-mini-card"><span>👁️ Visibility</span><strong id="weatherVisibility">--</strong></div>
+    <div class="weather-mini-card"><span>↧ Pressure</span><strong id="weatherPressure">--</strong></div>
+  </div>
+
+  <div class="weather-risk-card" id="weatherRiskCard">
+    <div>
+      <span>Yard Risk Score</span>
+      <strong id="weatherRisk">Checking…</strong>
+      <small id="weatherRiskNote">Loading yard conditions.</small>
+    </div>
+  </div>
+
+  <div class="weather-forecast-block">
+    <div class="weather-block-head"><strong>Next hours</strong><small>Rain probability + temperature</small></div>
+    <div class="hourly-strip" id="weatherHourly"></div>
+  </div>
+
+  </details>
+
+  
+  <div class="weather-permission-box" id="weatherPermissionBox" style="display:none;">
+    <strong>📍 Location permission needed</strong>
+    <p>To show live weather for your current yard, please allow location access in your browser.</p>
+    <button type="button" class="small-btn" id="weatherAllowLocationBtn">Share my location</button>
+    <button type="button" class="small-btn ghost-small" id="weatherUseSavedBtn">Use saved site address</button>
+  </div>
+<p class="muted weather-help" id="weatherHelp">
+    Uses User Location first. If that fails, it uses your saved site/address.
+  </p>
+</section>
+
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  const els = {
+    temp: $("weatherTemp"), desc: $("weatherDesc"), range: $("weatherRange"),
+    rain: $("weatherRain"), source: $("weatherSource"), wind: $("weatherWind"),
+    humidity: $("weatherHumidity"), visibility: $("weatherVisibility"), pressure: $("weatherPressure"),
+    risk: $("weatherRisk"), riskNote: $("weatherRiskNote"), riskCard: $("weatherRiskCard"),
+    hourly: $("weatherHourly"), daily: $("weatherDaily"), help: $("weatherHelp"), btn: $("weatherRefreshBtn"),
+    allowBtn: $("weatherAllowLocationBtn"), savedBtn: $("weatherUseSavedBtn"), permissionBox: $("weatherPermissionBox"),
+    sunrise: $("weatherSunrise"), sunset: $("weatherSunset"),
+    alertCard: $("weatherAlertCard"), alertTitle: $("weatherAlertTitle"), alertText: $("weatherAlertText")
+  };
+  if (!els.temp) return;
+
+  function wt(code) {
+    const map = {0:["Clear sky","☀️"],1:["Mainly clear","🌤️"],2:["Partly cloudy","⛅"],3:["Overcast","☁️"],45:["Fog","🌫️"],48:["Fog","🌫️"],51:["Light drizzle","🌦️"],53:["Drizzle","🌦️"],55:["Heavy drizzle","🌧️"],61:["Light rain","🌧️"],63:["Rain","🌧️"],65:["Heavy rain","⛈️"],71:["Light snow","🌨️"],73:["Snow","🌨️"],75:["Heavy snow","❄️"],80:["Rain showers","🌧️"],81:["Rain showers","🌧️"],82:["Heavy showers","⛈️"],95:["Thunderstorm","⛈️"]};
+    return map[Number(code)] || ["Weather update","🌡️"];
+  }
+  function timeOnly(v) {
+    if (!v) return "--";
+    try { return new Date(v).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
+    catch(e) { return "--"; }
+  }
+  function km(v) {
+    if (v === null || v === undefined) return "--";
+    return (Number(v) / 1000).toFixed(1) + " km";
+  }
+  function buildWeatherAlert(data) {
+    const riskLevel = (data.risk && data.risk.level ? data.risk.level : "Low").toLowerCase();
+    const rain = Number(data.precipitation || 0);
+    const wind = Number(data.wind_speed || 0);
+    const notes = data.risk && data.risk.notes ? data.risk.notes : [];
+
+    let level = riskLevel;
+    let title = "Good conditions";
+    let text = "No major weather risk for yard activity.";
+
+    if (riskLevel === "high" || wind >= 40 || rain >= 4) {
+      level = "high";
+      title = "High weather risk";
+      text = notes.length ? notes.join(" · ") : "Take extra care with yard movement, doors, straps and loading.";
+    } else if (riskLevel === "medium" || wind >= 25 || rain >= 1) {
+      level = "medium";
+      title = "Weather caution";
+      text = notes.length ? notes.join(" · ") : "Rain or wind may affect yard work. Monitor trailers and slips.";
+    } else if (rain > 0) {
+      level = "medium";
+      title = "Light rain alert";
+      text = "Light rain in the yard. Watch slips and visibility.";
+    }
+
+    return {level, title, text};
+  }
+
+  function setLoading() {
+    if (els.permissionBox) els.permissionBox.style.display = "none";
+    els.source.textContent = "Checking location...";
+    els.temp.textContent = "--°C";
+    els.desc.textContent = "Loading weather...";
+    els.range.textContent = "Live forecast";
+    els.rain.textContent = "--";
+    if (els.sunrise) els.sunrise.textContent = "--";
+    if (els.sunset) els.sunset.textContent = "--";
+    if (els.alertCard) {
+      els.alertCard.classList.remove("weather-alert-low","weather-alert-medium","weather-alert-high");
+      els.alertCard.classList.add("weather-alert-low");
+    }
+    if (els.alertTitle) els.alertTitle.textContent = "Checking yard risk…";
+    if (els.alertText) els.alertText.textContent = "Live alert for yard work conditions.";
+    if (els.help) els.help.textContent = "Loading weather...";
+  }
+  function render(data) {
+    if (!data || !data.ok) throw new Error((data && data.error) || "Weather error");
+    const main = wt(data.weather_code);
+    const today = (data.daily && data.daily[0]) || {};
+    els.source.textContent = (data.source || "Live location") + " 📍";
+    els.temp.textContent = Math.round(Number(data.temperature || 0)) + "°C";
+    els.desc.textContent = main[1] + " " + main[0];
+    els.range.textContent = (today.max !== undefined && today.min !== undefined) ? "High " + Math.round(Number(today.max)) + "° / Low " + Math.round(Number(today.min)) + "°" : "Live forecast";
+    els.rain.textContent = (data.precipitation || 0) + " mm";
+    if (els.sunrise) els.sunrise.textContent = timeOnly(today.sunrise);
+    if (els.sunset) els.sunset.textContent = timeOnly(today.sunset);
+    if (els.wind) els.wind.textContent = Math.round(Number(data.wind_speed || 0)) + " km/h";
+    if (els.humidity) els.humidity.textContent = (data.humidity ?? "--") + "%";
+    if (els.visibility) els.visibility.textContent = km(data.visibility);
+    if (els.pressure) els.pressure.textContent = data.pressure ? Math.round(Number(data.pressure)) + " mb" : "--";
+    if (els.risk) els.risk.textContent = data.risk?.level || "Low";
+    if (els.riskNote) els.riskNote.textContent = (data.risk?.notes || ["Good conditions for yard activity"]).join(" · ");
+    if (els.riskCard) {
+      els.riskCard.classList.remove("risk-low","risk-medium","risk-high");
+      els.riskCard.classList.add("risk-" + (data.risk?.level || "Low").toLowerCase());
+    }
+    if (els.alertCard && els.alertTitle && els.alertText) {
+      const alert = buildWeatherAlert(data);
+      els.alertCard.classList.remove("weather-alert-low","weather-alert-medium","weather-alert-high");
+      els.alertCard.classList.add("weather-alert-" + alert.level);
+      els.alertTitle.textContent = alert.title;
+      els.alertText.textContent = alert.text;
+    }
+    if (els.hourly) {
+      els.hourly.innerHTML = (data.hourly || []).map(function(h){
+        const w = wt(h.weather_code);
+        return `<div class="hourly-card"><span>${timeOnly(h.time)}</span><b>${w[1]}</b><strong>${Math.round(Number(h.temperature || 0))}°</strong><small>💧 ${h.rain_probability ?? 0}%</small></div>`;
+      }).join("");
+    }
+    if (els.help) els.help.textContent = "Live weather · " + (data.source || "location");
+  }
+  async function fetchWeather(lat, lon) {
+    let url = "/api/weather?t=" + Date.now();
+    if (typeof lat === "number" && typeof lon === "number") url += "&lat=" + encodeURIComponent(lat) + "&lon=" + encodeURIComponent(lon);
+    const res = await fetch(url, {cache:"no-store"});
+    const data = await res.json();
+    render(data);
+  }
+  function finishButton() {
+    if (els.btn) {
+      els.btn.disabled = false;
+      els.btn.textContent = "🔄 Refresh";
+    }
+  }
+  function useFallback(showBox) {
+    fetchWeather().catch(function(err){
+      els.desc.textContent = "Weather unavailable";
+      if (els.alertCard) {
+        els.alertCard.classList.remove("weather-alert-low","weather-alert-medium","weather-alert-high");
+        els.alertCard.classList.add("weather-alert-medium");
+      }
+      if (els.alertTitle) els.alertTitle.textContent = "Weather not available";
+      if (els.alertText) els.alertText.textContent = "Check local conditions before yard activity.";
+      if (els.help) els.help.textContent = err.message || "Could not load weather.";
+      if (els.permissionBox && showBox) els.permissionBox.style.display = "block";
+    }).finally(finishButton);
+  }
+  function loadWeather(askPermission) {
+    setLoading();
+    if (els.btn) {
+      els.btn.disabled = true;
+      els.btn.textContent = "Refreshing...";
+    }
+    if (!askPermission || !navigator.geolocation) {
+      useFallback(false);
+      return;
+    }
+    let done = false;
+    const timer = setTimeout(function(){
+      if (!done) {
+        done = true;
+        useFallback(true);
+      }
+    }, 7000);
+    navigator.geolocation.getCurrentPosition(function(pos){
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      fetchWeather(pos.coords.latitude, pos.coords.longitude).catch(function(){ useFallback(true); }).finally(finishButton);
+    }, function(){
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      useFallback(true);
+    }, {enableHighAccuracy:false, timeout:6000, maximumAge:300000});
+  }
+  if (els.btn) els.btn.addEventListener("click", function(e){ e.preventDefault(); loadWeather(true); });
+  if (els.allowBtn) els.allowBtn.addEventListener("click", function(e){ e.preventDefault(); loadWeather(true); });
+  if (els.savedBtn) els.savedBtn.addEventListener("click", function(e){ e.preventDefault(); loadWeather(false); });
+  window.addEventListener("load", function(){ loadWeather(true); });
+})();
+</script>
+
+<script>
+(function () {
+  const panel = document.getElementById("openHandoverPanel");
+  if (!panel) return;
+
+  const title = document.getElementById("openHandoverTitle");
+  const meta = document.getElementById("openHandoverMeta");
+  const latestKey = localStorage.getItem("whs_handover_draft_v1_latest");
+
+  function findDraft() {
+    if (latestKey && localStorage.getItem(latestKey)) return latestKey;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf("whs_handover_draft_v1_") === 0 && k !== "whs_handover_draft_v1_latest") {
+        if (localStorage.getItem(k)) return k;
+      }
+    }
+    return null;
+  }
+
+  const key = findDraft();
+  if (!key) return;
+
+  try {
+    const data = JSON.parse(localStorage.getItem(key) || "{}");
+    const date = data.date || key.replace("whs_handover_draft_v1_", "");
+    const shift = data.shift || data.shift_name || "Handover draft";
+    const saved = data.__saved_at ? new Date(data.__saved_at) : null;
+    panel.style.display = "";
+    if (title) title.textContent = shift + " · " + date;
+    if (meta) meta.textContent = saved ? "Last edited: " + saved.toLocaleString([], {dateStyle:"short", timeStyle:"short"}) : "Saved on this device";
+  } catch (e) {
+    panel.style.display = "";
+  }
+})();
+</script>
+
+<section class="dashboard-clean-grid">
+    {% if annual_leave %}
+    <a class="dash-mini-card blue no-red-dot" href="{{ url_for('holiday_tracker') }}">
+        <span>Holiday Tracker {{ annual_leave.year }}</span>
+        <strong>{{ annual_leave.remaining_days }} days</strong>
+        <small>{{ annual_leave.remaining_hours }} hrs left · {{ annual_leave.used_days }} used</small>
+    </a>
+    {% endif %}
+    <a class="dash-mini-card" href="{{ url_for('handover') }}">
+        <span>Open Handover</span>
+        <strong>Open</strong>
+        <small>Continue or create handover</small>
+    </a>
+</section>
+
+<section class="dashboard-favourites-strip">
+    {% for key, icon, label, endpoint in favorite_tools %}
+    <a class="dash-favourite-tile" href="{{ url_for(endpoint) }}">
+        <span class="fav-icon">{{ icon }}</span>
+        <strong>{{ label }}</strong>
+    </a>
+    {% endfor %}
+</section>
+
+{% endblock %}

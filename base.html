@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WHS - Operations Management Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/voice.js') }}"></script>
+    <link rel="manifest" href="{{ url_for('manifest_json') }}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/service-worker.js').catch(function() {});
+        });
+      }
+    </script>
+</head>
+<body class="{{ 'auth-page' if not user else 'app-page' }}">
+
+<div id="app-loader" class="app-loader" aria-label="Loading WHS">
+    <div class="loader-card">
+        <div class="op-logo loader-logo" aria-hidden="true">
+            <img src="{{ url_for('static', filename='icons/whs-logo.svg') }}" alt="WHS logo">
+        </div>
+        <h1>WHS</h1>
+        <p>Preparing your operations cockpit...</p>
+    </div>
+</div>
+
+{% if user %}
+<button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="document.body.classList.toggle('menu-open')">
+    <span></span><span></span><span></span>
+</button>
+<div class="mobile-backdrop" onclick="document.body.classList.remove('menu-open')"></div>
+{% endif %}
+
+<div class="app-shell">
+    {% if user %}
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="op-logo brand-icon"><img src="{{ url_for('static', filename='icons/whs-logo.svg') }}" alt="WHS logo"></div>
+            <div>
+                <h1>WHS</h1>
+                <p>Operations hub</p>
+            </div>
+        </div>
+
+        <div class="plan-chip">{{ 'Pro' if user.plan in ['pro','business'] else plan_names[user.plan] }} plan</div>
+
+        <nav class="nav">
+            <a class="{{ 'active' if page == 'dashboard' else '' }}" href="{{ url_for('index') }}">Dashboard</a>
+            <a class="{{ 'active' if page == 'morning_brief' else '' }}" href="{{ url_for('morning_brief') }}">Morning Brief</a>
+            <a class="{{ 'active' if page == 'mileage' else '' }}" href="{{ url_for('mileage') }}">Mileage</a>
+            <a class="{{ 'active' if page == 'expenses' else '' }}" href="{{ url_for('expenses') }}">Expenses</a>
+            <a class="{{ 'active' if page == 'yard_check' else '' }}" href="{{ url_for('yard_check') }}">Yard Check <span class="pro-badge">PRO</span></a>
+            {% if user and user.plan in ['pro', 'business'] %}<a class="{{ 'active' if page == 'yard_settings' else '' }}" href="{{ url_for('yard_settings') }}">Yard Settings <span class="pro-badge">PRO</span></a>{% endif %}
+            <a class="{{ 'active' if page == 'handover' else '' }}" href="{{ url_for('handover') }}">Handover <span class="pro-badge">PRO</span></a>
+            <a class="{{ 'active' if page == 'team' else '' }}" href="{{ url_for('team') }}">Team <span class="pro-badge">PRO</span></a>
+            {% if user and (user.email == "admin@whs.ai" or user.role == "admin") %}
+            <a class="{{ 'active' if page == 'admin' else '' }}" href="{{ url_for('admin_dashboard') }}">Admin <span class="pro-badge">ADMIN</span></a>
+            <a class="{{ 'active' if page == 'admin_billing' else '' }}" href="{{ url_for('admin_billing') }}">Billing <span class="pro-badge">ADMIN</span></a>
+            {% endif %}
+            <a class="{{ 'active' if page == 'pricing' else '' }}" href="{{ url_for('pricing') }}">Plans</a>
+            <a class="{{ 'active' if page == 'settings' else '' }}" href="{{ url_for('settings') }}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+
+        <div class="sidebar-note">
+            <strong>HMRC mileage</strong>
+            <span>55p per business mile</span>
+        </div>
+    </aside>
+    {% endif %}
+
+    <main class="main {{ 'auth-main' if not user else '' }}">
+        {% if user %}
+        <header class="topbar">
+            <div>
+                <h2>{% block title %}{% endblock %}</h2>
+            </div>
+            <div class="top-actions">
+                <a class="btn ghost" href="{{ url_for('pricing') }}">Plans</a>
+                <a class="btn primary" href="{{ url_for('yard_check') }}">+ Yard Check</a>
+            </div>
+        </header>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-wrap">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+        {% if user %}
+        <footer class="footer">
+            WHS © {{ current_year }} · Tax calculations are estimates only.
+        </footer>
+        {% endif %}
+    </main>
+</div>
+
+<script>
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      document.body.classList.add('loaded');
+    }, 3000);
+  });
+</script>
+
+<script>
+  // Biometric UI preview. Real Face ID / fingerprint login needs WebAuthn backend routes.
+  window.addEventListener('DOMContentLoaded', function () {
+    if (!document.body.classList.contains('auth-page')) return;
+    if (!window.PublicKeyCredential) return;
+    var forms = document.querySelectorAll('form');
+    if (!forms.length) return;
+    var form = forms[0];
+    var existing = document.querySelector('.biometric-login-btn');
+    if (existing) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'biometric-login-btn';
+    btn.innerHTML = '<span>🔐</span> Face ID / Fingerprint';
+    btn.addEventListener('click', function () {
+      alert('Biometric login is supported by this browser, but it needs WebAuthn setup in app.py first.');
+    });
+    form.appendChild(btn);
+  });
+</script>
+
+</body>
+</html>

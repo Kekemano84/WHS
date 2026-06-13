@@ -1,0 +1,12 @@
+{
+  "name": "WHS - Warehouse Support",
+  "short_name": "WHS",
+  "description": "Free logistics support app for warehouse teams.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#16a34a",
+  "icons": [{"src": "/static/icons/whs-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]
+}
