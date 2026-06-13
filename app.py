@@ -102,6 +102,16 @@ def get_db():
 
 
 
+
+def login_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Please log in to continue.", "error")
+            return redirect(url_for("login"))
+        return fn(*args, **kwargs)
+    return wrapper
+
 def safe_add_column(table, column, definition):
     conn = get_db()
     try:
