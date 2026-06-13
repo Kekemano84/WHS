@@ -557,8 +557,7 @@ def seed_admin_user():
     add_col("last_login_at", "TEXT")
     add_col("inactive_warning_at", "TEXT")
     add_col("password_changed_at", "TEXT")
-    add_col("default_site_id", "INTEGER"),
-            ("company_theme", "TEXT DEFAULT 'whs'")
+    add_col("default_site_id", "INTEGER")
     add_col("brand_color", "TEXT DEFAULT '#f59e0b'")
     add_col("company_theme", "TEXT DEFAULT 'whs'")
     add_col("business_logo_filename", "TEXT")
