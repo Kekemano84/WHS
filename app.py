@@ -764,6 +764,17 @@ for _lang, _items in V3_TRANSLATIONS.items():
 for _lang, _items in EXTRA_TRANSLATIONS.items():
     TRANSLATIONS.setdefault(_lang, {}).update(_items)
 
+APP_I18N_FIX = {
+    "en": {"appearance_themes":"Appearance / Themes","appearance_company_theme":"Appearance / Company Theme","appearance_company_theme_help":"Choose a UK logistics style, or use Custom and set your own colour. No company logos are used.","company_theme":"Company Theme","custom_accent_colour":"Custom Accent Colour","show_theme_label":"Show company theme name under WHS logo","show_theme_label_help":"Turn this off if you want only the colours to change."},
+    "hu": {"appearance_themes":"Megjelenés / témák","appearance_company_theme":"Megjelenés / céges téma","appearance_company_theme_help":"Válassz UK logisztikai stílust, vagy használd az egyedi színt. Céges logókat nem használunk.","company_theme":"Céges téma","custom_accent_colour":"Egyedi kiemelő szín","show_theme_label":"Céges téma nevének megjelenítése a WHS logó alatt","show_theme_label_help":"Kapcsold ki, ha csak a színeket szeretnéd módosítani."},
+    "pl": {"appearance_themes":"Wygląd / motywy","appearance_company_theme":"Wygląd / motyw firmowy","appearance_company_theme_help":"Wybierz styl logistyczny UK albo użyj własnego koloru. Logotypy firm nie są używane.","company_theme":"Motyw firmowy","custom_accent_colour":"Własny kolor akcentu","show_theme_label":"Pokaż nazwę motywu firmowego pod logo WHS","show_theme_label_help":"Wyłącz, jeśli chcesz zmieniać tylko kolory."},
+    "ro": {"appearance_themes":"Aspect / teme","appearance_company_theme":"Aspect / temă companie","appearance_company_theme_help":"Alege un stil logistic UK sau folosește Custom și setează propria culoare. Nu se folosesc logo-uri de companie.","company_theme":"Temă companie","custom_accent_colour":"Culoare accent personalizată","show_theme_label":"Afișează numele temei sub logo-ul WHS","show_theme_label_help":"Oprește dacă vrei să se schimbe doar culorile."},
+    "es": {"appearance_themes":"Apariencia / temas","appearance_company_theme":"Apariencia / tema de empresa","appearance_company_theme_help":"Elige un estilo logístico del Reino Unido o usa Custom y define tu propio color. No se usan logos de empresas.","company_theme":"Tema de empresa","custom_accent_colour":"Color de acento personalizado","show_theme_label":"Mostrar el nombre del tema bajo el logo WHS","show_theme_label_help":"Desactívalo si solo quieres cambiar los colores."},
+    "de": {"appearance_themes":"Darstellung / Designs","appearance_company_theme":"Darstellung / Firmen-Design","appearance_company_theme_help":"Wähle einen UK-Logistikstil oder nutze Benutzerdefiniert und setze deine eigene Farbe. Firmenlogos werden nicht verwendet.","company_theme":"Firmen-Design","custom_accent_colour":"Eigene Akzentfarbe","show_theme_label":"Designnamen unter dem WHS-Logo anzeigen","show_theme_label_help":"Ausschalten, wenn nur die Farben geändert werden sollen."}
+}
+for _lang, _items in APP_I18N_FIX.items():
+    TRANSLATIONS.setdefault(_lang, {}).update(_items)
+
 def tr(key):
     user = current_user()
     lang = row_get(user, "language", "en") if user else session.get("language", "en")
