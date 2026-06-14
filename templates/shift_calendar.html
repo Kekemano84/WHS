@@ -1,46 +1,5 @@
 {% extends "base.html" %}
-{% block title %}My Calendar
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-    const card = document.getElementById('selectedShiftCard');
-    if(!card) return;
-    const dayNum = document.getElementById('selectedDayNum');
-    const monthText = document.getElementById('selectedMonthText');
-    const title = document.getElementById('selectedShiftTitle');
-    const meta = document.getElementById('selectedShiftMeta');
-    const manualDate = document.querySelector('input[name="manual_date"]');
-    const manualStatus = document.querySelector('select[name="manual_status"]');
-    const manualShift = document.querySelector('input[name="manual_shift_name"]');
-    const manualStart = document.querySelector('input[name="manual_start_time"]');
-    const manualEnd = document.querySelector('input[name="manual_end_time"]');
-    const manualNotes = document.querySelector('input[name="manual_notes"]');
-    document.querySelectorAll('.compact-day').forEach(function(day){
-        day.addEventListener('click', function(){
-            document.querySelectorAll('.compact-day.is-selected').forEach(function(x){x.classList.remove('is-selected')});
-            day.classList.add('is-selected');
-            const d = day.dataset.date || '';
-            const dateObj = d ? new Date(d + 'T00:00:00') : null;
-            dayNum.textContent = d ? d.slice(-2) : '--';
-            monthText.textContent = dateObj ? dateObj.toLocaleDateString(undefined, {weekday:'short', month:'short'}) : 'Selected';
-            const status = day.dataset.status || 'Not Set';
-            const shift = day.dataset.shift || status;
-            const start = day.dataset.start || '';
-            const end = day.dataset.end || '';
-            const notes = day.dataset.notes || '';
-            title.textContent = shift + ' · ' + status;
-            meta.textContent = (start || end ? (start + ' - ' + end + ' · ') : '') + (notes || 'No notes');
-            if(manualDate) manualDate.value = d;
-            if(manualStatus) manualStatus.value = status;
-            if(manualShift) manualShift.value = shift === 'RDO' || shift === 'HOLS' ? '' : shift;
-            if(manualStart) manualStart.value = start;
-            if(manualEnd) manualEnd.value = end;
-            if(manualNotes) manualNotes.value = notes;
-        });
-    });
-});
-</script>
-
-{% endblock %}
+{% block title %}My Calendar{% endblock %}
 {% block content %}
 
 <style>
@@ -65,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function(){
   .month-calendar.compact-shift-calendar .compact-day.status-training{background:#7db0ff!important;color:#071428!important}
   .month-calendar.compact-shift-calendar .compact-day.status-not-set{background:#e5e7eb!important;color:#475569!important}
   .month-calendar.compact-shift-calendar .compact-day.outside-month{opacity:.45!important;filter:saturate(.65)!important}
+  .month-calendar.compact-shift-calendar .compact-day.is-today{outline:3px solid #ffffff!important;box-shadow:0 0 0 3px var(--accent,#0ea5e9),0 0 18px rgba(14,165,233,.75)!important;position:relative!important;z-index:3!important}
+  .month-calendar.compact-shift-calendar .compact-day.is-today .compact-date{background:#ffffff!important;color:#0f172a!important;border-radius:999px!important;padding:2px 5px!important;min-width:18px!important;text-align:center!important}
+  .month-calendar.compact-shift-calendar .compact-day.is-selected{outline:3px solid #111827!important;box-shadow:0 0 0 3px #fff!important}
   .selected-shift-card{margin-top:8px!important;border-radius:12px!important;padding:8px!important;display:grid!important;grid-template-columns:56px 1fr!important;gap:9px!important;background:#2f2f2f!important;color:#fff!important}
   .selected-date-box{border-radius:7px!important;padding:6px 4px!important}
   .selected-date-box strong{font-size:22px!important}
@@ -116,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="month-week compact-week">
             {% for row in week %}
             {% set short = 'HOLS' if row.status == 'Holiday' else ('RDO' if row.status == 'Off' else ('DHL' if row.status == 'Work' and not row.shift_name else (row.shift_name if row.shift_name else row.status))) %}
-            <button type="button" class="month-day compact-day {% if not row.in_month %}outside-month{% endif %} status-{{ row.status|lower|replace(' ', '-') }}" data-date="{{ row.date }}" data-status="{{ row.status }}" data-shift="{{ row.shift_name or short }}" data-start="{{ row.start_time }}" data-end="{{ row.end_time }}" data-notes="{{ row.notes }}">
+            <button type="button" class="month-day compact-day {% if not row.in_month %}outside-month{% endif %} {% if row.date == today_iso %}is-today{% endif %} status-{{ row.status|lower|replace(' ', '-') }}" data-date="{{ row.date }}" data-status="{{ row.status }}" data-shift="{{ row.shift_name or short }}" data-start="{{ row.start_time }}" data-end="{{ row.end_time }}" data-notes="{{ row.notes }}">
                 <span class="compact-date">{{ row.date[-2:] }}</span>
                 <strong>{{ short }}</strong>
                 {% if row.start_time or row.end_time %}<small>{{ row.start_time }}-{{ row.end_time }}</small>{% endif %}
@@ -331,6 +293,8 @@ document.addEventListener('DOMContentLoaded', function(){
             if(manualNotes) manualNotes.value = notes;
         });
     });
+    const todayDay = document.querySelector('.compact-day.is-today');
+    if(todayDay){ todayDay.click(); }
 });
 </script>
 

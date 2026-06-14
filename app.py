@@ -476,6 +476,21 @@ def init_db():
             created_at TEXT NOT NULL
         )
     """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS whatsapp_drafts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL UNIQUE,
+            title TEXT,
+            message_date TEXT,
+            shift_time TEXT,
+            recipient_name TEXT,
+            phone_number TEXT,
+            rows_json TEXT,
+            generated_message TEXT,
+            updated_at TEXT NOT NULL
+        )
+    """)
     conn.commit()
 
     safe_add_column("handovers", "extra_json", "TEXT")
@@ -558,6 +573,21 @@ def ensure_schema_updates():
             ("site_id", "INTEGER")
         ]
     }
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS whatsapp_drafts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL UNIQUE,
+            title TEXT,
+            message_date TEXT,
+            shift_time TEXT,
+            recipient_name TEXT,
+            phone_number TEXT,
+            rows_json TEXT,
+            generated_message TEXT,
+            updated_at TEXT NOT NULL
+        )
+    """)
 
     for table, cols in additions.items():
         existing = [row["name"] for row in cur.execute(f"PRAGMA table_info({table})").fetchall()]
@@ -2991,6 +3021,7 @@ def shift_calendar():
         next_start=next_start,
         status_colors=SHIFT_STATUS_COLORS,
         trial=shift_calendar_trial_info(user),
+        today_iso=datetime.today().date().isoformat(),
     )
 
 
@@ -3564,7 +3595,7 @@ def yard_check():
         conn.commit()
         conn.close()
 
-        flash(f"{saved_count} trailer record(s) saved. Continue adding more.", "success")
+        flash(f"{saved_count} trailer record(s) saved. Empty Trailer ID rows were ignored automatically.", "success")
         return redirect(url_for("yard_check"))
 
     search = request.args.get("search", "").strip()
@@ -5580,6 +5611,76 @@ def settings():
 
 
 
+
+@app.route("/whatsapp-message", methods=["GET", "POST"])
+@login_required
+def whatsapp_message():
+    user = current_user()
+    conn = get_db()
+    if request.method == "POST":
+        title = request.form.get("title", "").strip() or "Start Up"
+        message_date = request.form.get("message_date", "").strip()
+        shift_time = request.form.get("shift_time", "").strip()
+        recipient_name = request.form.get("recipient_name", "").strip()
+        phone_number = request.form.get("phone_number", "").strip()
+        rows_json = request.form.get("rows_json", "{}").strip() or "{}"
+        generated_message = request.form.get("generated_message", "").strip()
+        updated_at = datetime.now().isoformat()
+        existing = conn.execute("SELECT id FROM whatsapp_drafts WHERE user_id=?", (user["id"],)).fetchone()
+        if existing:
+            conn.execute("""
+                UPDATE whatsapp_drafts
+                SET title=?, message_date=?, shift_time=?, recipient_name=?, phone_number=?, rows_json=?, generated_message=?, updated_at=?
+                WHERE user_id=?
+            """, (title, message_date, shift_time, recipient_name, phone_number, rows_json, generated_message, updated_at, user["id"]))
+        else:
+            conn.execute("""
+                INSERT INTO whatsapp_drafts
+                (user_id, title, message_date, shift_time, recipient_name, phone_number, rows_json, generated_message, updated_at)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            """, (user["id"], title, message_date, shift_time, recipient_name, phone_number, rows_json, generated_message, updated_at))
+        conn.commit()
+        conn.close()
+        flash("WhatsApp message draft saved.", "success")
+        return redirect(url_for("whatsapp_message"))
+
+    draft = conn.execute("SELECT * FROM whatsapp_drafts WHERE user_id=?", (user["id"],)).fetchone()
+    conn.close()
+    if draft and row_get(draft, "rows_json", ""):
+        rows_json = row_get(draft, "rows_json", "{}")
+    else:
+        rows_json = json.dumps({
+            "main": [
+                {"label":"Absence", "value":"1", "prefix":"x"},
+                {"label":"Holiday", "value":"4", "prefix":"x"},
+                {"label":"FLM", "value":"2", "prefix":"x"},
+                {"label":"Clerk", "value":"2", "prefix":"x"},
+                {"label":"Pick", "value":"6", "prefix":"x"},
+                {"label":"Pack", "value":"1", "prefix":"x"},
+                {"label":"Run Off", "value":"1", "prefix":"x"},
+                {"label":"Despatch", "value":"5", "prefix":"x"},
+                {"label":"SC", "value":"4", "prefix":"x"},
+                {"label":"Suntory", "value":"2", "prefix":"x"}
+            ],
+            "notes": [
+                {"label":"Slam Plan", "value":"1500"},
+                {"label":"Pick/Pack", "value":"58 to pick/pack Inc EMC"},
+                {"label":"Total Well", "value":"- 416"},
+                {"label":"Despatch plan", "value":"18 Inc additionals"},
+                {"label":"SC", "value":"1 x ND"},
+                {"label":"Suntory", "value":"7.5 to invert, 3 to collect inverted"}
+            ]
+        })
+    return render_template(
+        "whatsapp_message.html",
+        page="whatsapp_message",
+        user=user,
+        draft=draft,
+        rows_json=rows_json,
+        generated_message=row_get(draft, "generated_message", "") if draft else "",
+        today=datetime.today().date().isoformat(),
+    )
+
 @app.route("/notifications", methods=["GET", "POST"])
 @login_required
 def notifications_page():
@@ -5610,7 +5711,7 @@ def manifest_json():
 @app.route("/service-worker.js")
 def service_worker():
     js = """
-const CACHE_NAME = 'whs-ai-v40';
+const CACHE_NAME = 'whs-ai-v25-whatsapp';
 const urlsToCache = [
   '/',
   '/static/css/style.css'

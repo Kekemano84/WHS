@@ -1,3 +1,21 @@
+# WHS - Warehouse Support v26
+
+Changes in this version:
+- Yard Check empty Trailer ID rows are ignored/removed automatically.
+- Yard Check matrix no longer forces every blank row to be completed.
+- Save Yard Board fixed for partially completed yard boards.
+- Download Excel export remains available.
+- Email sending/export options remain disabled.
+- Includes previous WhatsApp Message Draft and My Calendar Today Marker updates.
+
+Deploy on Render with:
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `gunicorn app:app`
+
+# WHS v24 - Today marker in My Calendar
+
+Updated from v23. My Calendar now highlights the current day with a clear border and automatically selects it when the month is opened.
+
 # WHS
 
 A full Flask SaaS MVP for self-employed finance, logistics yard checks and warehouse operations.

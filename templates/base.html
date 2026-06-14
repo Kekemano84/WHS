@@ -24,7 +24,7 @@
     <title>WHS - Operations Management Platform</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#2563eb">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=23calendarorder">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=25whatsapp">
     <script defer src="{{ url_for('static', filename='js/voice.js') }}"></script>
     <link rel="manifest" href="{{ url_for('manifest_json') }}">
     <meta name="theme-color" content="#2563eb">
@@ -85,6 +85,7 @@
             </a>
             <a class="{{ 'active' if page == 'morning_brief' else '' }} nav-link" href="{{ url_for('morning_brief') }}"><span class="nav-ico">☀️</span><span>Morning Brief</span></a>
             <a class="{{ 'active' if page == 'handover' else '' }} nav-link" href="{{ url_for('handover') }}"><span class="nav-ico">📋</span><span>Handover</span></a>
+            <a class="{{ 'active' if page == 'whatsapp_message' else '' }} nav-link" href="{{ url_for('whatsapp_message') }}"><span class="nav-ico">💬</span><span>WhatsApp Message</span></a>
             <a class="{{ 'active' if page == 'yard_check' else '' }} nav-link" href="{{ url_for('yard_check') }}"><span class="nav-ico">🚛</span><span>Yard Check</span></a>
             <details class="nav-group" open>
                 <summary><span class="nav-ico">📅</span><span>Calendar</span></summary>

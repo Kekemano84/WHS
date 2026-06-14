@@ -17,6 +17,34 @@ function addYardMatrixRow() {
     });
     body.appendChild(clone);
 }
+
+function cleanEmptyYardRowsBeforeSubmit(form) {
+    const body = document.getElementById("yardMatrixBody");
+    if (!body) return true;
+    const rows = Array.from(body.querySelectorAll("tr"));
+    let kept = 0;
+    rows.forEach(row => {
+        const trailer = row.querySelector('[name="row_trailer_id[]"]');
+        const location = row.querySelector('[name="row_location[]"]');
+        const trailerValue = trailer ? trailer.value.trim() : "";
+        const locationValue = location ? location.value.trim() : "";
+        if (!trailerValue) {
+            row.remove();
+            return;
+        }
+        if (!locationValue) {
+            if (location) location.value = "Yard";
+        }
+        kept += 1;
+    });
+    if (kept === 0) {
+        alert("Please enter at least one Trailer ID. Empty Trailer ID rows will be ignored automatically.");
+        // Rebuild one blank row so the form is usable after the alert.
+        addYardMatrixRow();
+        return false;
+    }
+    return true;
+}
 function showYardVoiceHint(input) {
     window.currentYardVoiceInput = input;
     const hint = document.getElementById("yardVoiceHint");
@@ -126,14 +154,14 @@ function startYardVoiceRecord(btn) {
     <div class="panel-head yard-matrix-head">
         <div>
             <h3>Yard Board Entry</h3>
-            <p class="muted">Locations are created from Yard Settings. Required: Location and Trailer ID. Notes and Custom Marker are optional.</p>
+            <p class="muted">Locations are created from Yard Settings. Only rows with a Trailer ID are saved. Empty Trailer ID rows are removed automatically. Notes and Custom Marker are optional.</p>
         </div>
         <div class="yard-row-actions top-actions">
             <button class="small-btn ghost-small" type="button" onclick="addYardMatrixRow()">+ Add Row</button>
         </div>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="yard-matrix-form">
+    <form method="POST" enctype="multipart/form-data" class="yard-matrix-form" onsubmit="return cleanEmptyYardRowsBeforeSubmit(this)">
         <input type="hidden" name="entry_mode" value="matrix">
         <input type="hidden" name="date" value="{{ today_iso }}">
         <input type="hidden" name="source" value="Manual">
@@ -159,9 +187,9 @@ function startYardVoiceRecord(btn) {
                 <tbody id="yardMatrixBody">
                     {% for i in range(fence_start, fence_end + 1) %}
                     <tr>
-                        <td><input class="yard-location-input" name="row_location[]" value="Fence {{ i }}" required placeholder="Fence {{ i }}"></td>
+                        <td><input class="yard-location-input" name="row_location[]" value="Fence {{ i }}" placeholder="Fence {{ i }}"></td>
                         <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
-                        <td><input class="yard-trailer-input" name="row_trailer_id[]" required placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
+                        <td><input class="yard-trailer-input" name="row_trailer_id[]" placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
                         <td><input name="row_notes[]" placeholder="Optional notes"></td>
                         <td><input name="row_marker[]" placeholder="Loaded / Empty / Seal / Bay note"></td>
                         <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>
@@ -169,9 +197,9 @@ function startYardVoiceRecord(btn) {
                     {% endfor %}
                     {% for i in range(door_start, door_end + 1) %}
                     <tr>
-                        <td><input class="yard-location-input" name="row_location[]" value="Door {{ i }}" required placeholder="Door {{ i }}"></td>
+                        <td><input class="yard-location-input" name="row_location[]" value="Door {{ i }}" placeholder="Door {{ i }}"></td>
                         <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
-                        <td><input class="yard-trailer-input" name="row_trailer_id[]" required placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
+                        <td><input class="yard-trailer-input" name="row_trailer_id[]" placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
                         <td><input name="row_notes[]" placeholder="Optional notes"></td>
                         <td><input name="row_marker[]" placeholder="Loaded / Empty / Seal / Bay note"></td>
                         <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>
@@ -259,6 +287,34 @@ function addYardMatrixRow() {
         if (input.name === "row_trailer_id[]") input.placeholder = "LG072";
     });
     body.appendChild(clone);
+}
+
+function cleanEmptyYardRowsBeforeSubmit(form) {
+    const body = document.getElementById("yardMatrixBody");
+    if (!body) return true;
+    const rows = Array.from(body.querySelectorAll("tr"));
+    let kept = 0;
+    rows.forEach(row => {
+        const trailer = row.querySelector('[name="row_trailer_id[]"]');
+        const location = row.querySelector('[name="row_location[]"]');
+        const trailerValue = trailer ? trailer.value.trim() : "";
+        const locationValue = location ? location.value.trim() : "";
+        if (!trailerValue) {
+            row.remove();
+            return;
+        }
+        if (!locationValue) {
+            if (location) location.value = "Yard";
+        }
+        kept += 1;
+    });
+    if (kept === 0) {
+        alert("Please enter at least one Trailer ID. Empty Trailer ID rows will be ignored automatically.");
+        // Rebuild one blank row so the form is usable after the alert.
+        addYardMatrixRow();
+        return false;
+    }
+    return true;
 }
 function showYardVoiceHint(input) {
     window.currentYardVoiceInput = input;

@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block title %}WhatsApp Message{% endblock %}
+{% block content %}
+<section class="hero-card whatsapp-hero">
+  <div>
+    <span class="eyebrow">WHATSAPP MESSAGE</span>
+    <h1>Daily Start Up Message</h1>
+    <p>Build your daily WhatsApp update, save it as a draft while you fill it in, then copy it into your WhatsApp group.</p>
+  </div>
+  <div class="hero-icon">💬</div>
+</section>
+
+<section class="panel whatsapp-panel">
+  <div class="panel-head">
+    <div>
+      <h2>Message Builder</h2>
+      <p class="muted">Rows are fully editable. Add or delete any line you need.</p>
+    </div>
+    <div class="quick-actions">
+      <button type="button" class="btn secondary" id="loadDraftBtn">Load Draft</button>
+      <button type="button" class="btn secondary" id="clearDraftBtn">Clear</button>
+    </div>
+  </div>
+
+  <form method="POST" id="whatsappForm" class="whatsapp-form">
+    <input type="hidden" name="action" id="formAction" value="save">
+    <input type="hidden" name="rows_json" id="rowsJson">
+    <input type="hidden" name="generated_message" id="generatedMessageInput">
+
+    <div class="form-grid three">
+      <div>
+        <label>Message Title</label>
+        <input name="title" id="titleInput" value="{{ draft.title if draft else 'D2 Start Up' }}" placeholder="e.g. D2 Start Up">
+      </div>
+      <div>
+        <label>Date</label>
+        <input type="date" name="message_date" id="dateInput" value="{{ draft.message_date if draft and draft.message_date else today }}">
+      </div>
+      <div>
+        <label>Time / Shift Start</label>
+        <input name="shift_time" id="timeInput" value="{{ draft.shift_time if draft else '6am' }}" placeholder="e.g. 6am">
+      </div>
+    </div>
+
+    <div class="form-grid two">
+      <div>
+        <label>WhatsApp group / contact name</label>
+        <input name="recipient_name" id="recipientInput" value="{{ draft.recipient_name if draft else 'DHL Update Group' }}" placeholder="e.g. DHL Update Group">
+      </div>
+      <div>
+        <label>Phone number (optional)</label>
+        <input name="phone_number" id="phoneInput" value="{{ draft.phone_number if draft else '' }}" placeholder="Only needed if you use Open WhatsApp">
+      </div>
+    </div>
+
+    <div class="whatsapp-section-title">
+      <h3>Headcount / Labour Lines</h3>
+      <button type="button" class="btn small" data-add-row="main">+ Add line</button>
+    </div>
+    <div id="mainRows" class="whatsapp-rows"></div>
+
+    <div class="whatsapp-section-title">
+      <h3>Plan / Operational Notes</h3>
+      <button type="button" class="btn small" data-add-row="notes">+ Add note</button>
+    </div>
+    <div id="noteRows" class="whatsapp-rows"></div>
+
+    <div class="form-actions wrap-actions">
+      <button class="btn primary" type="submit" onclick="setAction('save')">Save Draft</button>
+      <button class="btn secondary" type="button" id="generateBtn">Generate Message</button>
+      <button class="btn secondary" type="button" id="copyBtn">Copy Message</button>
+      <button class="btn secondary" type="button" id="openWhatsAppBtn">Open WhatsApp</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel whatsapp-output-panel">
+  <div class="panel-head">
+    <div>
+      <h2>Generated WhatsApp Message</h2>
+      <p class="muted">Copy this and paste it into your WhatsApp group.</p>
+    </div>
+    <span id="draftStatus" class="status-pill">Draft autosave ready</span>
+  </div>
+  <textarea id="messageOutput" class="generated-whatsapp" rows="16" readonly>{{ generated_message or '' }}</textarea>
+</section>
+
+<script id="initialRowsData" type="application/json">{{ rows_json|safe }}</script>
+<script>
+(function () {
+  const defaultRows = {
+    main: [
+      {label: 'Absence', value: '1', prefix: 'x'},
+      {label: 'Holiday', value: '4', prefix: 'x'},
+      {label: 'FLM', value: '2', prefix: 'x'},
+      {label: 'Clerk', value: '2', prefix: 'x'},
+      {label: 'Pick', value: '6', prefix: 'x'},
+      {label: 'Pack', value: '1', prefix: 'x'},
+      {label: 'Run Off', value: '1', prefix: 'x'},
+      {label: 'Despatch', value: '5', prefix: 'x'},
+      {label: 'SC', value: '4', prefix: 'x'},
+      {label: 'Suntory', value: '2', prefix: 'x'}
+    ],
+    notes: [
+      {label: 'Slam Plan', value: '1500'},
+      {label: 'Pick/Pack', value: '58 to pick/pack Inc EMC'},
+      {label: 'Total Well', value: '- 416'},
+      {label: 'Despatch plan', value: '18 Inc additionals'},
+      {label: 'SC', value: '1 x ND'},
+      {label: 'Suntory', value: '7.5 to invert, 3 to collect inverted'}
+    ]
+  };
+
+  let rows;
+  try {
+    rows = JSON.parse(document.getElementById('initialRowsData').textContent || '{}');
+  } catch (e) { rows = {}; }
+  if (!rows || !Array.isArray(rows.main) || !Array.isArray(rows.notes)) rows = defaultRows;
+
+  const mainRows = document.getElementById('mainRows');
+  const noteRows = document.getElementById('noteRows');
+  const output = document.getElementById('messageOutput');
+  const rowsJson = document.getElementById('rowsJson');
+  const generatedMessageInput = document.getElementById('generatedMessageInput');
+  const draftStatus = document.getElementById('draftStatus');
+  let autosaveTimer = null;
+
+  function rowTemplate(type, row, index) {
+    const isMain = type === 'main';
+    const wrap = document.createElement('div');
+    wrap.className = 'whatsapp-row';
+    wrap.dataset.type = type;
+    wrap.dataset.index = index;
+    wrap.innerHTML = `
+      ${isMain ? `<input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Qty">` : `<input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Title">`}
+      ${isMain ? `<span class="wa-prefix">x</span><input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Line name">` : `<input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Details">`}
+      <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
+      <button type="button" class="btn-icon wa-down" title="Move down">↓</button>
+      <button type="button" class="btn-icon danger wa-delete" title="Delete row">×</button>
+    `;
+    return wrap;
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  }
+
+  function renderRows() {
+    mainRows.innerHTML = '';
+    noteRows.innerHTML = '';
+    rows.main.forEach((row, i) => mainRows.appendChild(rowTemplate('main', row, i)));
+    rows.notes.forEach((row, i) => noteRows.appendChild(rowTemplate('notes', row, i)));
+    collectRows();
+  }
+
+  function collectRows() {
+    rows.main = Array.from(mainRows.querySelectorAll('.whatsapp-row')).map(el => ({
+      value: el.querySelector('.wa-value')?.value.trim() || '',
+      label: el.querySelector('.wa-label')?.value.trim() || '',
+      prefix: 'x'
+    })).filter(r => r.label || r.value);
+    rows.notes = Array.from(noteRows.querySelectorAll('.whatsapp-row')).map(el => ({
+      label: el.querySelector('.wa-label')?.value.trim() || '',
+      value: el.querySelector('.wa-value')?.value.trim() || ''
+    })).filter(r => r.label || r.value);
+    rowsJson.value = JSON.stringify(rows);
+  }
+
+  function formatDate(dateValue) {
+    if (!dateValue) return '';
+    const parts = dateValue.split('-');
+    if (parts.length !== 3) return dateValue;
+    return `${parts[2]}/${parts[1]}`;
+  }
+
+  function generateMessage() {
+    collectRows();
+    const title = document.getElementById('titleInput').value.trim() || 'Start Up';
+    const date = formatDate(document.getElementById('dateInput').value);
+    const time = document.getElementById('timeInput').value.trim();
+    let text = `${title}${date ? ' ' + date : ''}${time ? ' ' + time : ''}`.trim();
+
+    rows.main.forEach(row => {
+      const value = row.value || '0';
+      const label = row.label || '';
+      if (label || value) text += `\n${value} x ${label}`.trimEnd();
+    });
+
+    text += '\n';
+    rows.notes.forEach(row => {
+      const label = row.label || '';
+      const value = row.value || '';
+      if (label && value) text += `\n${label} ${value}`;
+      else if (label || value) text += `\n${label || value}`;
+    });
+
+    output.value = text.trim();
+    generatedMessageInput.value = output.value;
+    return output.value;
+  }
+
+  function autosaveLocal() {
+    collectRows();
+    const payload = {
+      title: document.getElementById('titleInput').value,
+      date: document.getElementById('dateInput').value,
+      time: document.getElementById('timeInput').value,
+      recipient: document.getElementById('recipientInput').value,
+      phone: document.getElementById('phoneInput').value,
+      rows: rows,
+      message: output.value
+    };
+    localStorage.setItem('whs_whatsapp_draft', JSON.stringify(payload));
+    draftStatus.textContent = 'Draft saved on this device';
+  }
+
+  function scheduleAutosave() {
+    draftStatus.textContent = 'Saving draft...';
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => { generateMessage(); autosaveLocal(); }, 500);
+  }
+
+  function loadLocalDraft() {
+    try {
+      const payload = JSON.parse(localStorage.getItem('whs_whatsapp_draft') || '{}');
+      if (!payload.rows) return;
+      document.getElementById('titleInput').value = payload.title || '';
+      document.getElementById('dateInput').value = payload.date || '';
+      document.getElementById('timeInput').value = payload.time || '';
+      document.getElementById('recipientInput').value = payload.recipient || '';
+      document.getElementById('phoneInput').value = payload.phone || '';
+      rows = payload.rows;
+      renderRows();
+      output.value = payload.message || generateMessage();
+      draftStatus.textContent = 'Draft loaded';
+    } catch (e) {}
+  }
+
+  document.addEventListener('input', function (e) {
+    if (e.target.closest('.whatsapp-form')) scheduleAutosave();
+  });
+
+  document.addEventListener('click', function (e) {
+    const add = e.target.closest('[data-add-row]');
+    if (add) {
+      collectRows();
+      const type = add.dataset.addRow;
+      rows[type].push(type === 'main' ? {value: '', label: '', prefix: 'x'} : {label: '', value: ''});
+      renderRows();
+      scheduleAutosave();
+      return;
+    }
+
+    const rowEl = e.target.closest('.whatsapp-row');
+    if (!rowEl) return;
+    const type = rowEl.dataset.type;
+    const index = Array.from(rowEl.parentElement.children).indexOf(rowEl);
+
+    if (e.target.closest('.wa-delete')) {
+      collectRows();
+      rows[type].splice(index, 1);
+      renderRows();
+      scheduleAutosave();
+    }
+    if (e.target.closest('.wa-up') && index > 0) {
+      collectRows();
+      [rows[type][index - 1], rows[type][index]] = [rows[type][index], rows[type][index - 1]];
+      renderRows();
+      scheduleAutosave();
+    }
+    if (e.target.closest('.wa-down') && index < rows[type].length - 1) {
+      collectRows();
+      [rows[type][index + 1], rows[type][index]] = [rows[type][index], rows[type][index + 1]];
+      renderRows();
+      scheduleAutosave();
+    }
+  });
+
+  window.setAction = function (action) {
+    document.getElementById('formAction').value = action;
+    generateMessage();
+  };
+
+  document.getElementById('generateBtn').addEventListener('click', () => {
+    generateMessage();
+    autosaveLocal();
+    draftStatus.textContent = 'Message generated';
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const text = generateMessage();
+    try {
+      await navigator.clipboard.writeText(text);
+      draftStatus.textContent = 'Copied to clipboard';
+    } catch (e) {
+      output.select();
+      document.execCommand('copy');
+      draftStatus.textContent = 'Copied';
+    }
+  });
+
+  document.getElementById('openWhatsAppBtn').addEventListener('click', () => {
+    const text = encodeURIComponent(generateMessage());
+    const phone = (document.getElementById('phoneInput').value || '').replace(/[^0-9+]/g, '');
+    const url = phone ? `https://wa.me/${phone.replace('+','')}?text=${text}` : `https://wa.me/?text=${text}`;
+    window.open(url, '_blank');
+  });
+
+  document.getElementById('loadDraftBtn').addEventListener('click', loadLocalDraft);
+  document.getElementById('clearDraftBtn').addEventListener('click', () => {
+    if (!confirm('Clear this WhatsApp draft?')) return;
+    localStorage.removeItem('whs_whatsapp_draft');
+    rows = JSON.parse(JSON.stringify(defaultRows));
+    renderRows();
+    generateMessage();
+    draftStatus.textContent = 'Draft cleared';
+  });
+
+  renderRows();
+  generateMessage();
+})();
+</script>
+{% endblock %}

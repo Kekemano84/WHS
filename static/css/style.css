@@ -3538,3 +3538,25 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
 }
 
 /* v23 calendar order/cache refresh - inline CSS also included in template */
+
+/* v25 WhatsApp daily message builder */
+.whatsapp-hero { background: linear-gradient(135deg, #075e54, var(--primary)); }
+.whatsapp-panel .quick-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.whatsapp-section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:20px 0 10px; }
+.whatsapp-section-title h3 { margin:0; }
+.whatsapp-rows { display:grid; gap:10px; }
+.whatsapp-row { display:grid; grid-template-columns: 110px 34px 1fr 42px 42px 42px; gap:8px; align-items:center; padding:10px; border:1px solid var(--line); border-radius:16px; background:#f8fafc; }
+.whatsapp-row input { margin:0; }
+.whatsapp-row .wa-prefix { font-weight:900; text-align:center; color:var(--muted); }
+.btn-icon { border:0; border-radius:12px; height:38px; min-width:38px; font-weight:900; background:#e0f2fe; color:#0f172a; cursor:pointer; }
+.btn-icon.danger { background:#fee2e2; color:#991b1b; }
+.btn.small { padding:10px 14px; border-radius:14px; font-size:14px; }
+.wrap-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.generated-whatsapp { min-height:300px; white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:15px; line-height:1.45; }
+.status-pill { display:inline-flex; align-items:center; padding:8px 12px; border-radius:999px; background:#ecfeff; color:#075985; font-weight:900; font-size:13px; }
+@media (max-width: 720px) {
+  .whatsapp-row { grid-template-columns: 70px 22px 1fr 34px 34px 34px; gap:6px; padding:8px; }
+  .whatsapp-row input { padding:10px 8px; font-size:14px; }
+  .whatsapp-section-title { align-items:flex-start; flex-direction:column; }
+  .generated-whatsapp { min-height:260px; font-size:14px; }
+}
