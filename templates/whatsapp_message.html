@@ -93,24 +93,24 @@
 (function () {
   const defaultRows = {
     main: [
-      {label: 'Absence', value: '1', prefix: 'x'},
-      {label: 'Holiday', value: '4', prefix: 'x'},
-      {label: 'FLM', value: '2', prefix: 'x'},
-      {label: 'Clerk', value: '2', prefix: 'x'},
-      {label: 'Pick', value: '6', prefix: 'x'},
-      {label: 'Pack', value: '1', prefix: 'x'},
-      {label: 'Run Off', value: '1', prefix: 'x'},
-      {label: 'Despatch', value: '5', prefix: 'x'},
-      {label: 'SC', value: '4', prefix: 'x'},
-      {label: 'Suntory', value: '2', prefix: 'x'}
+      {label: 'Absence', value: '', prefix: 'x'},
+      {label: 'Holiday', value: '', prefix: 'x'},
+      {label: 'FLM', value: '', prefix: 'x'},
+      {label: 'Clerk', value: '', prefix: 'x'},
+      {label: 'Pick', value: '', prefix: 'x'},
+      {label: 'Pack', value: '', prefix: 'x'},
+      {label: 'Run Off', value: '', prefix: 'x'},
+      {label: 'Despatch', value: '', prefix: 'x'},
+      {label: 'SC', value: '', prefix: 'x'},
+      {label: 'Suntory', value: '', prefix: 'x'}
     ],
     notes: [
-      {label: 'Slam Plan', value: '1500'},
-      {label: 'Pick/Pack', value: '58 to pick/pack Inc EMC'},
-      {label: 'Total Well', value: '- 416'},
-      {label: 'Despatch plan', value: '18 Inc additionals'},
-      {label: 'SC', value: '1 x ND'},
-      {label: 'Suntory', value: '7.5 to invert, 3 to collect inverted'}
+      {label: 'Slam Plan', value: ''},
+      {label: 'Pick/Pack', value: ''},
+      {label: 'Total Well', value: ''},
+      {label: 'Despatch plan', value: ''},
+      {label: 'SC', value: ''},
+      {label: 'Suntory', value: ''}
     ]
   };
 
@@ -193,18 +193,21 @@
     let text = `${title}${date ? ' ' + date : ''}${time ? ' ' + time : ''}`.trim();
 
     rows.main.forEach(row => {
-      const value = row.value || '0';
-      const label = row.label || '';
-      if (label || value) text += `\n${value} x ${label}`.trimEnd();
+      const value = (row.value || '').trim();
+      const label = (row.label || '').trim();
+      // If the quantity/value field is blank, do not include this line in the generated WhatsApp message.
+      if (value && label) text += `\n${value} x ${label}`;
     });
 
-    text += '\n';
+    const noteLines = [];
     rows.notes.forEach(row => {
-      const label = row.label || '';
-      const value = row.value || '';
-      if (label && value) text += `\n${label} ${value}`;
-      else if (label || value) text += `\n${label || value}`;
+      const label = (row.label || '').trim();
+      const value = (row.value || '').trim();
+      // If the details/value field is blank, do not include this note in the generated WhatsApp message.
+      if (value && label) noteLines.push(`${label} ${value}`);
+      else if (value) noteLines.push(value);
     });
+    if (noteLines.length) text += '\n\n' + noteLines.join('\n');
 
     output.value = text.trim();
     generatedMessageInput.value = output.value;
@@ -237,7 +240,7 @@
       const payload = JSON.parse(localStorage.getItem('whs_whatsapp_draft') || '{}');
       if (!payload.rows) return;
       document.getElementById('titleInput').value = payload.title || '';
-      document.getElementById('dateInput').value = payload.date || '';
+      document.getElementById('dateInput').value = payload.date || '{{ today }}';
       document.getElementById('timeInput').value = payload.time || '';
       document.getElementById('recipientInput').value = payload.recipient || '';
       document.getElementById('phoneInput').value = payload.phone || '';

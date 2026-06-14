@@ -1,7 +1,3 @@
-# WHS Warehouse Support App v28
-
-Added quick Copy Message button beside the WhatsApp generated message autosave status.
-
 # WHS - Warehouse Support v26
 
 Changes in this version:

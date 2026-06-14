@@ -22,6 +22,7 @@ from werkzeug.utils import secure_filename
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
 
 try:
     from openai import OpenAI
@@ -665,13 +666,13 @@ def seed_admin_user():
             END,
             company_name = 'WHS Admin',
             subscription_status = 'admin',
-            mileage_rate = 0.55,
-            door_count = 100,
-            door_start = 1,
-            door_end = 100,
-            fence_count = 120,
-            fence_start = 1,
-            fence_end = 120
+            mileage_rate = COALESCE(mileage_rate, 0.55),
+            door_count = COALESCE(door_count, 100),
+            door_start = COALESCE(door_start, 1),
+            door_end = COALESCE(door_end, 100),
+            fence_count = COALESCE(fence_count, 120),
+            fence_start = COALESCE(fence_start, 1),
+            fence_end = COALESCE(fence_end, 120)
         WHERE email = ?
     """, (generate_password_hash(os.getenv("WHS_ADMIN_PASSWORD", "WHSAdmin2026!")), "admin@whs-app.com"))
     conn.commit()
@@ -5668,24 +5669,24 @@ def whatsapp_message():
     else:
         rows_json = json.dumps({
             "main": [
-                {"label":"Absence", "value":"1", "prefix":"x"},
-                {"label":"Holiday", "value":"4", "prefix":"x"},
-                {"label":"FLM", "value":"2", "prefix":"x"},
-                {"label":"Clerk", "value":"2", "prefix":"x"},
-                {"label":"Pick", "value":"6", "prefix":"x"},
-                {"label":"Pack", "value":"1", "prefix":"x"},
-                {"label":"Run Off", "value":"1", "prefix":"x"},
-                {"label":"Despatch", "value":"5", "prefix":"x"},
-                {"label":"SC", "value":"4", "prefix":"x"},
-                {"label":"Suntory", "value":"2", "prefix":"x"}
+                {"label":"Absence", "value":"", "prefix":"x"},
+                {"label":"Holiday", "value":"", "prefix":"x"},
+                {"label":"FLM", "value":"", "prefix":"x"},
+                {"label":"Clerk", "value":"", "prefix":"x"},
+                {"label":"Pick", "value":"", "prefix":"x"},
+                {"label":"Pack", "value":"", "prefix":"x"},
+                {"label":"Run Off", "value":"", "prefix":"x"},
+                {"label":"Despatch", "value":"", "prefix":"x"},
+                {"label":"SC", "value":"", "prefix":"x"},
+                {"label":"Suntory", "value":"", "prefix":"x"}
             ],
             "notes": [
-                {"label":"Slam Plan", "value":"1500"},
-                {"label":"Pick/Pack", "value":"58 to pick/pack Inc EMC"},
-                {"label":"Total Well", "value":"- 416"},
-                {"label":"Despatch plan", "value":"18 Inc additionals"},
-                {"label":"SC", "value":"1 x ND"},
-                {"label":"Suntory", "value":"7.5 to invert, 3 to collect inverted"}
+                {"label":"Slam Plan", "value":""},
+                {"label":"Pick/Pack", "value":""},
+                {"label":"Total Well", "value":""},
+                {"label":"Despatch plan", "value":""},
+                {"label":"SC", "value":""},
+                {"label":"Suntory", "value":""}
             ]
         })
     return render_template(
