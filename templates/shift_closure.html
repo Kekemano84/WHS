@@ -37,14 +37,14 @@
 
     <div class="table-wrap closure-table-wrap">
       <table class="closure-table" id="closureTable">
-        <thead><tr><th>Bay Door</th><th>Carrier</th><th>Voice</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Bay Door</th><th>Voice</th><th>Status</th><th>Carrier</th><th>Notes</th><th></th></tr></thead>
         <tbody id="closureBody">
           {% for row in rows %}
           <tr>
             <td><input name="bay_door[]" value="{{ row.bay_door }}" placeholder="Door 1"></td>
-            <td><input name="carrier[]" value="{{ row.carrier }}" placeholder="DHL / EVRI / DPD"></td>
             <td class="voice-cell"><button type="button" class="voice-btn" title="Say status" onclick="voiceClosureStatus(this)">🎙️</button></td>
             <td><select name="status[]">{% for status in statuses %}<option value="{{ status }}">{{ status }}</option>{% endfor %}</select></td>
+            <td><input name="carrier[]" value="{{ row.carrier }}" placeholder="DHL / EVRI / DPD"></td>
             <td><input name="notes[]" placeholder="Optional notes"></td>
             <td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>
           </tr>
@@ -86,7 +86,7 @@ function closureStatusOptions(){
 function addClosureRow(){
   const body = document.getElementById('closureBody');
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input name="bay_door[]" placeholder="Door / Bay"></td><td><input name="carrier[]" placeholder="Carrier"></td><td class="voice-cell"><button type="button" class="voice-btn" title="Say status" onclick="voiceClosureStatus(this)">🎙️</button></td><td><select name="status[]">${closureStatusOptions()}</select></td><td><input name="notes[]" placeholder="Optional notes"></td><td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>`;
+  tr.innerHTML = `<td><input name="bay_door[]" placeholder="Door / Bay"></td><td class="voice-cell"><button type="button" class="voice-btn" title="Say status" onclick="voiceClosureStatus(this)">🎙️</button></td><td><select name="status[]">${closureStatusOptions()}</select></td><td><input name="carrier[]" placeholder="Carrier"></td><td><input name="notes[]" placeholder="Optional notes"></td><td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>`;
   body.appendChild(tr);
 }
 function populateClosureBays(){

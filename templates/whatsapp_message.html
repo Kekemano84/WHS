@@ -85,7 +85,7 @@
       <button type="button" class="btn secondary small" id="copyOutputBtn">📋 Copy Message</button>
     </div>
   </div>
-  <textarea id="messageOutput" class="generated-whatsapp" rows="16" readonly>{{ generated_message or '' }}</textarea>
+  <textarea id="messageOutput" class="generated-whatsapp" rows="16" readonly></textarea>
 </section>
 
 <script id="initialRowsData" type="application/json">{{ rows_json|safe }}</script>
@@ -246,7 +246,7 @@
       rows: rows,
       message: output.value
     };
-    localStorage.setItem('whs_whatsapp_draft', JSON.stringify(payload));
+    localStorage.setItem('whs_whatsapp_draft_v40', JSON.stringify(payload));
     draftStatus.textContent = 'Draft saved on this device';
   }
 
@@ -258,7 +258,7 @@
 
   function loadLocalDraft() {
     try {
-      const payload = JSON.parse(localStorage.getItem('whs_whatsapp_draft') || '{}');
+      const payload = JSON.parse(localStorage.getItem('whs_whatsapp_draft_v40') || '{}');
       if (!payload.rows) return;
       document.getElementById('titleInput').value = payload.title || '';
       document.getElementById('dateInput').value = payload.date || '';
@@ -428,7 +428,7 @@
   document.getElementById('loadDraftBtn').addEventListener('click', loadLocalDraft);
   document.getElementById('clearDraftBtn').addEventListener('click', () => {
     if (!confirm('Clear this WhatsApp draft?')) return;
-    localStorage.removeItem('whs_whatsapp_draft');
+    localStorage.removeItem('whs_whatsapp_draft_v40');
     rows = JSON.parse(JSON.stringify(defaultRows));
     renderRows();
     generateMessage();

@@ -5691,31 +5691,32 @@ def whatsapp_message():
 
     draft = conn.execute("SELECT * FROM whatsapp_drafts WHERE user_id=?", (user["id"],)).fetchone()
     conn.close()
-    if draft and row_get(draft, "rows_json", ""):
-        rows_json = row_get(draft, "rows_json", "{}")
-    else:
-        rows_json = json.dumps({
-            "main": [
-                {"label":"Absence", "value":"1", "prefix":"x"},
-                {"label":"Holiday", "value":"4", "prefix":"x"},
-                {"label":"FLM", "value":"2", "prefix":"x"},
-                {"label":"Clerk", "value":"2", "prefix":"x"},
-                {"label":"Pick", "value":"6", "prefix":"x"},
-                {"label":"Pack", "value":"1", "prefix":"x"},
-                {"label":"Run Off", "value":"1", "prefix":"x"},
-                {"label":"Despatch", "value":"5", "prefix":"x"},
-                {"label":"SC", "value":"4", "prefix":"x"},
-                {"label":"Suntory", "value":"2", "prefix":"x"}
-            ],
-            "notes": [
-                {"label":"Slam Plan", "value":"1500"},
-                {"label":"Pick/Pack", "value":"58 to pick/pack Inc EMC"},
-                {"label":"Total Well", "value":"- 416"},
-                {"label":"Despatch plan", "value":"18 Inc additionals"},
-                {"label":"SC", "value":"1 x ND"},
-                {"label":"Suntory", "value":"7.5 to invert, 3 to collect inverted"}
-            ]
-        })
+
+    # Default WhatsApp builder must open with EMPTY Qty / Details boxes.
+    # Keep the line labels, but do not pre-populate numbers or note details.
+    # Existing saved drafts can still be restored with the Load Draft button from the device.
+    rows_json = json.dumps({
+        "main": [
+            {"label":"Absence", "value":"", "prefix":"x"},
+            {"label":"Holiday", "value":"", "prefix":"x"},
+            {"label":"FLM", "value":"", "prefix":"x"},
+            {"label":"Clerk", "value":"", "prefix":"x"},
+            {"label":"Pick", "value":"", "prefix":"x"},
+            {"label":"Pack", "value":"", "prefix":"x"},
+            {"label":"Run Off", "value":"", "prefix":"x"},
+            {"label":"Despatch", "value":"", "prefix":"x"},
+            {"label":"SC", "value":"", "prefix":"x"},
+            {"label":"Suntory", "value":"", "prefix":"x"}
+        ],
+        "notes": [
+            {"label":"Slam Plan", "value":""},
+            {"label":"Pick/Pack", "value":""},
+            {"label":"Total Well", "value":""},
+            {"label":"Despatch plan", "value":""},
+            {"label":"SC", "value":""},
+            {"label":"Suntory", "value":""}
+        ]
+    })
     return render_template(
         "whatsapp_message.html",
         page="whatsapp_message",
