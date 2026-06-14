@@ -1,11 +1,52 @@
 {% extends "base.html" %}
-{% block title %}Shift Calendar{% endblock %}
+{% block title %}Shift Calendar
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const card = document.getElementById('selectedShiftCard');
+    if(!card) return;
+    const dayNum = document.getElementById('selectedDayNum');
+    const monthText = document.getElementById('selectedMonthText');
+    const title = document.getElementById('selectedShiftTitle');
+    const meta = document.getElementById('selectedShiftMeta');
+    const manualDate = document.querySelector('input[name="manual_date"]');
+    const manualStatus = document.querySelector('select[name="manual_status"]');
+    const manualShift = document.querySelector('input[name="manual_shift_name"]');
+    const manualStart = document.querySelector('input[name="manual_start_time"]');
+    const manualEnd = document.querySelector('input[name="manual_end_time"]');
+    const manualNotes = document.querySelector('input[name="manual_notes"]');
+    document.querySelectorAll('.compact-day').forEach(function(day){
+        day.addEventListener('click', function(){
+            document.querySelectorAll('.compact-day.is-selected').forEach(function(x){x.classList.remove('is-selected')});
+            day.classList.add('is-selected');
+            const d = day.dataset.date || '';
+            const dateObj = d ? new Date(d + 'T00:00:00') : null;
+            dayNum.textContent = d ? d.slice(-2) : '--';
+            monthText.textContent = dateObj ? dateObj.toLocaleDateString(undefined, {weekday:'short', month:'short'}) : 'Selected';
+            const status = day.dataset.status || 'Not Set';
+            const shift = day.dataset.shift || status;
+            const start = day.dataset.start || '';
+            const end = day.dataset.end || '';
+            const notes = day.dataset.notes || '';
+            title.textContent = shift + ' · ' + status;
+            meta.textContent = (start || end ? (start + ' - ' + end + ' · ') : '') + (notes || 'No notes');
+            if(manualDate) manualDate.value = d;
+            if(manualStatus) manualStatus.value = status;
+            if(manualShift) manualShift.value = shift === 'RDO' || shift === 'HOLS' ? '' : shift;
+            if(manualStart) manualStart.value = start;
+            if(manualEnd) manualEnd.value = end;
+            if(manualNotes) manualNotes.value = notes;
+        });
+    });
+});
+</script>
+
+{% endblock %}
 {% block content %}
 
 <section class="hero-card pro-hero">
     <div>
-        <p class="eyebrow">Shift Calendar</p>
-        <h3>Generate your work pattern automatically for the next year and manually mark Holiday, Sick, Training or Overtime days.</h3>
+        <p class="eyebrow">My Calendar</p>
+        <h3>Compact shift planner view with Add Shift Pattern, Work / Off / Holiday / Sick days and Holiday Tracker integration.</h3>
     </div>
     <a class="btn light" href="{{ url_for('export_shift_calendar') }}">[📊 Export Excel]</a> <a class="btn light" href="{{ url_for('email_excel', kind='shift_calendar') }}">📧 Email Excel</a>
 </section>
@@ -14,7 +55,7 @@
     <section class="panel shift-card">
         <div class="panel-head">
             <div>
-                <h3>Auto Generate Calendar</h3>
+                <h3>+ Add Shift Pattern</h3>
                 <p class="muted">Choose a standard pattern or create your own.</p>
             </div>
             <span class="pill">FREE</span>
@@ -77,8 +118,8 @@
     <section class="panel shift-card">
         <div class="panel-head">
             <div>
-                <h3>Manual Day Update</h3><a class="small-btn ghost-small" href="{{ url_for('holiday_tracker') }}">Holiday Tracker</a>
-                <p class="muted">Override one day as Holiday, Sick, Training, Overtime or Custom.</p>
+                <h3>Quick Day Edit</h3><a class="small-btn ghost-small" href="{{ url_for('holiday_tracker') }}">Holiday Tracker</a>
+                <p class="muted">Tap a day in the calendar, then update it as Work, Off, Sick, Training or Holiday.</p>
             </div>
         </div>
 
@@ -127,7 +168,7 @@
             </div>
             </div>
 
-            <button class="btn primary full" type="submit">Save Day</button>
+            <button class="btn primary full" type="submit">Save / Add Shift</button>
         </form>
     </section>
 </section>
@@ -167,23 +208,27 @@ document.addEventListener("DOMContentLoaded", toggleCustomPattern);
     </div>
 
     {% if view == "month" %}
-    <div class="month-calendar">
-        <div class="month-weekdays">
+    <div class="month-calendar compact-shift-calendar">
+        <div class="month-weekdays compact-weekdays">
             <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
         </div>
         {% for week in month_weeks %}
-        <div class="month-week">
+        <div class="month-week compact-week">
             {% for row in week %}
-            <div class="month-day {% if not row.in_month %}outside-month{% endif %} status-{{ row.status|lower|replace(' ', '-') }}">
-                <div class="month-date">{{ row.date[-2:] }}</div>
-                <strong>{{ row.status }}</strong>
-                {% if row.shift_name %}<small>{{ row.shift_name }}</small>{% endif %}
-                {% if row.start_time or row.end_time %}<small>{{ row.start_time }} - {{ row.end_time }}</small>{% endif %}
-                {% if row.notes %}<em>{{ row.notes }}</em>{% endif %}
-            </div>
+            {% set short = 'HOLS' if row.status == 'Holiday' else ('RDO' if row.status == 'Off' else ('DHL' if row.status == 'Work' and not row.shift_name else (row.shift_name if row.shift_name else row.status))) %}
+            <button type="button" class="month-day compact-day {% if not row.in_month %}outside-month{% endif %} status-{{ row.status|lower|replace(' ', '-') }}" data-date="{{ row.date }}" data-status="{{ row.status }}" data-shift="{{ row.shift_name or short }}" data-start="{{ row.start_time }}" data-end="{{ row.end_time }}" data-notes="{{ row.notes }}">
+                <span class="compact-date">{{ row.date[-2:] }}</span>
+                <strong>{{ short }}</strong>
+                {% if row.start_time or row.end_time %}<small>{{ row.start_time }}-{{ row.end_time }}</small>{% endif %}
+                {% if row.status == 'Holiday' %}<em>✈</em>{% elif row.status == 'Work' %}<em>★</em>{% endif %}
+            </button>
             {% endfor %}
         </div>
         {% endfor %}
+    </div>
+    <div class="selected-shift-card" id="selectedShiftCard">
+        <div class="selected-date-box"><strong id="selectedDayNum">--</strong><small id="selectedMonthText">Select a day</small></div>
+        <div><strong id="selectedShiftTitle">Tap a calendar day</strong><p id="selectedShiftMeta">Details will appear here.</p></div>
     </div>
     {% else %}
     <div class="calendar-grid">
@@ -214,5 +259,46 @@ document.addEventListener("DOMContentLoaded", toggleCustomPattern);
         {% endfor %}
     </div>
 </section>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const card = document.getElementById('selectedShiftCard');
+    if(!card) return;
+    const dayNum = document.getElementById('selectedDayNum');
+    const monthText = document.getElementById('selectedMonthText');
+    const title = document.getElementById('selectedShiftTitle');
+    const meta = document.getElementById('selectedShiftMeta');
+    const manualDate = document.querySelector('input[name="manual_date"]');
+    const manualStatus = document.querySelector('select[name="manual_status"]');
+    const manualShift = document.querySelector('input[name="manual_shift_name"]');
+    const manualStart = document.querySelector('input[name="manual_start_time"]');
+    const manualEnd = document.querySelector('input[name="manual_end_time"]');
+    const manualNotes = document.querySelector('input[name="manual_notes"]');
+    document.querySelectorAll('.compact-day').forEach(function(day){
+        day.addEventListener('click', function(){
+            document.querySelectorAll('.compact-day.is-selected').forEach(function(x){x.classList.remove('is-selected')});
+            day.classList.add('is-selected');
+            const d = day.dataset.date || '';
+            const dateObj = d ? new Date(d + 'T00:00:00') : null;
+            dayNum.textContent = d ? d.slice(-2) : '--';
+            monthText.textContent = dateObj ? dateObj.toLocaleDateString(undefined, {weekday:'short', month:'short'}) : 'Selected';
+            const status = day.dataset.status || 'Not Set';
+            const shift = day.dataset.shift || status;
+            const start = day.dataset.start || '';
+            const end = day.dataset.end || '';
+            const notes = day.dataset.notes || '';
+            title.textContent = shift + ' · ' + status;
+            meta.textContent = (start || end ? (start + ' - ' + end + ' · ') : '') + (notes || 'No notes');
+            if(manualDate) manualDate.value = d;
+            if(manualStatus) manualStatus.value = status;
+            if(manualShift) manualShift.value = shift === 'RDO' || shift === 'HOLS' ? '' : shift;
+            if(manualStart) manualStart.value = start;
+            if(manualEnd) manualEnd.value = end;
+            if(manualNotes) manualNotes.value = notes;
+        });
+    });
+});
+</script>
 
 {% endblock %}

@@ -1,5 +1,45 @@
 {% extends "base.html" %}
-{% block title %}Holiday Tracker{% endblock %}
+{% block title %}Holiday Tracker
+<script>
+(function(){
+    function hoursPerDay(){
+        const el = document.getElementById('paidHoursPerDay');
+        const fallback = parseFloat('{{ summary.paid_hours_per_day or 12 }}') || 12;
+        const value = el ? parseFloat(el.value) : fallback;
+        return value > 0 ? value : fallback;
+    }
+    function formatNumber(n){
+        if (!isFinite(n)) return '';
+        return (Math.round(n * 100) / 100).toString();
+    }
+    function wirePair(hoursEl, daysEl){
+        if(!hoursEl || !daysEl) return;
+        let lock = false;
+        hoursEl.addEventListener('input', function(){
+            if(lock) return; lock = true;
+            const h = parseFloat(hoursEl.value);
+            daysEl.value = h > 0 ? formatNumber(h / hoursPerDay()) : '';
+            lock = false;
+        });
+        daysEl.addEventListener('input', function(){
+            if(lock) return; lock = true;
+            const d = parseFloat(daysEl.value);
+            hoursEl.value = d > 0 ? formatNumber(d * hoursPerDay()) : '';
+            lock = false;
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+        const mainHours = document.getElementById('holidayHoursInput');
+        const mainDays = document.getElementById('holidayDaysInput');
+        wirePair(mainHours, mainDays);
+        document.querySelectorAll('.holiday-record-form').forEach(function(form){
+            wirePair(form.querySelector('.holiday-hours-input'), form.querySelector('.holiday-days-input'));
+        });
+    });
+})();
+</script>
+
+{% endblock %}
 {% block content %}
 <section class="mobile-more-hero">
     <p class="eyebrow">Annual Leave</p>
@@ -20,7 +60,8 @@
         <input type="hidden" name="return_to" value="holiday_tracker">
         <div><label>Holiday allowance</label><input type="number" step="0.5" name="annual_leave_entitlement" value="{{ user.annual_leave_entitlement or 28 }}"></div>
         <div><label>Unit</label><select name="annual_leave_unit"><option value="days" {% if user.annual_leave_unit != 'hours' %}selected{% endif %}>Days</option><option value="hours" {% if user.annual_leave_unit == 'hours' %}selected{% endif %}>Hours</option></select></div>
-        <div><label>Contracted shift hours</label><input type="number" step="0.25" name="contracted_shift_hours" value="{{ user.contracted_shift_hours or 12 }}"></div>
+        <div><label>Contracted shift hours</label><input id="contractedShiftHours" type="number" step="0.25" name="contracted_shift_hours" value="{{ user.contracted_shift_hours or 12 }}"></div>
+        <div><label>One holiday day equals</label><input id="paidHoursPerDay" type="number" step="0.25" name="paid_hours_per_day" value="{{ summary.paid_hours_per_day or user.contracted_shift_hours or 12 }}"><small class="muted">For 4 on / 4 off, use your full shift length, e.g. 12 hours.</small></div>
         <div><label>Break minutes</label><input type="number" step="1" name="break_minutes" value="{{ user.break_minutes or 45 }}"></div>
         <div class="wide theme-toggle-line"><div><strong>Break is paid</strong></div><label class="switch-toggle" for="breakPaidToggle"><input id="breakPaidToggle" type="checkbox" name="break_paid" value="yes" {% if user.break_paid %}checked{% endif %}><span class="switch-track"><span class="switch-knob"></span><b class="switch-on">ON</b><b class="switch-off">OFF</b></span></label></div>
         <div class="form-actions"><button class="btn primary" type="submit">Save Allowance</button></div>
@@ -32,8 +73,8 @@
     <form method="POST" action="{{ url_for('add_holiday_record') }}" class="form-grid compact-form">
         <div><label>Start Date</label><input type="date" name="holiday_start_date"></div>
         <div><label>End Date</label><input type="date" name="holiday_end_date"></div>
-        <div><label>Holiday Hours</label><input type="number" step="0.25" name="holiday_hours" placeholder="e.g. {{ summary.paid_hours_per_day }}"></div>
-        <div><label>Holiday Days</label><input type="number" step="0.25" name="holiday_days" placeholder="e.g. 1"></div>
+        <div><label>Holiday Hours</label><input id="holidayHoursInput" class="holiday-hours-input" type="number" step="0.25" name="holiday_hours" placeholder="e.g. {{ summary.paid_hours_per_day }}"></div>
+        <div><label>Holiday Days</label><input id="holidayDaysInput" class="holiday-days-input" type="number" step="0.25" name="holiday_days" placeholder="e.g. 1"></div>
         <div><label>Notes</label><input name="notes" value="Annual leave"></div><div class="wide theme-toggle-line"><div><strong>Include Off days as holiday too</strong></div><label class="switch-toggle" for="includeOffDaysToggle"><input id="includeOffDaysToggle" type="checkbox" name="include_off_days" value="yes"><span class="switch-track"><span class="switch-knob"></span><b class="switch-on">ON</b><b class="switch-off">OFF</b></span></label></div>
         <div class="wide"><p class="muted">Use the same start and end date for one day. For a full week, select Monday to Sunday.</p></div><div class="form-actions"><button class="btn primary" type="submit">Add Holiday Range</button></div>
     </form>
@@ -48,8 +89,8 @@
         <div class="holiday-record-card">
             <form method="POST" action="{{ url_for('edit_holiday_record', record_id=row.id) }}" class="holiday-record-form">
                 <div><label>Date</label><input type="date" name="date" value="{{ row.date }}"></div>
-                <div><label>Days</label><input type="number" step="0.25" name="holiday_days" value="{{ row.holiday_days or 1 }}"></div>
-                <div><label>Hours</label><input type="number" step="0.25" name="holiday_hours" value="{{ row.holiday_hours or summary.paid_hours_per_day }}"></div>
+                <div><label>Days</label><input class="holiday-days-input" type="number" step="0.25" name="holiday_days" value="{{ row.holiday_days or 1 }}"></div>
+                <div><label>Hours</label><input class="holiday-hours-input" type="number" step="0.25" name="holiday_hours" value="{{ row.holiday_hours or summary.paid_hours_per_day }}"></div>
                 <div><label>Notes</label><input name="notes" value="{{ row.notes or 'Annual leave' }}"></div>
                 <button class="btn primary small" type="submit">Save</button>
             </form>
@@ -61,5 +102,45 @@
     </div>
     {% else %}<p class="muted">No holiday records yet.</p>{% endif %}
 </section>
+
+
+<script>
+(function(){
+    function hoursPerDay(){
+        const el = document.getElementById('paidHoursPerDay');
+        const fallback = parseFloat('{{ summary.paid_hours_per_day or 12 }}') || 12;
+        const value = el ? parseFloat(el.value) : fallback;
+        return value > 0 ? value : fallback;
+    }
+    function formatNumber(n){
+        if (!isFinite(n)) return '';
+        return (Math.round(n * 100) / 100).toString();
+    }
+    function wirePair(hoursEl, daysEl){
+        if(!hoursEl || !daysEl) return;
+        let lock = false;
+        hoursEl.addEventListener('input', function(){
+            if(lock) return; lock = true;
+            const h = parseFloat(hoursEl.value);
+            daysEl.value = h > 0 ? formatNumber(h / hoursPerDay()) : '';
+            lock = false;
+        });
+        daysEl.addEventListener('input', function(){
+            if(lock) return; lock = true;
+            const d = parseFloat(daysEl.value);
+            hoursEl.value = d > 0 ? formatNumber(d * hoursPerDay()) : '';
+            lock = false;
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+        const mainHours = document.getElementById('holidayHoursInput');
+        const mainDays = document.getElementById('holidayDaysInput');
+        wirePair(mainHours, mainDays);
+        document.querySelectorAll('.holiday-record-form').forEach(function(form){
+            wirePair(form.querySelector('.holiday-hours-input'), form.querySelector('.holiday-days-input'));
+        });
+    });
+})();
+</script>
 
 {% endblock %}

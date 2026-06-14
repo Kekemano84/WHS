@@ -1969,7 +1969,7 @@ def ensure_holiday_schema_updates():
     safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
     safe_add_column("users", "break_paid", "INTEGER DEFAULT 0")
-    safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 11.25")
+    safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 12")
     safe_add_column("shift_calendar", "holiday_hours", "REAL DEFAULT 0")
     safe_add_column("shift_calendar", "holiday_days", "REAL DEFAULT 0")
 
@@ -1980,7 +1980,7 @@ def ensure_holiday_user_columns():
     safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
     safe_add_column("users", "break_paid", "INTEGER DEFAULT 0")
-    safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 11.25")
+    safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 12")
 
 
 def ensure_holiday_schema_all():
@@ -1989,7 +1989,7 @@ def ensure_holiday_schema_all():
     safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
     safe_add_column("users", "break_paid", "INTEGER DEFAULT 0")
-    safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 11.25")
+    safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 12")
     safe_add_column("shift_calendar", "holiday_hours", "REAL DEFAULT 0")
     safe_add_column("shift_calendar", "holiday_days", "REAL DEFAULT 0")
 
@@ -2071,7 +2071,7 @@ def op_ensure_holiday_schema():
     op_safe_add_column("users", "contracted_shift_hours", "REAL DEFAULT 12")
     op_safe_add_column("users", "break_minutes", "REAL DEFAULT 45")
     op_safe_add_column("users", "break_paid", "INTEGER DEFAULT 0")
-    op_safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 11.25")
+    op_safe_add_column("users", "paid_hours_per_day", "REAL DEFAULT 12")
     op_safe_add_column("shift_calendar", "holiday_hours", "REAL DEFAULT 0")
     op_safe_add_column("shift_calendar", "holiday_days", "REAL DEFAULT 0")
 
@@ -2325,7 +2325,14 @@ def save_annual_leave_settings():
         break_minutes = 45
 
     break_paid = 1 if request.form.get("break_paid") == "yes" else 0
-    paid_hours = contracted if break_paid else max(contracted - (break_minutes / 60), 0)
+    # WHS holiday logic: one holiday day can be the full shift length (e.g. 12h on 4 on / 4 off).
+    # This value is used to convert hours <-> days and prevents double counting.
+    try:
+        paid_hours = float(request.form.get("paid_hours_per_day") or contracted)
+    except Exception:
+        paid_hours = contracted
+    if paid_hours <= 0:
+        paid_hours = contracted
 
     conn = get_db()
     conn.execute("""
