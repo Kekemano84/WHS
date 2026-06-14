@@ -127,6 +127,28 @@
   const generatedMessageInput = document.getElementById('generatedMessageInput');
   const draftStatus = document.getElementById('draftStatus');
   let autosaveTimer = null;
+  let lastFocusedInput = null;
+
+  document.addEventListener('focusin', function(e) {
+    if (e.target && e.target.matches('.wa-label, .wa-value')) {
+      lastFocusedInput = e.target;
+    }
+  });
+
+  function spokenToNumber(text) {
+    const raw = String(text || '').trim().toLowerCase().replace(/[-,]/g, ' ');
+    if (!raw) return '';
+    const direct = raw.match(/\d+(?:\.\d+)?/);
+    if (direct) return direct[0];
+    const map = {
+      'zero':'0','oh':'0','o':'0','one':'1','won':'1','two':'2','too':'2','to':'2','three':'3','four':'4','for':'4','five':'5','six':'6','seven':'7','eight':'8','ate':'8','nine':'9','ten':'10','eleven':'11','twelve':'12','thirteen':'13','fourteen':'14','fifteen':'15','sixteen':'16','seventeen':'17','eighteen':'18','nineteen':'19','twenty':'20'
+    };
+    const words = raw.split(/\s+/).filter(Boolean);
+    for (const w of words) {
+      if (map[w] !== undefined) return map[w];
+    }
+    return text;
+  }
 
   function rowTemplate(type, row, index) {
     const isMain = type === 'main';
@@ -136,8 +158,8 @@
     wrap.dataset.index = index;
     wrap.innerHTML = isMain ? `
       <input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Line name">
-      <button type="button" class="btn-icon wa-voice" title="Voice record line name" data-voice-target="label">🎙️</button>
-      <input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Qty">
+      <button type="button" class="btn-icon wa-voice" title="Voice record quantity" data-voice-target="value">🎙️</button>
+      <input class="wa-value wa-qty" inputmode="numeric" value="${escapeHtml(row.value || '')}" placeholder="Qty">
       <span class="wa-prefix">x</span>
       <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
       <button type="button" class="btn-icon wa-down" title="Move down">↓</button>
@@ -256,7 +278,10 @@
     const rowEl = button.closest('.whatsapp-row');
     if (!rowEl) return;
     const targetName = button.dataset.voiceTarget || 'value';
-    const target = rowEl.querySelector(targetName === 'label' ? '.wa-label' : '.wa-value');
+    let target = rowEl.querySelector(targetName === 'label' ? '.wa-label' : '.wa-value');
+    if (lastFocusedInput && rowEl.contains(lastFocusedInput)) {
+      target = lastFocusedInput;
+    }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Voice recording is not supported on this browser. Please type manually.');
@@ -271,7 +296,13 @@
     recognition.onresult = function(event) {
       const text = event.results && event.results[0] && event.results[0][0] ? event.results[0][0].transcript : '';
       if (text && target) {
-        target.value = target.value ? (target.value + ' ' + text) : text;
+        const isQty = target.classList.contains('wa-qty') || target.placeholder.toLowerCase().includes('qty');
+        const cleaned = isQty ? spokenToNumber(text) : text;
+        if (isQty) {
+          target.value = cleaned;
+        } else {
+          target.value = target.value ? (target.value + ' ' + cleaned) : cleaned;
+        }
         target.dispatchEvent(new Event('input', { bubbles: true }));
       }
     };

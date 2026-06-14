@@ -44,6 +44,7 @@
                     <label>Header</label>
                     <input name="section_header[]" value="{{ header }}" placeholder="Section header">
                 </div>
+                <button type="button" class="btn-icon brief-voice" title="Voice record message">🎙️</button>
                 <div>
                     <label>Message</label>
                     <input name="section_value[]" placeholder="{{ placeholder }}">
@@ -82,6 +83,10 @@
   const addBtn = document.getElementById('addBriefSection');
   if(!builder || !addBtn) return;
   function wire(row){
+    const voiceBtn = row.querySelector('.brief-voice');
+    if (voiceBtn) {
+      voiceBtn.addEventListener('click', function(){ startBriefVoice(row, voiceBtn); });
+    }
     const btn = row.querySelector('.remove-brief-section');
     if(btn){
       btn.addEventListener('click', function(){
@@ -94,11 +99,37 @@
       });
     }
   }
+  function startBriefVoice(row, button){
+    const messageInput = row.querySelector('input[name="section_value[]"]');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Voice recording is not supported on this browser. Please type manually.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = document.documentElement.lang || 'en-GB';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    button.classList.add('recording');
+    button.textContent = '●';
+    recognition.onresult = function(event){
+      const text = event.results && event.results[0] && event.results[0][0] ? event.results[0][0].transcript : '';
+      if (text && messageInput) {
+        messageInput.value = messageInput.value ? (messageInput.value + ' ' + text) : text;
+        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    };
+    recognition.onerror = function(){ button.classList.remove('recording'); button.textContent = '🎙️'; };
+    recognition.onend = function(){ button.classList.remove('recording'); button.textContent = '🎙️'; };
+    recognition.start();
+  }
+
   function createRow(){
     const row = document.createElement('div');
     row.className = 'brief-section-row';
     row.innerHTML = `
       <div><label>Header</label><input name="section_header[]" placeholder="Section header"></div>
+      <button type="button" class="btn-icon brief-voice" title="Voice record message">🎙️</button>
       <div><label>Message</label><input name="section_value[]" placeholder="Message for the team"></div>
       <button type="button" class="remove-brief-section">Delete</button>`;
     wire(row);
