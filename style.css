@@ -3560,3 +3560,9 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   .whatsapp-section-title { align-items:flex-start; flex-direction:column; }
   .generated-whatsapp { min-height:260px; font-size:14px; }
 }
+
+/* v28 WhatsApp output quick copy */
+.whatsapp-output-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
+.whatsapp-output-actions .status-pill{white-space:nowrap;}
+.whatsapp-output-actions .btn.small{padding:9px 14px;font-size:13px;min-height:38px;}
+@media(max-width:700px){.whatsapp-output-panel .panel-head{align-items:flex-start;}.whatsapp-output-actions{width:100%;justify-content:flex-start;}.whatsapp-output-actions .btn.small{width:auto;}}

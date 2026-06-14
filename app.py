@@ -3772,6 +3772,10 @@ def export_yard_check():
         cell.alignment = Alignment(horizontal="center")
 
     for row in rows:
+        trailer_id = (row["trailer_id"] or "").strip()
+        # Empty trailer rows are draft/blank rows and should not be exported.
+        if not trailer_id:
+            continue
         raw_notes = row["notes"] or ""
         note_text = raw_notes
         marker_text = ""
@@ -3786,7 +3790,15 @@ def export_yard_check():
                 else:
                     note_parts.append(part)
             note_text = " | ".join([p for p in note_parts if p])
-        ws.append([row["date"], row["location_detail"] or row["location_type"], row["trailer_id"], note_text, marker_text, row["source"], row["created_at"]])
+        ws.append([
+            row["date"] or "",
+            row["location_detail"] or row["location_type"] or "",
+            trailer_id,
+            note_text,
+            marker_text,
+            row["source"] or "",
+            row["created_at"] or "",
+        ])
 
     widths = [16, 22, 18, 35, 28, 16, 22]
     for idx, width in enumerate(widths, start=1):
@@ -3795,7 +3807,12 @@ def export_yard_check():
     buffer = BytesIO()
     wb.save(buffer)
     buffer.seek(0)
-    return send_file(buffer, as_attachment=True, download_name="yard-check.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="yard-check.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
 
 
 @app.route("/kpi", methods=["GET", "POST"])

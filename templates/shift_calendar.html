@@ -24,8 +24,9 @@
   .month-calendar.compact-shift-calendar .compact-day.status-training{background:#7db0ff!important;color:#071428!important}
   .month-calendar.compact-shift-calendar .compact-day.status-not-set{background:#e5e7eb!important;color:#475569!important}
   .month-calendar.compact-shift-calendar .compact-day.outside-month{opacity:.45!important;filter:saturate(.65)!important}
-  .month-calendar.compact-shift-calendar .compact-day.is-today{outline:3px solid #ffffff!important;box-shadow:0 0 0 3px var(--accent,#0ea5e9),0 0 18px rgba(14,165,233,.75)!important;position:relative!important;z-index:3!important}
-  .month-calendar.compact-shift-calendar .compact-day.is-today .compact-date{background:#ffffff!important;color:#0f172a!important;border-radius:999px!important;padding:2px 5px!important;min-width:18px!important;text-align:center!important}
+  .month-calendar.compact-shift-calendar .compact-day.is-today{outline:4px solid #ff8a00!important;box-shadow:0 0 0 3px #fff,0 0 0 7px rgba(255,138,0,.55),0 0 18px rgba(255,138,0,.95)!important;position:relative!important;z-index:6!important;transform:translateY(-1px)!important}
+  .month-calendar.compact-shift-calendar .compact-day.is-today::before{content:'TODAY';position:absolute;top:-9px;right:4px;background:#ef4444;color:#fff;border-radius:999px;padding:1px 5px;font-size:7px;font-weight:900;line-height:1.2;border:1px solid #fff}
+  .month-calendar.compact-shift-calendar .compact-day.is-today .compact-date{background:#ef4444!important;color:#fff!important;border-radius:999px!important;padding:2px 6px!important;min-width:22px!important;text-align:center!important}
   .month-calendar.compact-shift-calendar .compact-day.is-selected{outline:3px solid #111827!important;box-shadow:0 0 0 3px #fff!important}
   .selected-shift-card{margin-top:8px!important;border-radius:12px!important;padding:8px!important;display:grid!important;grid-template-columns:56px 1fr!important;gap:9px!important;background:#2f2f2f!important;color:#fff!important}
   .selected-date-box{border-radius:7px!important;padding:6px 4px!important}

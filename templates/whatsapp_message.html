@@ -80,7 +80,10 @@
       <h2>Generated WhatsApp Message</h2>
       <p class="muted">Copy this and paste it into your WhatsApp group.</p>
     </div>
-    <span id="draftStatus" class="status-pill">Draft autosave ready</span>
+    <div class="whatsapp-output-actions">
+      <span id="draftStatus" class="status-pill">Draft autosave ready</span>
+      <button type="button" class="btn secondary small" id="copyOutputBtn">📋 Copy Message</button>
+    </div>
   </div>
   <textarea id="messageOutput" class="generated-whatsapp" rows="16" readonly>{{ generated_message or '' }}</textarea>
 </section>
@@ -128,12 +131,21 @@
   function rowTemplate(type, row, index) {
     const isMain = type === 'main';
     const wrap = document.createElement('div');
-    wrap.className = 'whatsapp-row';
+    wrap.className = isMain ? 'whatsapp-row whatsapp-row-main' : 'whatsapp-row whatsapp-row-note';
     wrap.dataset.type = type;
     wrap.dataset.index = index;
-    wrap.innerHTML = `
-      ${isMain ? `<input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Qty">` : `<input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Title">`}
-      ${isMain ? `<span class="wa-prefix">x</span><input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Line name">` : `<input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Details">`}
+    wrap.innerHTML = isMain ? `
+      <input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Line name">
+      <button type="button" class="btn-icon wa-voice" title="Voice record line name" data-voice-target="label">🎙️</button>
+      <input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Qty">
+      <span class="wa-prefix">x</span>
+      <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
+      <button type="button" class="btn-icon wa-down" title="Move down">↓</button>
+      <button type="button" class="btn-icon danger wa-delete" title="Delete row">×</button>
+    ` : `
+      <input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Title">
+      <button type="button" class="btn-icon wa-voice" title="Voice record note details" data-voice-target="value">🎙️</button>
+      <input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Details">
       <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
       <button type="button" class="btn-icon wa-down" title="Move down">↓</button>
       <button type="button" class="btn-icon danger wa-delete" title="Delete row">×</button>
@@ -240,6 +252,40 @@
     if (e.target.closest('.whatsapp-form')) scheduleAutosave();
   });
 
+  function startVoiceForRow(button) {
+    const rowEl = button.closest('.whatsapp-row');
+    if (!rowEl) return;
+    const targetName = button.dataset.voiceTarget || 'value';
+    const target = rowEl.querySelector(targetName === 'label' ? '.wa-label' : '.wa-value');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Voice recording is not supported on this browser. Please type manually.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = document.documentElement.lang || 'en-GB';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    button.classList.add('recording');
+    button.textContent = '●';
+    recognition.onresult = function(event) {
+      const text = event.results && event.results[0] && event.results[0][0] ? event.results[0][0].transcript : '';
+      if (text && target) {
+        target.value = target.value ? (target.value + ' ' + text) : text;
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    };
+    recognition.onerror = function() {
+      button.classList.remove('recording');
+      button.textContent = '🎙️';
+    };
+    recognition.onend = function() {
+      button.classList.remove('recording');
+      button.textContent = '🎙️';
+    };
+    recognition.start();
+  }
+
   document.addEventListener('click', function (e) {
     const add = e.target.closest('[data-add-row]');
     if (add) {
@@ -248,6 +294,11 @@
       rows[type].push(type === 'main' ? {value: '', label: '', prefix: 'x'} : {label: '', value: ''});
       renderRows();
       scheduleAutosave();
+      return;
+    }
+
+    if (e.target.closest('.wa-voice')) {
+      startVoiceForRow(e.target.closest('.wa-voice'));
       return;
     }
 
@@ -298,6 +349,26 @@
       draftStatus.textContent = 'Copied';
     }
   });
+
+
+  const copyOutputBtn = document.getElementById('copyOutputBtn');
+  if (copyOutputBtn) {
+    copyOutputBtn.addEventListener('click', async () => {
+      const text = generateMessage();
+      try {
+        await navigator.clipboard.writeText(text);
+        draftStatus.textContent = 'Copied to clipboard';
+        copyOutputBtn.textContent = '✅ Copied';
+      } catch (e) {
+        output.focus();
+        output.select();
+        document.execCommand('copy');
+        draftStatus.textContent = 'Copied';
+        copyOutputBtn.textContent = '✅ Copied';
+      }
+      setTimeout(() => { copyOutputBtn.textContent = '📋 Copy Message'; }, 1800);
+    });
+  }
 
   document.getElementById('openWhatsAppBtn').addEventListener('click', () => {
     const text = encodeURIComponent(generateMessage());
