@@ -3575,3 +3575,14 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
 .closure-table td,.closure-table th{vertical-align:middle}
 .closure-table-wrap{overflow-x:auto}
 @media(max-width:700px){.closure-table th,.closure-table td{padding:8px 6px}.closure-table input,.closure-table select{min-width:110px}.closure-table td:nth-child(4) input{min-width:150px}}
+
+/* Shift Closure small update only */
+.closure-table .voice-cell{width:72px;text-align:center;}
+.voice-btn{border:1px solid #b8e7f2;background:linear-gradient(135deg,var(--accent,#0891b2),#07354a);color:#fff;border-radius:14px;min-width:44px;height:44px;font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 8px 16px rgba(0,0,0,.12);}
+.voice-btn.recording{outline:3px solid rgba(20,184,166,.35);transform:scale(1.03);}
+.form-actions-inline{display:flex;align-items:end;gap:.5rem;}
+@media (max-width: 760px){
+  .closure-table-wrap{overflow-x:auto;}
+  .closure-table{min-width:900px;}
+  .closure-table .voice-cell{width:64px;}
+}

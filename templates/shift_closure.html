@@ -25,20 +25,25 @@
     <div class="form-grid compact-form">
       <div><label>Date</label><input type="date" name="date" value="{{ today }}"></div>
       <div><label>Shift</label><input name="shift" placeholder="D1 / D2 / Night"></div>
+      <div><label>Bay label</label><input id="closureBayPrefix" value="Door" placeholder="Door / Bay"></div>
+      <div><label>Bay from</label><input id="closureBayFrom" type="number" min="1" placeholder="1"></div>
+      <div><label>Bay to</label><input id="closureBayTo" type="number" min="1" placeholder="24"></div>
+      <div class="form-actions-inline"><button class="small-btn" type="button" onclick="populateClosureBays()">Create Bay Doors</button></div>
       <div class="wide theme-toggle-line">
-        <div><strong>Save Bay / Carrier as default</strong><small class="muted">Keeps your door and carrier list for the next shift closure.</small></div>
+        <div><strong>Save Bay / Carrier as default</strong><small class="muted">Turn this ON before saving to keep your Bay Door and Carrier list for next time.</small></div>
         <label class="switch-toggle" for="closureTemplateToggle"><input id="closureTemplateToggle" type="checkbox" name="save_template" value="yes"><span class="switch-track"><span class="switch-knob"></span><b class="switch-on">ON</b><b class="switch-off">OFF</b></span></label>
       </div>
     </div>
 
     <div class="table-wrap closure-table-wrap">
       <table class="closure-table" id="closureTable">
-        <thead><tr><th>Bay Door</th><th>Carrier</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Bay Door</th><th>Carrier</th><th>Voice</th><th>Status</th><th>Notes</th><th></th></tr></thead>
         <tbody id="closureBody">
           {% for row in rows %}
           <tr>
             <td><input name="bay_door[]" value="{{ row.bay_door }}" placeholder="Door 1"></td>
             <td><input name="carrier[]" value="{{ row.carrier }}" placeholder="DHL / EVRI / DPD"></td>
+            <td class="voice-cell"><button type="button" class="voice-btn" title="Say status" onclick="voiceClosureStatus(this)">🎙️</button></td>
             <td><select name="status[]">{% for status in statuses %}<option value="{{ status }}">{{ status }}</option>{% endfor %}</select></td>
             <td><input name="notes[]" placeholder="Optional notes"></td>
             <td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>
@@ -81,8 +86,23 @@ function closureStatusOptions(){
 function addClosureRow(){
   const body = document.getElementById('closureBody');
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input name="bay_door[]" placeholder="Door / Bay"></td><td><input name="carrier[]" placeholder="Carrier"></td><td><select name="status[]">${closureStatusOptions()}</select></td><td><input name="notes[]" placeholder="Optional notes"></td><td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>`;
+  tr.innerHTML = `<td><input name="bay_door[]" placeholder="Door / Bay"></td><td><input name="carrier[]" placeholder="Carrier"></td><td class="voice-cell"><button type="button" class="voice-btn" title="Say status" onclick="voiceClosureStatus(this)">🎙️</button></td><td><select name="status[]">${closureStatusOptions()}</select></td><td><input name="notes[]" placeholder="Optional notes"></td><td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>`;
   body.appendChild(tr);
+}
+function populateClosureBays(){
+  const prefix = (document.getElementById('closureBayPrefix')?.value || 'Door').trim() || 'Door';
+  const start = parseInt(document.getElementById('closureBayFrom')?.value || '1', 10);
+  const end = parseInt(document.getElementById('closureBayTo')?.value || '1', 10);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) { alert('Please enter a valid Bay from/to range.'); return; }
+  const current = readClosureForm();
+  const carrierByBay = {};
+  current.forEach(r => { if (r.bay) carrierByBay[r.bay] = r.carrier || ''; });
+  const rows = [];
+  for (let n = start; n <= end; n++) {
+    const bay = `${prefix} ${n}`;
+    rows.push({bay, carrier: carrierByBay[bay] || '', status:'Completed', notes:''});
+  }
+  writeClosureForm(rows);
 }
 function removeClosureRow(btn){
   const body = document.getElementById('closureBody');
@@ -127,6 +147,44 @@ function clearClosureDraft(){
   localStorage.removeItem('whs_shift_closure_draft');
   document.getElementById('closureDraftStatus').textContent = 'Draft cleared';
 }
+
+function normaliseClosureStatus(text){
+  const t = (text || '').toLowerCase().trim();
+  if (!t) return '';
+  if (t.includes('complete') || t.includes('completed') || t.includes('kész')) return 'Completed';
+  if (t.includes('loaded') || t.includes('load') || t.includes('berak') || t.includes('rakod')) return 'Loaded';
+  if (t.includes('bsw') || t.includes('built') || t.includes('scanned') || t.includes('wrapped') || t.includes('scan') || t.includes('wrap')) return 'BSW (Built - Scanned - Wrapped)';
+  if (t.includes('progress') || t.includes('in progress') || t.includes('folyamat')) return 'In Progress';
+  if (t.includes('await') || t.includes('waiting') || t.includes('trailer')) return 'Awaiting Trailer';
+  if (t.includes('issue') || t.includes('problem') || t.includes('hiba')) return 'Issue';
+  if (t.includes('hold') || t.includes('stop')) return 'Hold';
+  return '';
+}
+function voiceClosureStatus(btn){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const tr = btn.closest('tr');
+  const select = tr?.querySelector('[name="status[]"]');
+  if (!SpeechRecognition || !select) { alert('Voice input is not supported in this browser.'); return; }
+  const rec = new SpeechRecognition();
+  rec.lang = document.documentElement.lang || 'en-GB';
+  rec.interimResults = false;
+  btn.classList.add('recording');
+  rec.onresult = function(event){
+    const spoken = event.results?.[0]?.[0]?.transcript || '';
+    const status = normaliseClosureStatus(spoken);
+    if (status) {
+      select.value = status;
+      select.dispatchEvent(new Event('change', {bubbles:true}));
+      saveClosureDraft();
+    } else {
+      alert('Status not recognised. Try: Completed, Loaded, BSW, In Progress, Awaiting Trailer, Issue or Hold.');
+    }
+  };
+  rec.onerror = function(){ alert('Voice input failed. Please try again or select the status manually.'); };
+  rec.onend = function(){ btn.classList.remove('recording'); };
+  rec.start();
+}
+
 document.getElementById('shiftClosureForm')?.addEventListener('input', function(){ clearTimeout(window.__closureAuto); window.__closureAuto=setTimeout(saveClosureDraft, 600); });
 </script>
 {% endblock %}
