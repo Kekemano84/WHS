@@ -183,29 +183,42 @@ function applyClosureStatus(select, spokenText){
   }
   return false;
 }
-function fallbackClosureStatus(select){
-  const typed = prompt('Type status: Completed, Loaded, BSW, In Progress, Awaiting Trailer, Issue or Hold');
-  if (!typed) return;
-  if (!applyClosureStatus(select, typed)) alert('Status not recognised. Please select it manually.');
+function showClosureVoiceMessage(message){
+  const status = document.getElementById('closureDraftStatus');
+  if (status) status.textContent = message;
 }
 function voiceClosureStatus(btn){
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const tr = btn.closest('tr');
   const select = tr?.querySelector('[name="status[]"]');
   if (!select) return;
-  if (!SpeechRecognition) { fallbackClosureStatus(select); return; }
+  if (!SpeechRecognition) {
+    showClosureVoiceMessage('Voice not supported in this browser. Please select the status manually.');
+    return;
+  }
   const rec = new SpeechRecognition();
   rec.lang = 'en-GB';
   rec.interimResults = false;
-  rec.maxAlternatives = 1;
+  rec.continuous = false;
+  rec.maxAlternatives = 3;
   btn.classList.add('recording');
+  showClosureVoiceMessage('Listening... say Completed, Loaded, BSW, In Progress, Awaiting Trailer, Issue or Hold');
   rec.onresult = function(event){
-    const spoken = event.results?.[0]?.[0]?.transcript || '';
-    if (!applyClosureStatus(select, spoken)) fallbackClosureStatus(select);
+    const spoken = Array.from(event.results?.[0] || []).map(r => r.transcript || '').join(' ');
+    if (applyClosureStatus(select, spoken)) {
+      showClosureVoiceMessage('Status updated by voice');
+    } else {
+      showClosureVoiceMessage('Could not recognise the status. Please say: Completed, Loaded, BSW, In Progress, Awaiting Trailer, Issue or Hold.');
+    }
   };
-  rec.onerror = function(){ fallbackClosureStatus(select); };
+  rec.onerror = function(){
+    showClosureVoiceMessage('Voice input failed. Please tap the mic and try again.');
+  };
   rec.onend = function(){ btn.classList.remove('recording'); };
-  try { rec.start(); } catch(e) { btn.classList.remove('recording'); fallbackClosureStatus(select); }
+  try { rec.start(); } catch(e) {
+    btn.classList.remove('recording');
+    showClosureVoiceMessage('Voice is already running. Please try again.');
+  }
 }
 
 (function restoreSavedClosureLayout(){
