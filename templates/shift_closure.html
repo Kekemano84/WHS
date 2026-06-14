@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Shift Closure{% endblock %}
+{% block content %}
+<section class="hero-card pro-hero">
+  <div>
+    <p class="eyebrow">End of shift</p>
+    <h3>Bay handover check before the shift closes.</h3>
+    <p>Record bay door, carrier and closing status, then export to Excel.</p>
+  </div>
+  <div class="hero-actions">
+    <a class="btn light" href="{{ url_for('export_shift_closure') }}">Export Excel</a>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h3>Shift Closure</h3>
+      <p class="muted">Bay Door and Carrier are editable. Tick “Save Bay / Carrier as default” to reuse them next time.</p>
+    </div>
+    <button class="small-btn ghost-small" type="button" onclick="addClosureRow()">+ Add Row</button>
+  </div>
+
+  <form method="POST" id="shiftClosureForm" data-no-draft="1" class="closure-form">
+    <div class="form-grid compact-form">
+      <div><label>Date</label><input type="date" name="date" value="{{ today }}"></div>
+      <div><label>Shift</label><input name="shift" placeholder="D1 / D2 / Night"></div>
+      <div class="wide theme-toggle-line">
+        <div><strong>Save Bay / Carrier as default</strong><small class="muted">Keeps your door and carrier list for the next shift closure.</small></div>
+        <label class="switch-toggle" for="closureTemplateToggle"><input id="closureTemplateToggle" type="checkbox" name="save_template" value="yes"><span class="switch-track"><span class="switch-knob"></span><b class="switch-on">ON</b><b class="switch-off">OFF</b></span></label>
+      </div>
+    </div>
+
+    <div class="table-wrap closure-table-wrap">
+      <table class="closure-table" id="closureTable">
+        <thead><tr><th>Bay Door</th><th>Carrier</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="closureBody">
+          {% for row in rows %}
+          <tr>
+            <td><input name="bay_door[]" value="{{ row.bay_door }}" placeholder="Door 1"></td>
+            <td><input name="carrier[]" value="{{ row.carrier }}" placeholder="DHL / EVRI / DPD"></td>
+            <td><select name="status[]">{% for status in statuses %}<option value="{{ status }}">{{ status }}</option>{% endfor %}</select></td>
+            <td><input name="notes[]" placeholder="Optional notes"></td>
+            <td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn primary" type="submit">Save Shift Closure</button>
+      <button class="btn ghost" type="button" onclick="saveClosureDraft()">Save Draft</button>
+      <button class="btn ghost" type="button" onclick="loadClosureDraft()">Load Draft</button>
+      <button class="btn ghost" type="button" onclick="clearClosureDraft()">Clear Draft</button>
+    </div>
+    <p class="muted" id="closureDraftStatus">Draft ready</p>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><h3>Saved Shift Closures</h3><a class="small-btn" href="{{ url_for('export_shift_closure') }}">Download Excel</a></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Shift</th><th>Bay Door</th><th>Carrier</th><th>Status</th><th>Notes</th></tr></thead>
+      <tbody>
+      {% for row in history %}
+        <tr><td>{{ row.date|dateuk }}</td><td>{{ row.shift or '-' }}</td><td>{{ row.bay_door }}</td><td>{{ row.carrier or '-' }}</td><td>{{ row.status }}</td><td>{{ row.notes or '-' }}</td></tr>
+      {% else %}
+        <tr><td colspan="6" class="empty">No shift closure records yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+function closureStatusOptions(){
+  return `{% for status in statuses %}<option value="{{ status }}">{{ status }}</option>{% endfor %}`;
+}
+function addClosureRow(){
+  const body = document.getElementById('closureBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input name="bay_door[]" placeholder="Door / Bay"></td><td><input name="carrier[]" placeholder="Carrier"></td><td><select name="status[]">${closureStatusOptions()}</select></td><td><input name="notes[]" placeholder="Optional notes"></td><td><button type="button" class="small-btn ghost-small danger-mini" onclick="removeClosureRow(this)">Delete</button></td>`;
+  body.appendChild(tr);
+}
+function removeClosureRow(btn){
+  const body = document.getElementById('closureBody');
+  if (body.querySelectorAll('tr').length <= 1) return;
+  btn.closest('tr').remove();
+}
+function readClosureForm(){
+  return Array.from(document.querySelectorAll('#closureBody tr')).map(tr => ({
+    bay: tr.querySelector('[name="bay_door[]"]')?.value || '',
+    carrier: tr.querySelector('[name="carrier[]"]')?.value || '',
+    status: tr.querySelector('[name="status[]"]')?.value || '',
+    notes: tr.querySelector('[name="notes[]"]')?.value || ''
+  }));
+}
+function writeClosureForm(rows){
+  const body = document.getElementById('closureBody');
+  body.innerHTML = '';
+  (rows && rows.length ? rows : [{bay:'', carrier:'', status:'Completed', notes:''}]).forEach(r => {
+    addClosureRow();
+    const tr = body.lastElementChild;
+    tr.querySelector('[name="bay_door[]"]').value = r.bay || '';
+    tr.querySelector('[name="carrier[]"]').value = r.carrier || '';
+    tr.querySelector('[name="status[]"]').value = r.status || 'Completed';
+    tr.querySelector('[name="notes[]"]').value = r.notes || '';
+  });
+}
+function saveClosureDraft(){
+  const payload = {date: document.querySelector('[name="date"]').value, shift: document.querySelector('[name="shift"]').value, rows: readClosureForm()};
+  localStorage.setItem('whs_shift_closure_draft', JSON.stringify(payload));
+  document.getElementById('closureDraftStatus').textContent = 'Draft saved';
+}
+function loadClosureDraft(){
+  const raw = localStorage.getItem('whs_shift_closure_draft');
+  if (!raw) { document.getElementById('closureDraftStatus').textContent = 'No draft found'; return; }
+  const payload = JSON.parse(raw);
+  document.querySelector('[name="date"]').value = payload.date || '{{ today }}';
+  document.querySelector('[name="shift"]').value = payload.shift || '';
+  writeClosureForm(payload.rows || []);
+  document.getElementById('closureDraftStatus').textContent = 'Draft loaded';
+}
+function clearClosureDraft(){
+  localStorage.removeItem('whs_shift_closure_draft');
+  document.getElementById('closureDraftStatus').textContent = 'Draft cleared';
+}
+document.getElementById('shiftClosureForm')?.addEventListener('input', function(){ clearTimeout(window.__closureAuto); window.__closureAuto=setTimeout(saveClosureDraft, 600); });
+</script>
+{% endblock %}

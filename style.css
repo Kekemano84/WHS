@@ -3569,3 +3569,9 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
 
 .brief-voice{align-self:end;min-width:44px;height:44px;border-radius:14px;}
 .btn-icon.recording{background:#fee2e2!important;color:#b91c1c!important;box-shadow:0 0 0 3px rgba(239,68,68,.18);}
+
+/* v36 Shift Closure */
+.closure-table input,.closure-table select{width:100%;min-width:120px}
+.closure-table td,.closure-table th{vertical-align:middle}
+.closure-table-wrap{overflow-x:auto}
+@media(max-width:700px){.closure-table th,.closure-table td{padding:8px 6px}.closure-table input,.closure-table select{min-width:110px}.closure-table td:nth-child(4) input{min-width:150px}}

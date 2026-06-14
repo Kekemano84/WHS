@@ -2343,12 +2343,11 @@ def save_annual_leave_settings():
         break_minutes = 45
 
     break_paid = 1 if request.form.get("break_paid") == "yes" else 0
-    # WHS holiday logic: one holiday day can be the full shift length (e.g. 12h on 4 on / 4 off).
-    # This value is used to convert hours <-> days and prevents double counting.
-    try:
-        paid_hours = float(request.form.get("paid_hours_per_day") or contracted)
-    except Exception:
-        paid_hours = contracted
+    # WHS holiday logic:
+    # If break is paid, one holiday day equals the full contracted shift hours.
+    # If break is unpaid, one holiday day equals contracted hours minus break minutes.
+    # Example: 06:00-18:00 = 12h shift, 45 min unpaid break => 11.25 paid holiday hours.
+    paid_hours = contracted if break_paid else max(contracted - (break_minutes / 60), 0)
     if paid_hours <= 0:
         paid_hours = contracted
 
@@ -5963,6 +5962,144 @@ def dashboard():
 @login_required
 def more():
     return render_template("more.html", user=current_user(), page="more")
+
+# --- Shift Closure module ---
+def ensure_shift_closure_schema():
+    conn = get_db()
+    try:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS shift_closures (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                date TEXT,
+                shift TEXT,
+                bay_door TEXT,
+                carrier TEXT,
+                status TEXT,
+                notes TEXT,
+                created_at TEXT
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS shift_closure_template (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                bay_door TEXT,
+                carrier TEXT,
+                display_order INTEGER DEFAULT 0
+            )
+        """)
+        conn.commit()
+    finally:
+        conn.close()
+
+@app.before_request
+def apply_shift_closure_schema():
+    try:
+        ensure_shift_closure_schema()
+    except Exception:
+        pass
+
+def get_shift_closure_template_rows(user_id):
+    ensure_shift_closure_schema()
+    conn = get_db()
+    try:
+        rows = conn.execute("""
+            SELECT * FROM shift_closure_template
+            WHERE user_id = ?
+            ORDER BY display_order ASC, id ASC
+        """, (user_id,)).fetchall()
+    finally:
+        conn.close()
+    if rows:
+        return rows
+    return [
+        {"bay_door": "Door 1", "carrier": "", "display_order": 1},
+        {"bay_door": "Door 2", "carrier": "", "display_order": 2},
+        {"bay_door": "Door 3", "carrier": "", "display_order": 3},
+        {"bay_door": "Door 4", "carrier": "", "display_order": 4},
+    ]
+
+@app.route('/shift-closure', methods=['GET', 'POST'])
+@login_required
+def shift_closure():
+    user = current_user()
+    ensure_shift_closure_schema()
+    statuses = ["Completed", "Loaded", "BSW (Built - Scanned - Wrapped)", "In Progress", "Awaiting Trailer", "Issue", "Hold"]
+    if request.method == 'POST':
+        date = request.form.get('date') or datetime.today().strftime('%Y-%m-%d')
+        shift = request.form.get('shift', '').strip()
+        bay_doors = request.form.getlist('bay_door[]')
+        carriers = request.form.getlist('carrier[]')
+        row_statuses = request.form.getlist('status[]')
+        notes_list = request.form.getlist('notes[]')
+        save_template = request.form.get('save_template') == 'yes'
+        conn = get_db()
+        try:
+            if save_template:
+                conn.execute('DELETE FROM shift_closure_template WHERE user_id=?', (user['id'],))
+            saved = 0
+            max_rows = max(len(bay_doors), len(carriers), len(row_statuses), len(notes_list), 0)
+            for i in range(max_rows):
+                bay = (bay_doors[i] if i < len(bay_doors) else '').strip()
+                carrier = (carriers[i] if i < len(carriers) else '').strip()
+                status = (row_statuses[i] if i < len(row_statuses) else '').strip()
+                notes = (notes_list[i] if i < len(notes_list) else '').strip()
+                if not bay and not carrier and not status and not notes:
+                    continue
+                if save_template and (bay or carrier):
+                    conn.execute('INSERT INTO shift_closure_template (user_id, bay_door, carrier, display_order) VALUES (?, ?, ?, ?)', (user['id'], bay, carrier, i))
+                conn.execute("""
+                    INSERT INTO shift_closures (user_id, date, shift, bay_door, carrier, status, notes, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (user['id'], date, shift, bay, carrier, status, notes, datetime.now().isoformat()))
+                saved += 1
+            conn.commit()
+        finally:
+            conn.close()
+        flash(f'{saved} shift closure row(s) saved.', 'success')
+        return redirect(url_for('shift_closure'))
+
+    conn = get_db()
+    try:
+        history = conn.execute("""
+            SELECT * FROM shift_closures
+            WHERE user_id=?
+            ORDER BY date DESC, id DESC
+            LIMIT 200
+        """, (user['id'],)).fetchall()
+    finally:
+        conn.close()
+    return render_template('shift_closure.html', page='shift_closure', rows=get_shift_closure_template_rows(user['id']), history=history, statuses=statuses, today=datetime.today().strftime('%Y-%m-%d'))
+
+@app.route('/shift-closure/export')
+@login_required
+def export_shift_closure():
+    user = current_user()
+    ensure_shift_closure_schema()
+    conn = get_db()
+    try:
+        rows = conn.execute('SELECT * FROM shift_closures WHERE user_id=? ORDER BY date DESC, id DESC', (user['id'],)).fetchall()
+    finally:
+        conn.close()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Shift Closure'
+    headers = ['Date', 'Shift', 'Bay Door', 'Carrier', 'Status', 'Notes', 'Recorded At']
+    ws.append(headers)
+    for cell in ws[1]:
+        cell.font = Font(bold=True, color='FFFFFF')
+        cell.fill = PatternFill('solid', fgColor='2563EB')
+        cell.alignment = Alignment(horizontal='center')
+    for row in rows:
+        ws.append([row['date'] or '', row['shift'] or '', row['bay_door'] or '', row['carrier'] or '', row['status'] or '', row['notes'] or '', row['created_at'] or ''])
+    for idx, width in enumerate([14, 16, 20, 22, 32, 36, 22], start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True, download_name='shift-closure.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+# --- End Shift Closure module ---
 
 
 if __name__ == "__main__":

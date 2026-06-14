@@ -1,20 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Account</h1>
+<h1>More</h1>
 
 <section class="panel more-panel whs-account-panel">
-  <h2>Account Options</h2>
-  <p class="muted">Profile, yard setup and personal work records.</p>
+  <h2>More Tools</h2>
+  <p class="muted">Everything that is not shown in the bottom menu is here.</p>
 
   <div class="more-menu-grid">
-    <a class="more-option-card" href="{{ url_for('settings') }}">
-      <span class="more-option-icon">👤</span>
-      <span class="more-option-text"><strong>Profile</strong><small>Name, site, role and language</small></span>
+    <a class="more-option-card" href="{{ url_for('morning_brief') }}">
+      <span class="more-option-icon">☀️</span>
+      <span class="more-option-text"><strong>Brief</strong><small>Daily brief builder with voice input</small></span>
     </a>
-
     <a class="more-option-card" href="{{ url_for('whatsapp_message') }}">
       <span class="more-option-icon">💬</span>
       <span class="more-option-text"><strong>WhatsApp Message</strong><small>Build and copy daily start-up updates</small></span>
+    </a>
+    <a class="more-option-card" href="{{ url_for('shift_closure') }}">
+      <span class="more-option-icon">✅</span>
+      <span class="more-option-text"><strong>Shift Closure</strong><small>Bay door closure check and Excel export</small></span>
+    </a>
+    <a class="more-option-card" href="{{ url_for('holiday_tracker') }}">
+      <span class="more-option-icon">🏖️</span>
+      <span class="more-option-text"><strong>Holiday Tracker</strong><small>Annual leave days and hours</small></span>
+    </a>
+    <a class="more-option-card" href="{{ url_for('team') }}">
+      <span class="more-option-icon">👥</span>
+      <span class="more-option-text"><strong>Team</strong><small>Team records and search</small></span>
+    </a>
+    <a class="more-option-card" href="{{ url_for('settings') }}">
+      <span class="more-option-icon">👤</span>
+      <span class="more-option-text"><strong>Profile</strong><small>Name, site, role and language</small></span>
     </a>
     <a class="more-option-card" href="{{ url_for('yard_settings') }}">
       <span class="more-option-icon">📍</span>
@@ -28,6 +43,16 @@
       <span class="more-option-icon">💷</span>
       <span class="more-option-text"><strong>Expenses</strong><small>Business costs</small></span>
     </a>
+    <a class="more-option-card" href="{{ url_for('notifications_page') }}">
+      <span class="more-option-icon">🔔</span>
+      <span class="more-option-text"><strong>Notifications</strong><small>Reminder and alert settings</small></span>
+    </a>
+    {% if user and user.email == "admin@whs-app.com" %}
+    <a class="more-option-card" href="{{ url_for('admin_dashboard') }}">
+      <span class="more-option-icon">🛡️</span>
+      <span class="more-option-text"><strong>Admin</strong><small>Admin controls</small></span>
+    </a>
+    {% endif %}
     <a class="more-option-card danger-soft" href="{{ url_for('logout') }}">
       <span class="more-option-icon">🚪</span>
       <span class="more-option-text"><strong>Logout</strong><small>Sign out</small></span>

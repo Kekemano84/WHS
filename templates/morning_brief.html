@@ -85,7 +85,17 @@
   function wire(row){
     const voiceBtn = row.querySelector('.brief-voice');
     if (voiceBtn) {
-      voiceBtn.addEventListener('click', function(){ startBriefVoice(row, voiceBtn); });
+      let longPress = false;
+      let pressTimer = null;
+      voiceBtn.addEventListener('pointerdown', function(){
+        longPress = false;
+        pressTimer = setTimeout(function(){ longPress = true; startBriefVoice(row, voiceBtn, true); }, 650);
+      });
+      voiceBtn.addEventListener('pointerup', function(){
+        clearTimeout(pressTimer);
+        if (!longPress) startBriefVoice(row, voiceBtn, false);
+      });
+      voiceBtn.addEventListener('pointerleave', function(){ clearTimeout(pressTimer); });
     }
     const btn = row.querySelector('.remove-brief-section');
     if(btn){
@@ -99,7 +109,7 @@
       });
     }
   }
-  function startBriefVoice(row, button){
+  function startBriefVoice(row, button, overwrite){
     const messageInput = row.querySelector('input[name="section_value[]"]');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -115,7 +125,7 @@
     recognition.onresult = function(event){
       const text = event.results && event.results[0] && event.results[0][0] ? event.results[0][0].transcript : '';
       if (text && messageInput) {
-        messageInput.value = messageInput.value ? (messageInput.value + ' ' + text) : text;
+        messageInput.value = overwrite ? text : (messageInput.value ? (messageInput.value + ' ' + text) : text);
         messageInput.dispatchEvent(new Event('input', { bubbles: true }));
       }
     };

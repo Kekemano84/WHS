@@ -215,9 +215,11 @@
     let text = `${title}${date ? ' ' + date : ''}${time ? ' ' + time : ''}`.trim();
 
     rows.main.forEach(row => {
-      const value = row.value || '0';
+      const value = row.value || '';
       const label = row.label || '';
-      if (label || value) text += `\n${value} x ${label}`.trimEnd();
+      if (label && value) text += `\n${value} x ${label}`.trimEnd();
+      else if (label && !value) return;
+      else if (value) text += `\n${value}`;
     });
 
     text += '\n';
@@ -274,7 +276,7 @@
     if (e.target.closest('.whatsapp-form')) scheduleAutosave();
   });
 
-  function startVoiceForRow(button) {
+  function startVoiceForRow(button, overwrite) {
     const rowEl = button.closest('.whatsapp-row');
     if (!rowEl) return;
     const targetName = button.dataset.voiceTarget || 'value';
@@ -301,7 +303,7 @@
         if (isQty) {
           target.value = cleaned;
         } else {
-          target.value = target.value ? (target.value + ' ' + cleaned) : cleaned;
+          target.value = overwrite ? cleaned : (target.value ? (target.value + ' ' + cleaned) : cleaned);
         }
         target.dispatchEvent(new Event('input', { bubbles: true }));
       }
@@ -317,6 +319,23 @@
     recognition.start();
   }
 
+  document.addEventListener('pointerdown', function(e){
+    const btn = e.target.closest('.wa-voice');
+    if (!btn) return;
+    btn.dataset.longPress = '0';
+    btn._pressTimer = setTimeout(function(){ btn.dataset.longPress = '1'; startVoiceForRow(btn, true); }, 650);
+  });
+  document.addEventListener('pointerup', function(e){
+    const btn = e.target.closest('.wa-voice');
+    if (!btn) return;
+    clearTimeout(btn._pressTimer);
+    if (btn.dataset.longPress !== '1') startVoiceForRow(btn, false);
+  });
+  document.addEventListener('pointerleave', function(e){
+    const btn = e.target.closest('.wa-voice');
+    if (btn && btn._pressTimer) clearTimeout(btn._pressTimer);
+  });
+
   document.addEventListener('click', function (e) {
     const add = e.target.closest('[data-add-row]');
     if (add) {
@@ -328,10 +347,8 @@
       return;
     }
 
-    if (e.target.closest('.wa-voice')) {
-      startVoiceForRow(e.target.closest('.wa-voice'));
-      return;
-    }
+    // Voice buttons use pointer events below so short tap appends and long press overwrites.
+    if (e.target.closest('.wa-voice')) { return; }
 
     const rowEl = e.target.closest('.whatsapp-row');
     if (!rowEl) return;

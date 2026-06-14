@@ -86,6 +86,7 @@
             <a class="{{ 'active' if page == 'morning_brief' else '' }} nav-link" href="{{ url_for('morning_brief') }}"><span class="nav-ico">☀️</span><span>Brief</span></a>
             <a class="{{ 'active' if page == 'handover' else '' }} nav-link" href="{{ url_for('handover') }}"><span class="nav-ico">📋</span><span>Handover</span></a>
             <a class="{{ 'active' if page == 'whatsapp_message' else '' }} nav-link" href="{{ url_for('whatsapp_message') }}"><span class="nav-ico">💬</span><span>WhatsApp Message</span></a>
+            <a class="{{ 'active' if page == 'shift_closure' else '' }} nav-link" href="{{ url_for('shift_closure') }}"><span class="nav-ico">✅</span><span>Shift Closure</span></a>
             <a class="{{ 'active' if page == 'yard_check' else '' }} nav-link" href="{{ url_for('yard_check') }}"><span class="nav-ico">🚛</span><span>Yard Check</span></a>
             <details class="nav-group" open>
                 <summary><span class="nav-ico">📅</span><span>Calendar</span></summary>
@@ -194,7 +195,7 @@
     <a class="{{ 'active' if page == 'shift_calendar' else '' }}" href="{{ url_for('shift_calendar') }}"><span>📅</span><b>Calendar</b></a>
     <a class="{{ 'active' if page == 'handover' else '' }}" href="{{ url_for('handover') }}"><span>📋</span><b>Handover</b></a>
     <a class="{{ 'active' if page == 'yard_check' else '' }}" href="{{ url_for('yard_check') }}"><span>🚛</span><b>Yard</b></a>
-    <a class="{{ 'active' if page == 'more' else '' }}" href="{{ url_for('more') }}"><span>☰</span><b>More</b></a>
+    <a class="{{ 'active' if page in ['more','morning_brief','whatsapp_message','shift_closure','holiday_tracker','team','settings','yard_settings','mileage','expenses','notifications','admin'] else '' }}" href="{{ url_for('more') }}"><span>☰</span><b>More</b></a>
 </nav>
         {% endif %}
 

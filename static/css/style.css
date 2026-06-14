@@ -3636,3 +3636,9 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
 .whatsapp-output-actions .status-pill{white-space:nowrap;}
 .whatsapp-output-actions .btn.small{padding:9px 14px;font-size:13px;min-height:38px;}
 @media(max-width:700px){.whatsapp-output-panel .panel-head{align-items:flex-start;}.whatsapp-output-actions{width:100%;justify-content:flex-start;}.whatsapp-output-actions .btn.small{width:auto;}}
+
+/* v36 Shift Closure */
+.closure-table input,.closure-table select{width:100%;min-width:120px}
+.closure-table td,.closure-table th{vertical-align:middle}
+.closure-table-wrap{overflow-x:auto}
+@media(max-width:700px){.closure-table th,.closure-table td{padding:8px 6px}.closure-table input,.closure-table select{min-width:110px}.closure-table td:nth-child(4) input{min-width:150px}}

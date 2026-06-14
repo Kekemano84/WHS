@@ -156,7 +156,8 @@ function fixYardLocationAutofillIfNeeded() {
     // If the browser restored/autofilled the same location in every row, rebuild proper Door/Fence list.
     if (unique.size <= 1) rebuildYardLocationsFromSetup();
 }
-document.addEventListener('DOMContentLoaded', fixYardLocationAutofillIfNeeded);
+document.addEventListener('DOMContentLoaded', function(){ fixYardLocationAutofillIfNeeded(); setTimeout(fixYardLocationAutofillIfNeeded, 150); setTimeout(fixYardLocationAutofillIfNeeded, 700); });
+window.addEventListener('pageshow', function(){ setTimeout(fixYardLocationAutofillIfNeeded, 100); });
 </script>
 {% endblock %}
 {% block content %}
@@ -234,7 +235,7 @@ document.addEventListener('DOMContentLoaded', fixYardLocationAutofillIfNeeded);
         </div>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" autocomplete="off" class="yard-matrix-form" onsubmit="return cleanEmptyYardRowsBeforeSubmit(this)">
+    <form method="POST" enctype="multipart/form-data" autocomplete="off" data-no-draft="1" class="yard-matrix-form" onsubmit="return cleanEmptyYardRowsBeforeSubmit(this)">
         <input type="hidden" name="entry_mode" value="matrix">
         <input type="hidden" name="date" value="{{ today_iso }}">
         <input type="hidden" name="source" value="Manual">
