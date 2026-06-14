@@ -483,3 +483,10 @@ The app also supports `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWOR
 - Fixed Yard Check save 500 error by adding missing photo_filename column migration.
 - Fixed Yard Check Excel export 500 error by importing get_column_letter.
 - Rebuilt ZIP for download.
+
+
+V33 fixes:
+- Holiday paid day auto-calculates from paid/unpaid break.
+- Yard Check save/export hardened.
+- Yard Check locations rebuild from Yard Setup and avoid browser autofill duplicate locations.
+- Brief label updated.

@@ -696,7 +696,7 @@ def current_user():
 TRANSLATIONS = {
     "en": {
         "dashboard":"Home","home":"Home","calendar":"Calendar","team":"Team","more":"More","warehouse_support":"Warehouse Support","notifications":"Notifications",
-        "morning_brief":"Morning Brief","mileage":"Mileage","expenses":"Expenses","yard_check":"Yard Check","yard_settings":"Yard Settings","handover":"Handover",
+        "morning_brief":"Brief","mileage":"Mileage","expenses":"Expenses","yard_check":"Yard Check","yard_settings":"Yard Settings","handover":"Handover",
         "daily_log":"Daily Log","actions":"Actions","absence":"Absence","evidence":"Evidence","search":"Search","plans":"Plans","settings":"Settings","logout":"Logout",
         "checks":"Checks","hmrc_mileage":"HMRC mileage","rate_55p":"55p per business mile","tax_estimates":"Tax calculations are estimates only."
     },

@@ -127,6 +127,36 @@ function startYardVoiceRecord(btn) {
     };
     rec.start();
 }
+
+function rebuildYardLocationsFromSetup() {
+    const body = document.getElementById("yardMatrixBody");
+    if (!body) return;
+    const locations = [];
+    for (let i = {{ door_start }}; i <= {{ door_end }}; i++) locations.push("Door " + i);
+    for (let i = {{ fence_start }}; i <= {{ fence_end }}; i++) locations.push("Fence " + i);
+    body.innerHTML = "";
+    locations.forEach(function(loc){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input class="yard-location-input" name="row_location[]" autocomplete="off" value="${loc}" placeholder="${loc}" autocomplete="off"></td>
+            <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
+            <td><input class="yard-trailer-input" name="row_trailer_id[]" autocomplete="off" placeholder="LG072" autocomplete="off" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
+            <td><input name="row_notes[]" autocomplete="off" placeholder="Optional notes" autocomplete="off"></td>
+            <td><input name="row_marker[]" autocomplete="off" placeholder="Loaded / Empty / Seal / Bay note" autocomplete="off"></td>
+            <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>`;
+        body.appendChild(tr);
+    });
+}
+function fixYardLocationAutofillIfNeeded() {
+    const body = document.getElementById("yardMatrixBody");
+    if (!body) return;
+    const locInputs = Array.from(body.querySelectorAll('[name="row_location[]"]'));
+    if (locInputs.length < 2) return;
+    const unique = new Set(locInputs.map(i => (i.value || '').trim()).filter(Boolean));
+    // If the browser restored/autofilled the same location in every row, rebuild proper Door/Fence list.
+    if (unique.size <= 1) rebuildYardLocationsFromSetup();
+}
+document.addEventListener('DOMContentLoaded', fixYardLocationAutofillIfNeeded);
 </script>
 {% endblock %}
 {% block content %}
@@ -200,11 +230,11 @@ function startYardVoiceRecord(btn) {
             <p class="muted">Locations are created from Yard Settings. Only rows with a Trailer ID are saved. Empty Trailer ID rows are removed automatically. Notes and Custom Marker are optional.</p>
         </div>
         <div class="yard-row-actions top-actions">
-            <button class="small-btn ghost-small" type="button" onclick="addYardMatrixRow()">+ Add Row</button>
+            <button class="small-btn ghost-small" type="button" onclick="addYardMatrixRow()">+ Add Row</button> <button class="small-btn ghost-small" type="button" onclick="rebuildYardLocationsFromSetup()">Reset Locations</button>
         </div>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="yard-matrix-form" onsubmit="return cleanEmptyYardRowsBeforeSubmit(this)">
+    <form method="POST" enctype="multipart/form-data" autocomplete="off" class="yard-matrix-form" onsubmit="return cleanEmptyYardRowsBeforeSubmit(this)">
         <input type="hidden" name="entry_mode" value="matrix">
         <input type="hidden" name="date" value="{{ today_iso }}">
         <input type="hidden" name="source" value="Manual">
@@ -228,26 +258,27 @@ function startYardVoiceRecord(btn) {
                     </tr>
                 </thead>
                 <tbody id="yardMatrixBody">
-                    {% for i in range(fence_start, fence_end + 1) %}
-                    <tr>
-                        <td><input class="yard-location-input" name="row_location[]" value="Fence {{ i }}" placeholder="Fence {{ i }}"></td>
-                        <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
-                        <td><input class="yard-trailer-input" name="row_trailer_id[]" placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
-                        <td><input name="row_notes[]" placeholder="Optional notes"></td>
-                        <td><input name="row_marker[]" placeholder="Loaded / Empty / Seal / Bay note"></td>
-                        <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>
-                    </tr>
-                    {% endfor %}
                     {% for i in range(door_start, door_end + 1) %}
                     <tr>
-                        <td><input class="yard-location-input" name="row_location[]" value="Door {{ i }}" placeholder="Door {{ i }}"></td>
+                        <td><input class="yard-location-input" name="row_location[]" autocomplete="off" value="Door {{ i }}" placeholder="Door {{ i }}"></td>
                         <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
-                        <td><input class="yard-trailer-input" name="row_trailer_id[]" placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
-                        <td><input name="row_notes[]" placeholder="Optional notes"></td>
-                        <td><input name="row_marker[]" placeholder="Loaded / Empty / Seal / Bay note"></td>
+                        <td><input class="yard-trailer-input" name="row_trailer_id[]" autocomplete="off" placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
+                        <td><input name="row_notes[]" autocomplete="off" placeholder="Optional notes"></td>
+                        <td><input name="row_marker[]" autocomplete="off" placeholder="Loaded / Empty / Seal / Bay note"></td>
                         <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>
                     </tr>
                     {% endfor %}
+                    {% for i in range(fence_start, fence_end + 1) %}
+                    <tr>
+                        <td><input class="yard-location-input" name="row_location[]" autocomplete="off" value="Fence {{ i }}" placeholder="Fence {{ i }}"></td>
+                        <td class="yard-voice-cell"><button class="small-btn ghost-small mic-btn" type="button" onclick="startYardVoiceRecord(this)" aria-label="Record Trailer ID">🎙️</button></td>
+                        <td><input class="yard-trailer-input" name="row_trailer_id[]" autocomplete="off" placeholder="LG072" onfocus="showYardVoiceHint(this)" oninput="this.value=this.value.toUpperCase()"></td>
+                        <td><input name="row_notes[]" autocomplete="off" placeholder="Optional notes"></td>
+                        <td><input name="row_marker[]" autocomplete="off" placeholder="Loaded / Empty / Seal / Bay note"></td>
+                        <td><button class="small-btn ghost-small danger-mini" type="button" onclick="removeYardMatrixRow(this)">Delete</button></td>
+                    </tr>
+                    {% endfor %}
+                    
                 </tbody>
             </table>
         </div>
