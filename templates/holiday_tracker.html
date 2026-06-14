@@ -82,7 +82,7 @@
 
 
 <section class="panel">
-    <div class="panel-head"><h3>Holiday Records</h3><a class="small-btn" href="{{ url_for('email_excel', kind='holiday_tracker') }}">📧 Email Excel</a><a class="small-btn ghost-small" href="{{ url_for('holiday_settings') }}">Advanced Settings</a></div>
+    <div class="panel-head"><h3>Holiday Records</h3><a class="small-btn ghost-small" href="{{ url_for('holiday_settings') }}">Advanced Settings</a></div>
     {% if rows %}
     <div class="holiday-record-list">
     {% for row in rows %}

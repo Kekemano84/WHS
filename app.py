@@ -1171,22 +1171,8 @@ EMAIL_EXPORT_CONFIG = {
 @app.route("/email-excel/<kind>")
 @login_required
 def email_excel(kind):
-    cfg = EMAIL_EXPORT_CONFIG.get(kind)
-    if not cfg:
-        flash("Unknown Excel export.", "error")
-        return redirect(url_for("dashboard"))
-    user = current_user()
-    try:
-        conn = get_db()
-        rows = conn.execute(cfg["sql"], (user["id"],)).fetchall()
-        conn.close()
-        values = [[row[i] for i in range(len(row))] for row in rows]
-        wb = simple_table_workbook(cfg["title"], cfg["headers"], values)
-        ok, message = send_excel_to_self(wb, cfg["filename"], cfg["title"])
-        flash(message, "success" if ok else "error")
-    except Exception as exc:
-        flash(f"Could not send Excel email: {exc}", "error")
-    return redirect(url_for(cfg["return"]))
+    flash("Email Excel has been disabled. Please use Download Excel instead.", "info")
+    return redirect(url_for("dashboard"))
 
 
 
@@ -2743,11 +2729,9 @@ def register():
             session["user_id"] = cur.lastrowid
             conn.execute("UPDATE users SET last_login_at=? WHERE id=?", (datetime.now().isoformat(timespec="seconds"), cur.lastrowid))
             conn.commit()
-            welcome_sent = send_welcome_email(name, email)
-            if welcome_sent:
-                flash("Account created. Welcome email sent.", "success")
-            else:
-                flash("Account created. Email sending is not configured yet or failed. Please check Render Environment variables.", "info")
+            # Email sending is disabled in this version.
+            # The account is created immediately without SMTP configuration.
+            flash("Account created successfully.", "success")
         except sqlite3.IntegrityError:
             flash("Email already registered.", "error")
             conn.close()

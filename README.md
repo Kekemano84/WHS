@@ -448,3 +448,10 @@ SMTP_FROM=your-gmail-address@gmail.com
 For Gmail, use a Google App Password. Your normal Gmail password will not work.
 
 The app also supports `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, and `MAIL_DEFAULT_SENDER` if you prefer those names.
+
+
+## v20 changes
+- Removed Email Excel / email sending UI options.
+- Registration no longer requires SMTP and does not attempt to send welcome emails.
+- Added client-side Save Draft / auto-save draft for forms while filling them in.
+- Excel downloads remain available.

@@ -279,6 +279,76 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
+
+<style>
+.whs-draft-bar{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin:10px 0;flex-wrap:wrap}
+.whs-draft-status{font-size:12px;color:#64748b;background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.25);border-radius:999px;padding:7px 10px}
+.whs-draft-btn{border:1px solid rgba(148,163,184,.35);background:rgba(255,255,255,.75);color:#0f172a;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer}
+.dark .whs-draft-btn{background:rgba(15,23,42,.75);color:#e5e7eb}
+.whs-draft-btn:hover{filter:brightness(.97)}
+</style>
+<script>
+(function(){
+  function isDraftableForm(form){
+    if(!form || form.dataset.noDraft === '1') return false;
+    const path = location.pathname || '';
+    if(path.includes('/login') || path.includes('/register') || path.includes('/admin')) return false;
+    if(form.querySelector('input[type="password"]')) return false;
+    return !!form.querySelector('input:not([type="hidden"]), textarea, select');
+  }
+  function formKey(form, idx){ return 'whs_draft:' + location.pathname + ':form:' + idx; }
+  function readForm(form){
+    const data = {};
+    form.querySelectorAll('input, textarea, select').forEach(function(el){
+      if(!el.name || el.type === 'hidden' || el.type === 'file' || el.type === 'password') return;
+      if(el.type === 'checkbox') data[el.name] = el.checked;
+      else if(el.type === 'radio') { if(el.checked) data[el.name] = el.value; }
+      else data[el.name] = el.value;
+    });
+    return data;
+  }
+  function writeForm(form, data){
+    if(!data) return;
+    form.querySelectorAll('input, textarea, select').forEach(function(el){
+      if(!el.name || !(el.name in data) || el.type === 'hidden' || el.type === 'file' || el.type === 'password') return;
+      if(el.type === 'checkbox') el.checked = !!data[el.name];
+      else if(el.type === 'radio') el.checked = (el.value === data[el.name]);
+      else el.value = data[el.name];
+      el.dispatchEvent(new Event('input', {bubbles:true}));
+      el.dispatchEvent(new Event('change', {bubbles:true}));
+    });
+  }
+  function hasContent(data){
+    return Object.keys(data||{}).some(function(k){ const v=data[k]; return typeof v==='boolean' ? v : String(v||'').trim() !== ''; });
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('form').forEach(function(form, idx){
+      if(!isDraftableForm(form)) return;
+      const key=formKey(form, idx);
+      const bar=document.createElement('div');
+      bar.className='whs-draft-bar';
+      bar.innerHTML='<span class="whs-draft-status">Draft ready</span><button type="button" class="whs-draft-btn whs-save-draft">Save Draft</button><button type="button" class="whs-draft-btn whs-clear-draft">Clear Draft</button>';
+      form.insertBefore(bar, form.firstChild);
+      const status=bar.querySelector('.whs-draft-status');
+      try{
+        const saved=JSON.parse(localStorage.getItem(key)||'null');
+        if(saved && hasContent(saved.data)) { writeForm(form, saved.data); status.textContent='Draft restored'; }
+      }catch(e){}
+      let timer=null;
+      function save(auto){
+        const payload={savedAt:new Date().toISOString(), data:readForm(form)};
+        try{ localStorage.setItem(key, JSON.stringify(payload)); status.textContent=auto ? 'Draft auto-saved' : 'Draft saved'; }catch(e){ status.textContent='Draft could not be saved'; }
+      }
+      form.addEventListener('input', function(){ clearTimeout(timer); timer=setTimeout(function(){ save(true); }, 650); });
+      form.addEventListener('change', function(){ clearTimeout(timer); timer=setTimeout(function(){ save(true); }, 300); });
+      bar.querySelector('.whs-save-draft').addEventListener('click', function(){ save(false); });
+      bar.querySelector('.whs-clear-draft').addEventListener('click', function(){ localStorage.removeItem(key); status.textContent='Draft cleared'; });
+      form.addEventListener('submit', function(){ localStorage.removeItem(key); });
+    });
+  });
+})();
+</script>
+
 {% block scripts %}{% endblock %}
 </body>
 </html>

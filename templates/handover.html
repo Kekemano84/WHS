@@ -188,7 +188,7 @@
         <p class="eyebrow">Shift Handover</p>
         <h3>Shift handover with editable sections, dispatch VRIDs and Excel export.</h3>
     </div>
-    <a class="btn light" href="{{ url_for('export_handovers') }}">📊 Export Excel</a> <a class="btn light" href="{{ url_for('email_excel', kind='handover') }}">📧 Email Excel</a>
+    <a class="btn light" href="{{ url_for('export_handovers') }}">📊 Export Excel</a>
 </section>
 
 
@@ -370,7 +370,7 @@
 </section>
 
 <section class="panel compact-panel">
-    <div class="panel-head"><h3>Saved Handovers</h3><a class="small-btn" href="{{ url_for('export_handovers') }}">📊 Export Excel</a> <a class="btn light" href="{{ url_for('email_excel', kind='handover') }}">📧 Email Excel</a></div>
+    <div class="panel-head"><h3>Saved Handovers</h3><a class="small-btn" href="{{ url_for('export_handovers') }}">📊 Export Excel</a></div>
     {% for row in rows %}
     <div class="handover-card">
         <div class="panel-head">
