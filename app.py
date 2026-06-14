@@ -1473,10 +1473,11 @@ def generate_morning_brief_text(date, shift, manager, role, volume, available_hc
         for section in custom_sections:
             header = (section.get('header') or '').strip()
             value = (section.get('value') or '').strip()
-            if not header and not value:
+            # Only show sections that have a message. Empty message rows are ignored.
+            if not value:
                 continue
             lines.append(f"{header or 'Section'}:")
-            lines.append(value or 'No message added.')
+            lines.append(value)
             lines.append("")
     else:
         default_sections = [

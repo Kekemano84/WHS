@@ -16,7 +16,7 @@
   <div class="panel-head">
     <div>
       <h3>Shift Closure</h3>
-      <p class="muted">Bay Door and Carrier are editable. Tick “Save Bay / Carrier as default” to reuse them next time.</p>
+      <p class="muted">Bay Door and Carrier are editable. Set your door numbers, type carriers manually, then turn ON “Save Bay / Carrier as default” before saving to reuse them next time.</p>
     </div>
     <button class="small-btn ghost-small" type="button" onclick="addClosureRow()">+ Add Row</button>
   </div>
@@ -130,8 +130,18 @@ function writeClosureForm(rows){
   });
 }
 function saveClosureDraft(){
-  const payload = {date: document.querySelector('[name="date"]').value, shift: document.querySelector('[name="shift"]').value, rows: readClosureForm()};
+  const payload = {
+    date: document.querySelector('[name="date"]').value,
+    shift: document.querySelector('[name="shift"]').value,
+    bayPrefix: document.getElementById('closureBayPrefix')?.value || 'Door',
+    bayFrom: document.getElementById('closureBayFrom')?.value || '',
+    bayTo: document.getElementById('closureBayTo')?.value || '',
+    rows: readClosureForm()
+  };
   localStorage.setItem('whs_shift_closure_draft', JSON.stringify(payload));
+  if (document.getElementById('closureTemplateToggle')?.checked) {
+    localStorage.setItem('whs_shift_closure_saved_layout', JSON.stringify(payload));
+  }
   document.getElementById('closureDraftStatus').textContent = 'Draft saved';
 }
 function loadClosureDraft(){
@@ -140,6 +150,9 @@ function loadClosureDraft(){
   const payload = JSON.parse(raw);
   document.querySelector('[name="date"]').value = payload.date || '{{ today }}';
   document.querySelector('[name="shift"]').value = payload.shift || '';
+  if (document.getElementById('closureBayPrefix')) document.getElementById('closureBayPrefix').value = payload.bayPrefix || 'Door';
+  if (document.getElementById('closureBayFrom')) document.getElementById('closureBayFrom').value = payload.bayFrom || '';
+  if (document.getElementById('closureBayTo')) document.getElementById('closureBayTo').value = payload.bayTo || '';
   writeClosureForm(payload.rows || []);
   document.getElementById('closureDraftStatus').textContent = 'Draft loaded';
 }
@@ -160,31 +173,60 @@ function normaliseClosureStatus(text){
   if (t.includes('hold') || t.includes('stop')) return 'Hold';
   return '';
 }
+function applyClosureStatus(select, spokenText){
+  const status = normaliseClosureStatus(spokenText);
+  if (status && select) {
+    select.value = status;
+    select.dispatchEvent(new Event('change', {bubbles:true}));
+    saveClosureDraft();
+    return true;
+  }
+  return false;
+}
+function fallbackClosureStatus(select){
+  const typed = prompt('Type status: Completed, Loaded, BSW, In Progress, Awaiting Trailer, Issue or Hold');
+  if (!typed) return;
+  if (!applyClosureStatus(select, typed)) alert('Status not recognised. Please select it manually.');
+}
 function voiceClosureStatus(btn){
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const tr = btn.closest('tr');
   const select = tr?.querySelector('[name="status[]"]');
-  if (!SpeechRecognition || !select) { alert('Voice input is not supported in this browser.'); return; }
+  if (!select) return;
+  if (!SpeechRecognition) { fallbackClosureStatus(select); return; }
   const rec = new SpeechRecognition();
-  rec.lang = document.documentElement.lang || 'en-GB';
+  rec.lang = 'en-GB';
   rec.interimResults = false;
+  rec.maxAlternatives = 1;
   btn.classList.add('recording');
   rec.onresult = function(event){
     const spoken = event.results?.[0]?.[0]?.transcript || '';
-    const status = normaliseClosureStatus(spoken);
-    if (status) {
-      select.value = status;
-      select.dispatchEvent(new Event('change', {bubbles:true}));
-      saveClosureDraft();
-    } else {
-      alert('Status not recognised. Try: Completed, Loaded, BSW, In Progress, Awaiting Trailer, Issue or Hold.');
-    }
+    if (!applyClosureStatus(select, spoken)) fallbackClosureStatus(select);
   };
-  rec.onerror = function(){ alert('Voice input failed. Please try again or select the status manually.'); };
+  rec.onerror = function(){ fallbackClosureStatus(select); };
   rec.onend = function(){ btn.classList.remove('recording'); };
-  rec.start();
+  try { rec.start(); } catch(e) { btn.classList.remove('recording'); fallbackClosureStatus(select); }
 }
 
+(function restoreSavedClosureLayout(){
+  try {
+    const raw = localStorage.getItem('whs_shift_closure_saved_layout');
+    if (!raw) return;
+    const currentRows = readClosureForm();
+    const hasTypedCarrier = currentRows.some(r => (r.carrier || '').trim());
+    if (hasTypedCarrier) return;
+    const payload = JSON.parse(raw);
+    if (payload && Array.isArray(payload.rows) && payload.rows.length) {
+      if (document.getElementById('closureBayPrefix')) document.getElementById('closureBayPrefix').value = payload.bayPrefix || 'Door';
+      if (document.getElementById('closureBayFrom')) document.getElementById('closureBayFrom').value = payload.bayFrom || '';
+      if (document.getElementById('closureBayTo')) document.getElementById('closureBayTo').value = payload.bayTo || '';
+      writeClosureForm(payload.rows);
+      document.getElementById('closureDraftStatus').textContent = 'Saved Bay / Carrier layout loaded';
+    }
+  } catch(e) {}
+})();
+
 document.getElementById('shiftClosureForm')?.addEventListener('input', function(){ clearTimeout(window.__closureAuto); window.__closureAuto=setTimeout(saveClosureDraft, 600); });
+document.getElementById('shiftClosureForm')?.addEventListener('submit', function(){ if(document.getElementById('closureTemplateToggle')?.checked) saveClosureDraft(); });
 </script>
 {% endblock %}
