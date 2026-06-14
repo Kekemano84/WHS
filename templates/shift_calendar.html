@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Shift Calendar
+{% block title %}My Calendar
 <script>
 document.addEventListener('DOMContentLoaded', function(){
     const card = document.getElementById('selectedShiftCard');
@@ -43,13 +43,114 @@ document.addEventListener('DOMContentLoaded', function(){
 {% endblock %}
 {% block content %}
 
+<style>
+/* v23 force compact mobile calendar and correct order */
+@media (max-width: 760px){
+  .calendar-view-head{gap:8px!important;align-items:center!important}
+  .calendar-view-head h3{font-size:20px!important;margin:0!important}
+  .calendar-actions{display:grid!important;grid-template-columns:1fr 1fr 1fr!important;gap:6px!important;width:100%!important}
+  .calendar-actions .small-btn{font-size:11px!important;padding:9px 5px!important;border-radius:10px!important;text-align:center!important}
+  .month-calendar.compact-shift-calendar{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important;background:#111827!important;padding:5px!important;border-radius:16px!important;border:0!important;box-sizing:border-box!important}
+  .month-calendar.compact-shift-calendar .month-weekdays,.month-calendar.compact-shift-calendar .compact-weekdays,.month-calendar.compact-shift-calendar .month-week,.month-calendar.compact-shift-calendar .compact-week{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:3px!important;width:100%!important;margin:0 0 3px!important;min-width:0!important;box-sizing:border-box!important}
+  .month-calendar.compact-shift-calendar .month-weekdays span,.month-calendar.compact-shift-calendar .compact-weekdays span{font-size:10px!important;line-height:1!important;color:#39c7c9!important;text-align:center!important;padding:3px 0!important;background:transparent!important;border:0!important;font-weight:900!important}
+  .month-calendar.compact-shift-calendar .month-day.compact-day,.month-calendar.compact-shift-calendar button.compact-day{height:50px!important;min-height:50px!important;width:100%!important;min-width:0!important;padding:3px 1px!important;border-radius:7px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:1px!important;overflow:hidden!important;text-align:center!important;border:0!important;box-sizing:border-box!important}
+  .month-calendar.compact-shift-calendar .compact-date{font-size:9px!important;line-height:1!important;font-weight:800!important;background:transparent!important;border:0!important;width:auto!important;height:auto!important;color:inherit!important}
+  .month-calendar.compact-shift-calendar .compact-day strong{font-size:10px!important;line-height:1!important;margin:1px 0 0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+  .month-calendar.compact-shift-calendar .compact-day small{display:none!important}
+  .month-calendar.compact-shift-calendar .compact-day em{font-size:8px!important;margin-top:auto!important;line-height:1!important}
+  .month-calendar.compact-shift-calendar .compact-day.status-work{background:#fb8500!important;color:#111827!important}
+  .month-calendar.compact-shift-calendar .compact-day.status-off{background:#fff0bd!important;color:#111827!important}
+  .month-calendar.compact-shift-calendar .compact-day.status-holiday{background:#ff6b4a!important;color:#111827!important}
+  .month-calendar.compact-shift-calendar .compact-day.status-sick{background:#2d5a1f!important;color:#eaffea!important}
+  .month-calendar.compact-shift-calendar .compact-day.status-training{background:#7db0ff!important;color:#071428!important}
+  .month-calendar.compact-shift-calendar .compact-day.status-not-set{background:#e5e7eb!important;color:#475569!important}
+  .month-calendar.compact-shift-calendar .compact-day.outside-month{opacity:.45!important;filter:saturate(.65)!important}
+  .selected-shift-card{margin-top:8px!important;border-radius:12px!important;padding:8px!important;display:grid!important;grid-template-columns:56px 1fr!important;gap:9px!important;background:#2f2f2f!important;color:#fff!important}
+  .selected-date-box{border-radius:7px!important;padding:6px 4px!important}
+  .selected-date-box strong{font-size:22px!important}
+  .selected-date-box small{font-size:10px!important}
+  .selected-shift-card div:nth-child(2) strong{font-size:14px!important}
+  .selected-shift-card p{font-size:12px!important;line-height:1.2!important;margin:2px 0 0!important}
+  .shift-mobile-stack{margin-top:16px!important}
+}
+</style>
+
 <section class="hero-card pro-hero">
     <div>
         <p class="eyebrow">My Calendar</p>
-        <h3>Compact shift planner view with Add Shift Pattern, Work / Off / Holiday / Sick days and Holiday Tracker integration.</h3>
+        <h3>Compact monthly shift view with Work / RDO / Holiday / Sick days.</h3>
     </div>
     <a class="btn light" href="{{ url_for('export_shift_calendar') }}">[📊 Export Excel]</a>
 </section>
+
+<section class="panel">
+    <div class="panel-head calendar-view-head">
+        <div>
+            <h3>Calendar View</h3>
+            {% if view == "month" %}
+            <p class="muted">{{ current_month }}</p>
+            {% else %}
+            <p class="muted">28 day list view</p>
+            {% endif %}
+        </div>
+        <div class="mini-actions calendar-actions">
+            {% if view == "month" %}
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month', month=prev_start) }}">Previous Month</a>
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month') }}">This Month</a>
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month', month=next_start) }}">Next Month</a>
+            <a class="small-btn" href="{{ url_for('shift_calendar', view='list', start=rows[0].date if rows else '') }}">List View</a>
+            {% else %}
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='list', start=prev_start) }}">Previous</a>
+            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='list', start=next_start) }}">Next</a>
+            <a class="small-btn" href="{{ url_for('shift_calendar', view='month', month=current_month_value) }}">Month View</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if view == "month" %}
+    <div class="month-calendar compact-shift-calendar">
+        <div class="month-weekdays compact-weekdays">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        {% for week in month_weeks %}
+        <div class="month-week compact-week">
+            {% for row in week %}
+            {% set short = 'HOLS' if row.status == 'Holiday' else ('RDO' if row.status == 'Off' else ('DHL' if row.status == 'Work' and not row.shift_name else (row.shift_name if row.shift_name else row.status))) %}
+            <button type="button" class="month-day compact-day {% if not row.in_month %}outside-month{% endif %} status-{{ row.status|lower|replace(' ', '-') }}" data-date="{{ row.date }}" data-status="{{ row.status }}" data-shift="{{ row.shift_name or short }}" data-start="{{ row.start_time }}" data-end="{{ row.end_time }}" data-notes="{{ row.notes }}">
+                <span class="compact-date">{{ row.date[-2:] }}</span>
+                <strong>{{ short }}</strong>
+                {% if row.start_time or row.end_time %}<small>{{ row.start_time }}-{{ row.end_time }}</small>{% endif %}
+                {% if row.status == 'Holiday' %}<em>✈</em>{% elif row.status == 'Work' %}<em>★</em>{% endif %}
+            </button>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="selected-shift-card" id="selectedShiftCard">
+        <div class="selected-date-box"><strong id="selectedDayNum">--</strong><small id="selectedMonthText">Select a day</small></div>
+        <div><strong id="selectedShiftTitle">Tap a calendar day</strong><p id="selectedShiftMeta">Details will appear here.</p></div>
+    </div>
+    {% else %}
+    <div class="calendar-grid">
+        {% for row in rows %}
+        <div class="calendar-day status-{{ row.status|lower|replace(' ', '-') }}">
+            <span>{{ row.date|dateuk }}</span>
+            <strong>{{ row.status }}</strong>
+            {% if row.shift_name %}<small>{{ row.shift_name }}</small>{% endif %}
+            {% if row.start_time or row.end_time %}<small>{{ row.start_time }} - {{ row.end_time }}</small>{% endif %}
+            {% if row.notes %}<em>{{ row.notes }}</em>{% endif %}
+            <form method="POST" action="{{ url_for('save_calendar_note') }}" class="day-note-form">
+                <input type="hidden" name="date" value="{{ row.date }}">
+                <input type="hidden" name="return_to" value="{{ request.full_path }}">
+                <input name="notes" value="{{ row.notes or '' }}" placeholder="Add note...">
+                <button class="small-btn" type="submit">Save Note</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+
 
 <section class="shift-mobile-stack">
     <section class="panel shift-card">
@@ -182,74 +283,6 @@ function toggleCustomPattern() {
 }
 document.addEventListener("DOMContentLoaded", toggleCustomPattern);
 </script>
-
-<section class="panel">
-    <div class="panel-head calendar-view-head">
-        <div>
-            <h3>Calendar View</h3>
-            {% if view == "month" %}
-            <p class="muted">{{ current_month }}</p>
-            {% else %}
-            <p class="muted">28 day list view</p>
-            {% endif %}
-        </div>
-        <div class="mini-actions calendar-actions">
-            {% if view == "month" %}
-            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month', month=prev_start) }}">Previous Month</a>
-            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month') }}">This Month</a>
-            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='month', month=next_start) }}">Next Month</a>
-            <a class="small-btn" href="{{ url_for('shift_calendar', view='list', start=rows[0].date if rows else '') }}">List View</a>
-            {% else %}
-            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='list', start=prev_start) }}">Previous</a>
-            <a class="small-btn ghost-small" href="{{ url_for('shift_calendar', view='list', start=next_start) }}">Next</a>
-            <a class="small-btn" href="{{ url_for('shift_calendar', view='month', month=current_month_value) }}">Month View</a>
-            {% endif %}
-        </div>
-    </div>
-
-    {% if view == "month" %}
-    <div class="month-calendar compact-shift-calendar">
-        <div class="month-weekdays compact-weekdays">
-            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-        </div>
-        {% for week in month_weeks %}
-        <div class="month-week compact-week">
-            {% for row in week %}
-            {% set short = 'HOLS' if row.status == 'Holiday' else ('RDO' if row.status == 'Off' else ('DHL' if row.status == 'Work' and not row.shift_name else (row.shift_name if row.shift_name else row.status))) %}
-            <button type="button" class="month-day compact-day {% if not row.in_month %}outside-month{% endif %} status-{{ row.status|lower|replace(' ', '-') }}" data-date="{{ row.date }}" data-status="{{ row.status }}" data-shift="{{ row.shift_name or short }}" data-start="{{ row.start_time }}" data-end="{{ row.end_time }}" data-notes="{{ row.notes }}">
-                <span class="compact-date">{{ row.date[-2:] }}</span>
-                <strong>{{ short }}</strong>
-                {% if row.start_time or row.end_time %}<small>{{ row.start_time }}-{{ row.end_time }}</small>{% endif %}
-                {% if row.status == 'Holiday' %}<em>✈</em>{% elif row.status == 'Work' %}<em>★</em>{% endif %}
-            </button>
-            {% endfor %}
-        </div>
-        {% endfor %}
-    </div>
-    <div class="selected-shift-card" id="selectedShiftCard">
-        <div class="selected-date-box"><strong id="selectedDayNum">--</strong><small id="selectedMonthText">Select a day</small></div>
-        <div><strong id="selectedShiftTitle">Tap a calendar day</strong><p id="selectedShiftMeta">Details will appear here.</p></div>
-    </div>
-    {% else %}
-    <div class="calendar-grid">
-        {% for row in rows %}
-        <div class="calendar-day status-{{ row.status|lower|replace(' ', '-') }}">
-            <span>{{ row.date|dateuk }}</span>
-            <strong>{{ row.status }}</strong>
-            {% if row.shift_name %}<small>{{ row.shift_name }}</small>{% endif %}
-            {% if row.start_time or row.end_time %}<small>{{ row.start_time }} - {{ row.end_time }}</small>{% endif %}
-            {% if row.notes %}<em>{{ row.notes }}</em>{% endif %}
-            <form method="POST" action="{{ url_for('save_calendar_note') }}" class="day-note-form">
-                <input type="hidden" name="date" value="{{ row.date }}">
-                <input type="hidden" name="return_to" value="{{ request.full_path }}">
-                <input name="notes" value="{{ row.notes or '' }}" placeholder="Add note...">
-                <button class="small-btn" type="submit">Save Note</button>
-            </form>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-</section>
 
 <section class="panel legend-panel">
     <h3>Legend</h3>

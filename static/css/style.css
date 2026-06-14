@@ -3404,3 +3404,137 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     .voice-hint { font-size: 13px; align-items: center; }
     .voice-hint span { line-height: 1.25; }
 }
+
+/* WHS v22 - TRUE mobile compact month calendar (applies to deployed static CSS) */
+@media (max-width: 760px) {
+  .shift-calendar-page .panel,
+  section.panel:has(.compact-shift-calendar) {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .month-calendar.compact-shift-calendar {
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 6px !important;
+    background: #111827 !important;
+    border-radius: 18px !important;
+    border: 0 !important;
+    box-shadow: 0 12px 26px rgba(15,23,42,.18) !important;
+  }
+
+  .month-calendar.compact-shift-calendar .month-weekdays,
+  .month-calendar.compact-shift-calendar .month-week,
+  .month-calendar.compact-shift-calendar .compact-weekdays,
+  .month-calendar.compact-shift-calendar .compact-week {
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    gap: 3px !important;
+    margin: 0 0 3px 0 !important;
+  }
+
+  .month-calendar.compact-shift-calendar .compact-weekdays span,
+  .month-calendar.compact-shift-calendar .month-weekdays span {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    padding: 3px 0 5px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+    background: transparent !important;
+    color: #39c7c9 !important;
+    border: 0 !important;
+    text-align: center !important;
+    font-weight: 900 !important;
+  }
+
+  .month-calendar.compact-shift-calendar .month-day.compact-day,
+  .month-calendar.compact-shift-calendar button.compact-day {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    min-height: 54px !important;
+    height: 54px !important;
+    padding: 4px 1px !important;
+    border-radius: 7px !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: center !important;
+    gap: 1px !important;
+  }
+
+  .month-calendar.compact-shift-calendar .compact-date {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    background: transparent !important;
+    border: 0 !important;
+    color: inherit !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  .month-calendar.compact-shift-calendar .compact-day strong {
+    font-size: 11px !important;
+    line-height: 1 !important;
+    margin: 1px 0 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+
+  .month-calendar.compact-shift-calendar .compact-day small { display: none !important; }
+  .month-calendar.compact-shift-calendar .compact-day em {
+    font-size: 8px !important;
+    line-height: 1 !important;
+    margin-top: auto !important;
+  }
+
+  .month-calendar.compact-shift-calendar .compact-day.status-work { background:#fb8500 !important; color:#111827 !important; }
+  .month-calendar.compact-shift-calendar .compact-day.status-off { background:#fff0bd !important; color:#111827 !important; }
+  .month-calendar.compact-shift-calendar .compact-day.status-holiday { background:#ff6b4a !important; color:#111827 !important; }
+  .month-calendar.compact-shift-calendar .compact-day.status-sick { background:#2d5a1f !important; color:#eaffea !important; }
+  .month-calendar.compact-shift-calendar .compact-day.status-training { background:#7db0ff !important; color:#071428 !important; }
+  .month-calendar.compact-shift-calendar .compact-day.status-not-set { background:#e5e7eb !important; color:#475569 !important; }
+  .month-calendar.compact-shift-calendar .compact-day.outside-month { opacity:.45 !important; filter:saturate(.65) !important; }
+
+  .selected-shift-card {
+    margin-top: 10px !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    grid-template-columns: 58px 1fr !important;
+    gap: 10px !important;
+    background: #2f2f2f !important;
+    color: #fff !important;
+  }
+  .selected-date-box { padding: 7px 4px !important; border-radius: 7px !important; }
+  .selected-date-box strong { font-size: 22px !important; }
+  .selected-date-box small { font-size: 10px !important; }
+  .selected-shift-card div:nth-child(2) strong { font-size: 14px !important; }
+  .selected-shift-card p { font-size: 12px !important; line-height:1.2!important; }
+}
+
+@media (max-width: 390px) {
+  .month-calendar.compact-shift-calendar .month-day.compact-day,
+  .month-calendar.compact-shift-calendar button.compact-day {
+    min-height: 49px !important;
+    height: 49px !important;
+  }
+  .month-calendar.compact-shift-calendar .compact-day strong { font-size: 10px !important; }
+  .month-calendar.compact-shift-calendar .compact-date { font-size: 9px !important; }
+}
+
+/* v23 calendar order/cache refresh - inline CSS also included in template */
