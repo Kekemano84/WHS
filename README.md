@@ -1,3 +1,7 @@
+# WHS Warehouse Support App v28
+
+Added quick Copy Message button beside the WhatsApp generated message autosave status.
+
 # WHS - Warehouse Support v26
 
 Changes in this version:
@@ -473,3 +477,9 @@ The app also supports `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWOR
 - Registration no longer requires SMTP and does not attempt to send welcome emails.
 - Added client-side Save Draft / auto-save draft for forms while filling them in.
 - Excel downloads remain available.
+
+
+## v30 FIX
+- Fixed Yard Check save 500 error by adding missing photo_filename column migration.
+- Fixed Yard Check Excel export 500 error by importing get_column_letter.
+- Rebuilt ZIP for download.
