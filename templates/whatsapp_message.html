@@ -276,70 +276,84 @@
     if (e.target.closest('.whatsapp-form')) scheduleAutosave();
   });
 
-  window.startWhatsAppRowVoice = function(button) {
-    const rowEl = button.closest('.whatsapp-row');
-    if (!rowEl) return;
+  // WhatsApp voice now uses the same simple Web Speech logic as Yard Check.
+  // Main/headcount rows write ONLY into the Qty box. Note rows write into Details.
+  window.startWhatsAppRowVoice = function(btn) {
+    const row = btn.closest('.whatsapp-row');
+    if (!row) return;
 
-    const isMain = rowEl.dataset.type === 'main';
-    const target = isMain ? rowEl.querySelector('.wa-qty') : rowEl.querySelector('.wa-value');
-    if (!target) return;
+    const isMain = row.dataset.type === 'main';
+    const targetInput = isMain
+      ? row.querySelector('input.wa-qty, input.wa-value')
+      : row.querySelector('input.wa-value');
+
+    if (!targetInput) return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Voice recording is not supported on this browser. Please type manually.');
-      target.focus();
+      alert('Voice recording is not supported in this browser. You can type manually.');
+      targetInput.focus();
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-GB';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = false;
+    const rec = new SpeechRecognition();
+    rec.lang = 'en-GB';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.continuous = false;
 
-    button.disabled = true;
-    button.classList.add('recording');
-    button.textContent = '●';
+    const oldText = btn.textContent;
+    btn.textContent = '🎙️...';
 
-    recognition.onresult = function(event) {
-      const transcript = event.results && event.results[0] && event.results[0][0]
+    rec.onresult = function(event) {
+      const text = event.results && event.results[0] && event.results[0][0]
         ? String(event.results[0][0].transcript || '').trim()
         : '';
 
-      if (!transcript) return;
-
-      if (isMain) {
-        // Headcount / Labour Lines: always write the spoken number into the Qty box.
-        const qty = spokenToNumber(transcript);
-        target.value = qty;
-      } else {
-        // Operational notes: add the spoken text to the Details box.
-        target.value = target.value ? (target.value + ' ' + transcript) : transcript;
+      if (!text) {
+        btn.textContent = oldText || '🎙️';
+        targetInput.focus();
+        return;
       }
 
-      target.dispatchEvent(new Event('input', { bubbles: true }));
+      let finalValue = text;
+      if (isMain) {
+        finalValue = spokenToNumber(text);
+        // If the speech engine returns words like "five", convert them.
+        // If it returns digits like "5", keep the digits.
+        const numberMatch = String(finalValue || '').match(/\d+(?:\.\d+)?/);
+        finalValue = numberMatch ? numberMatch[0] : String(finalValue || '').trim();
+      }
+
+      targetInput.value = finalValue;
+      targetInput.defaultValue = finalValue;
+      targetInput.setAttribute('value', finalValue);
+
+      ['input', 'change', 'keyup'].forEach(function(eventName) {
+        targetInput.dispatchEvent(new Event(eventName, { bubbles: true }));
+      });
+
+      collectRows();
       generateMessage();
       autosaveLocal();
-      target.focus();
+      targetInput.focus();
+      btn.textContent = oldText || '🎙️';
     };
 
-    recognition.onerror = function() {
-      target.focus();
+    rec.onerror = function() {
+      btn.textContent = oldText || '🎙️';
+      targetInput.focus();
     };
 
-    recognition.onend = function() {
-      button.disabled = false;
-      button.classList.remove('recording');
-      button.textContent = '🎙️';
+    rec.onend = function() {
+      btn.textContent = oldText || '🎙️';
     };
 
     try {
-      recognition.start();
+      rec.start();
     } catch (err) {
-      button.disabled = false;
-      button.classList.remove('recording');
-      button.textContent = '🎙️';
-      target.focus();
+      btn.textContent = oldText || '🎙️';
+      targetInput.focus();
     }
   };
 
