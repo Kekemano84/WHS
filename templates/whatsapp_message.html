@@ -158,7 +158,7 @@
     wrap.dataset.index = index;
     wrap.innerHTML = isMain ? `
       <input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Line name">
-      <button type="button" class="btn-icon wa-voice" title="Voice record quantity" data-voice-target="value">🎙️</button>
+      <button type="button" class="btn-icon wa-voice" title="Voice record quantity" data-voice-target="value" onclick="startWhatsAppRowVoice(this)">🎙️</button>
       <input class="wa-value wa-qty" inputmode="numeric" value="${escapeHtml(row.value || '')}" placeholder="Qty">
       <span class="wa-prefix">x</span>
       <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
@@ -166,7 +166,7 @@
       <button type="button" class="btn-icon danger wa-delete" title="Delete row">×</button>
     ` : `
       <input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Title">
-      <button type="button" class="btn-icon wa-voice" title="Voice record note details" data-voice-target="value">🎙️</button>
+      <button type="button" class="btn-icon wa-voice" title="Voice record note details" data-voice-target="value" onclick="startWhatsAppRowVoice(this)">🎙️</button>
       <input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Details">
       <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
       <button type="button" class="btn-icon wa-down" title="Move down">↓</button>
@@ -276,114 +276,72 @@
     if (e.target.closest('.whatsapp-form')) scheduleAutosave();
   });
 
-  function startVoiceForRow(button, overwrite) {
+  window.startWhatsAppRowVoice = function(button) {
     const rowEl = button.closest('.whatsapp-row');
     if (!rowEl) return;
 
-    // WhatsApp Message voice must write to the field in the same row:
-    // Headcount rows -> Qty box, Notes rows -> Details box.
-    // Do not use the previously focused input here, because on mobile the
-    // line-name input can keep focus and steal the voice result.
-    const target = rowEl.dataset.type === 'main'
-      ? rowEl.querySelector('.wa-qty')
-      : rowEl.querySelector('.wa-value');
+    const isMain = rowEl.dataset.type === 'main';
+    const target = isMain ? rowEl.querySelector('.wa-qty') : rowEl.querySelector('.wa-value');
+    if (!target) return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Voice recording is not supported on this browser. Please type manually.');
+      target.focus();
       return;
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = document.documentElement.lang || 'en-GB';
+    recognition.lang = 'en-GB';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
+    recognition.continuous = false;
 
+    button.disabled = true;
     button.classList.add('recording');
     button.textContent = '●';
 
     recognition.onresult = function(event) {
-      const text = event.results && event.results[0] && event.results[0][0]
-        ? event.results[0][0].transcript
+      const transcript = event.results && event.results[0] && event.results[0][0]
+        ? String(event.results[0][0].transcript || '').trim()
         : '';
-      if (!text || !target) return;
 
-      const isQty = target.classList.contains('wa-qty');
-      const cleaned = isQty ? spokenToNumber(text) : text.trim();
+      if (!transcript) return;
 
-      if (isQty) {
-        target.value = cleaned;
+      if (isMain) {
+        // Headcount / Labour Lines: always write the spoken number into the Qty box.
+        const qty = spokenToNumber(transcript);
+        target.value = qty;
       } else {
-        target.value = overwrite ? cleaned : (target.value ? (target.value + ' ' + cleaned) : cleaned);
+        // Operational notes: add the spoken text to the Details box.
+        target.value = target.value ? (target.value + ' ' + transcript) : transcript;
       }
 
       target.dispatchEvent(new Event('input', { bubbles: true }));
       generateMessage();
       autosaveLocal();
+      target.focus();
     };
 
     recognition.onerror = function() {
-      button.classList.remove('recording');
-      button.textContent = '🎙️';
+      target.focus();
     };
+
     recognition.onend = function() {
+      button.disabled = false;
       button.classList.remove('recording');
       button.textContent = '🎙️';
-      button.dataset.voiceActive = '0';
     };
 
     try {
       recognition.start();
-      button.dataset.voiceActive = '1';
     } catch (err) {
+      button.disabled = false;
       button.classList.remove('recording');
       button.textContent = '🎙️';
-      button.dataset.voiceActive = '0';
+      target.focus();
     }
-  }
-
-  function handleVoicePressStart(btn) {
-    btn.dataset.longPress = '0';
-    clearTimeout(btn._pressTimer);
-    btn._pressTimer = setTimeout(function(){
-      btn.dataset.longPress = '1';
-      startVoiceForRow(btn, true);
-    }, 650);
-  }
-
-  function handleVoicePressEnd(btn) {
-    clearTimeout(btn._pressTimer);
-    if (btn.dataset.longPress !== '1' && btn.dataset.voiceActive !== '1') {
-      startVoiceForRow(btn, false);
-    }
-  }
-
-  document.addEventListener('pointerdown', function(e){
-    const btn = e.target.closest('.wa-voice');
-    if (!btn) return;
-    e.preventDefault();
-    handleVoicePressStart(btn);
-  });
-  document.addEventListener('pointerup', function(e){
-    const btn = e.target.closest('.wa-voice');
-    if (!btn) return;
-    e.preventDefault();
-    handleVoicePressEnd(btn);
-  });
-  document.addEventListener('touchstart', function(e){
-    const btn = e.target.closest('.wa-voice');
-    if (!btn) return;
-    handleVoicePressStart(btn);
-  }, {passive: true});
-  document.addEventListener('touchend', function(e){
-    const btn = e.target.closest('.wa-voice');
-    if (!btn) return;
-    handleVoicePressEnd(btn);
-  }, {passive: true});
-  document.addEventListener('pointerleave', function(e){
-    const btn = e.target.closest('.wa-voice');
-    if (btn && btn._pressTimer) clearTimeout(btn._pressTimer);
-  });
+  };
 
   document.addEventListener('click', function (e) {
     const add = e.target.closest('[data-add-row]');
