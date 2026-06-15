@@ -138,8 +138,24 @@
   }
 
   // Always open WhatsApp Message with today's date. The field is still editable.
+  // This also overrides any old browser autosaved draft date after the page finishes loading.
   const dateInput = document.getElementById('dateInput');
-  if (dateInput) dateInput.value = todayIsoLocal();
+  function forceWhatsAppTodayDate() {
+    if (!dateInput) return;
+    dateInput.value = todayIsoLocal();
+    dateInput.defaultValue = todayIsoLocal();
+  }
+  forceWhatsAppTodayDate();
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(forceWhatsAppTodayDate, 100);
+  });
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      forceWhatsAppTodayDate();
+      generateMessage();
+      autosaveLocal();
+    }, 150);
+  });
 
   document.addEventListener('focusin', function(e) {
     if (e.target && e.target.matches('.wa-label, .wa-value')) {
