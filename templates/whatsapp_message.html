@@ -141,7 +141,7 @@
     const direct = raw.match(/\d+(?:\.\d+)?/);
     if (direct) return direct[0];
     const map = {
-      'zero':'0','oh':'0','o':'0','one':'1','won':'1','two':'2','too':'2','to':'2','three':'3','four':'4','for':'4','five':'5','six':'6','seven':'7','eight':'8','ate':'8','nine':'9','ten':'10','eleven':'11','twelve':'12','thirteen':'13','fourteen':'14','fifteen':'15','sixteen':'16','seventeen':'17','eighteen':'18','nineteen':'19','twenty':'20'
+      'zero':'0','oh':'0','o':'0','one':'1','won':'1','two':'2','too':'2','to':'2','three':'3','four':'4','for':'4','five':'5','six':'6','seven':'7','eight':'8','ate':'8','nine':'9','ten':'10','eleven':'11','twelve':'12','thirteen':'13','fourteen':'14','fifteen':'15','sixteen':'16','seventeen':'17','eighteen':'18','nineteen':'19','twenty':'20','egy':'1','kettő':'2','ketto':'2','két':'2','ket':'2','három':'3','harom':'3','négy':'4','negy':'4','öt':'5','ot':'5','hat':'6','hét':'7','het':'7','nyolc':'8','kilenc':'9','tíz':'10','tiz':'10'
     };
     const words = raw.split(/\s+/).filter(Boolean);
     for (const w of words) {
@@ -279,35 +279,49 @@
   function startVoiceForRow(button, overwrite) {
     const rowEl = button.closest('.whatsapp-row');
     if (!rowEl) return;
-    const targetName = button.dataset.voiceTarget || 'value';
-    let target = rowEl.querySelector(targetName === 'label' ? '.wa-label' : '.wa-value');
-    if (lastFocusedInput && rowEl.contains(lastFocusedInput)) {
-      target = lastFocusedInput;
-    }
+
+    // WhatsApp Message voice must write to the field in the same row:
+    // Headcount rows -> Qty box, Notes rows -> Details box.
+    // Do not use the previously focused input here, because on mobile the
+    // line-name input can keep focus and steal the voice result.
+    const target = rowEl.dataset.type === 'main'
+      ? rowEl.querySelector('.wa-qty')
+      : rowEl.querySelector('.wa-value');
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Voice recording is not supported on this browser. Please type manually.');
       return;
     }
+
     const recognition = new SpeechRecognition();
     recognition.lang = document.documentElement.lang || 'en-GB';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
+
     button.classList.add('recording');
     button.textContent = '●';
+
     recognition.onresult = function(event) {
-      const text = event.results && event.results[0] && event.results[0][0] ? event.results[0][0].transcript : '';
-      if (text && target) {
-        const isQty = target.classList.contains('wa-qty') || target.placeholder.toLowerCase().includes('qty');
-        const cleaned = isQty ? spokenToNumber(text) : text;
-        if (isQty) {
-          target.value = cleaned;
-        } else {
-          target.value = overwrite ? cleaned : (target.value ? (target.value + ' ' + cleaned) : cleaned);
-        }
-        target.dispatchEvent(new Event('input', { bubbles: true }));
+      const text = event.results && event.results[0] && event.results[0][0]
+        ? event.results[0][0].transcript
+        : '';
+      if (!text || !target) return;
+
+      const isQty = target.classList.contains('wa-qty');
+      const cleaned = isQty ? spokenToNumber(text) : text.trim();
+
+      if (isQty) {
+        target.value = cleaned;
+      } else {
+        target.value = overwrite ? cleaned : (target.value ? (target.value + ' ' + cleaned) : cleaned);
       }
+
+      target.dispatchEvent(new Event('input', { bubbles: true }));
+      generateMessage();
+      autosaveLocal();
     };
+
     recognition.onerror = function() {
       button.classList.remove('recording');
       button.textContent = '🎙️';
@@ -315,22 +329,57 @@
     recognition.onend = function() {
       button.classList.remove('recording');
       button.textContent = '🎙️';
+      button.dataset.voiceActive = '0';
     };
-    recognition.start();
+
+    try {
+      recognition.start();
+      button.dataset.voiceActive = '1';
+    } catch (err) {
+      button.classList.remove('recording');
+      button.textContent = '🎙️';
+      button.dataset.voiceActive = '0';
+    }
+  }
+
+  function handleVoicePressStart(btn) {
+    btn.dataset.longPress = '0';
+    clearTimeout(btn._pressTimer);
+    btn._pressTimer = setTimeout(function(){
+      btn.dataset.longPress = '1';
+      startVoiceForRow(btn, true);
+    }, 650);
+  }
+
+  function handleVoicePressEnd(btn) {
+    clearTimeout(btn._pressTimer);
+    if (btn.dataset.longPress !== '1' && btn.dataset.voiceActive !== '1') {
+      startVoiceForRow(btn, false);
+    }
   }
 
   document.addEventListener('pointerdown', function(e){
     const btn = e.target.closest('.wa-voice');
     if (!btn) return;
-    btn.dataset.longPress = '0';
-    btn._pressTimer = setTimeout(function(){ btn.dataset.longPress = '1'; startVoiceForRow(btn, true); }, 650);
+    e.preventDefault();
+    handleVoicePressStart(btn);
   });
   document.addEventListener('pointerup', function(e){
     const btn = e.target.closest('.wa-voice');
     if (!btn) return;
-    clearTimeout(btn._pressTimer);
-    if (btn.dataset.longPress !== '1') startVoiceForRow(btn, false);
+    e.preventDefault();
+    handleVoicePressEnd(btn);
   });
+  document.addEventListener('touchstart', function(e){
+    const btn = e.target.closest('.wa-voice');
+    if (!btn) return;
+    handleVoicePressStart(btn);
+  }, {passive: true});
+  document.addEventListener('touchend', function(e){
+    const btn = e.target.closest('.wa-voice');
+    if (!btn) return;
+    handleVoicePressEnd(btn);
+  }, {passive: true});
   document.addEventListener('pointerleave', function(e){
     const btn = e.target.closest('.wa-voice');
     if (btn && btn._pressTimer) clearTimeout(btn._pressTimer);
