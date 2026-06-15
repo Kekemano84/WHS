@@ -7,48 +7,48 @@
   <p class="muted">Everything that is not shown in the bottom menu is here.</p>
 
   <div class="more-menu-grid">
-    <a class="more-option-card" href="{{ url_for('morning_brief') }}">
+    <a class="more-option-card" href="{{ url_for('morning_brief', from='more') }}">
       <span class="more-option-icon">☀️</span>
       <span class="more-option-text"><strong>Brief</strong><small>Daily brief builder with voice input</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('whatsapp_message') }}">
-      <span class="more-option-icon">💬</span>
+    <a class="more-option-card" href="{{ url_for('whatsapp_message', from='more') }}">
+      <span class="more-option-icon whatsapp-original-icon" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><circle cx="16" cy="16" r="15" fill="#25D366"/><path fill="#fff" d="M23.4 19.1c-.4-.2-2.3-1.1-2.7-1.3-.4-.1-.6-.2-.9.2-.3.4-1 1.3-1.2 1.5-.2.3-.5.3-.9.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.3-2.1-2.7-.2-.4 0-.6.2-.8.2-.2.4-.5.6-.7.2-.2.3-.4.4-.7.1-.3 0-.5 0-.7-.1-.2-.9-2.1-1.2-2.9-.3-.8-.7-.7-.9-.7h-.8c-.3 0-.7.1-1.1.5-.4.4-1.4 1.4-1.4 3.4s1.5 4 1.7 4.3c.2.3 2.9 4.5 7.1 6.3 1 .4 1.8.7 2.4.9 1 .3 1.9.3 2.6.2.8-.1 2.3-1 2.7-1.9.3-.9.3-1.7.2-1.9-.1-.2-.4-.3-.8-.5z"/><path fill="#fff" d="M16 3.2C9 3.2 3.2 9 3.2 16c0 2.3.6 4.5 1.8 6.4L3.8 29l6.8-1.8c1.7.9 3.5 1.3 5.4 1.3 7 0 12.8-5.7 12.8-12.8S23 3.2 16 3.2zm0 22.9c-1.7 0-3.3-.4-4.7-1.2l-.3-.2-4 1.1 1.1-3.9-.2-.4c-1-1.6-1.5-3.5-1.5-5.5 0-5.3 4.3-9.7 9.7-9.7s9.7 4.3 9.7 9.7-4.5 10.1-9.8 10.1z"/></svg></span>
       <span class="more-option-text"><strong>WhatsApp Message</strong><small>Build and copy daily start-up updates</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('shift_closure') }}">
+    <a class="more-option-card" href="{{ url_for('shift_closure', from='more') }}">
       <span class="more-option-icon">✅</span>
       <span class="more-option-text"><strong>Shift Closure</strong><small>Bay door closure check and Excel export</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('holiday_tracker') }}">
+    <a class="more-option-card" href="{{ url_for('holiday_tracker', from='more') }}">
       <span class="more-option-icon">🏖️</span>
       <span class="more-option-text"><strong>Holiday Tracker</strong><small>Annual leave days and hours</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('team') }}">
+    <a class="more-option-card" href="{{ url_for('team', from='more') }}">
       <span class="more-option-icon">👥</span>
       <span class="more-option-text"><strong>Team</strong><small>Team records and search</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('settings') }}">
+    <a class="more-option-card" href="{{ url_for('settings', from='more') }}">
       <span class="more-option-icon">👤</span>
       <span class="more-option-text"><strong>Profile</strong><small>Name, site, role and language</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('yard_settings') }}">
+    <a class="more-option-card" href="{{ url_for('yard_settings', from='more') }}">
       <span class="more-option-icon">📍</span>
       <span class="more-option-text"><strong>Yard Setup</strong><small>Doors, fences and locations</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('mileage') }}">
+    <a class="more-option-card" href="{{ url_for('mileage', from='more') }}">
       <span class="more-option-icon">🚗</span>
       <span class="more-option-text"><strong>Mileage</strong><small>HMRC mileage records</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('expenses') }}">
+    <a class="more-option-card" href="{{ url_for('expenses', from='more') }}">
       <span class="more-option-icon">💷</span>
       <span class="more-option-text"><strong>Expenses</strong><small>Business costs</small></span>
     </a>
-    <a class="more-option-card" href="{{ url_for('notifications_page') }}">
+    <a class="more-option-card" href="{{ url_for('notifications_page', from='more') }}">
       <span class="more-option-icon">🔔</span>
       <span class="more-option-text"><strong>Notifications</strong><small>Reminder and alert settings</small></span>
     </a>
     {% if user and user.email == "admin@whs-app.com" %}
-    <a class="more-option-card" href="{{ url_for('admin_dashboard') }}">
+    <a class="more-option-card" href="{{ url_for('admin_dashboard', from='more') }}">
       <span class="more-option-icon">🛡️</span>
       <span class="more-option-text"><strong>Admin</strong><small>Admin controls</small></span>
     </a>

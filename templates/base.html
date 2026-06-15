@@ -122,7 +122,11 @@
             <div>
                 <h2>{% block title %}{% endblock %}</h2>
             </div>
-            {% if page not in ['auth', 'login', 'register', 'dashboard', 'more', 'notifications'] %}
+            {% if request.args.get('from') == 'more' %}
+            <div class="top-actions">
+                <a class="btn secondary more-back-btn" href="{{ url_for('more') }}">← Back to More</a>
+            </div>
+            {% elif page not in ['auth', 'login', 'register', 'dashboard', 'more', 'notifications'] %}
             <div class="top-actions">
                 <a class="btn primary" href="{{ url_for('yard_check') }}">+ Yard Check</a>
             </div>

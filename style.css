@@ -3586,3 +3586,36 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   .closure-table{min-width:900px;}
   .closure-table .voice-cell{width:64px;}
 }
+
+
+/* v45 targeted: More WhatsApp icon + Back to More button */
+.more-option-icon.whatsapp-original-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.more-option-icon.whatsapp-original-icon svg {
+  width: 44px;
+  height: 44px;
+  display: block;
+}
+.more-back-btn {
+  white-space: nowrap;
+}
+@media (max-width: 760px) {
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .topbar .top-actions {
+    display: flex;
+    margin-left: auto;
+  }
+  .more-back-btn {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+  }
+}
