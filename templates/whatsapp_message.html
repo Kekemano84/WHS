@@ -186,7 +186,7 @@
     wrap.dataset.index = index;
     wrap.innerHTML = isMain ? `
       <input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Line name">
-      <button type="button" class="btn-icon wa-voice" title="Voice record quantity" data-voice-target="value" onclick="startWhatsAppRowVoice(this)">🎙️</button>
+      <button type="button" class="btn-icon wa-voice" title="Voice record quantity" data-voice-target="value" >🎙️</button>
       <input class="wa-value wa-qty" inputmode="numeric" value="${escapeHtml(row.value || '')}" placeholder="Qty">
       <span class="wa-prefix">x</span>
       <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
@@ -194,7 +194,7 @@
       <button type="button" class="btn-icon danger wa-delete" title="Delete row">×</button>
     ` : `
       <input class="wa-label" value="${escapeHtml(row.label || '')}" placeholder="Title">
-      <button type="button" class="btn-icon wa-voice" title="Voice record note details" data-voice-target="value" onclick="startWhatsAppRowVoice(this)">🎙️</button>
+      <button type="button" class="btn-icon wa-voice" title="Voice record note details" data-voice-target="value" >🎙️</button>
       <input class="wa-value" value="${escapeHtml(row.value || '')}" placeholder="Details">
       <button type="button" class="btn-icon wa-up" title="Move up">↑</button>
       <button type="button" class="btn-icon wa-down" title="Move down">↓</button>
@@ -304,24 +304,27 @@
     if (e.target.closest('.whatsapp-form')) scheduleAutosave();
   });
 
-  // WhatsApp voice now uses the same simple Web Speech logic as Yard Check.
-  // Main/headcount rows write ONLY into the Qty box. Note rows write into Details.
-  window.startWhatsAppRowVoice = function(btn) {
+  // WhatsApp Qty voice: same direct Web Speech approach as Yard Check.
+  // Main/headcount rows write into the Qty box. Note rows write into Details.
+  window.startWhatsAppRowVoice = function(btn, ev) {
+    if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+    if (!btn || btn.dataset.listening === '1') return false;
+
     const row = btn.closest('.whatsapp-row');
-    if (!row) return;
+    if (!row) return false;
 
     const isMain = row.dataset.type === 'main';
     const targetInput = isMain
-      ? row.querySelector('input.wa-qty, input.wa-value')
+      ? row.querySelector('input.wa-qty')
       : row.querySelector('input.wa-value');
 
-    if (!targetInput) return;
+    if (!targetInput) return false;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Voice recording is not supported in this browser. You can type manually.');
       targetInput.focus();
-      return;
+      return false;
     }
 
     const rec = new SpeechRecognition();
@@ -331,61 +334,77 @@
     rec.continuous = false;
 
     const oldText = btn.textContent;
+    btn.dataset.listening = '1';
+    btn.classList.add('recording');
     btn.textContent = '🎙️...';
 
     rec.onresult = function(event) {
-      const text = event.results && event.results[0] && event.results[0][0]
+      const heard = event.results && event.results[0] && event.results[0][0]
         ? String(event.results[0][0].transcript || '').trim()
         : '';
 
-      if (!text) {
-        btn.textContent = oldText || '🎙️';
+      if (!heard) {
         targetInput.focus();
         return;
       }
 
-      let finalValue = text;
+      let finalValue = heard;
       if (isMain) {
-        finalValue = spokenToNumber(text);
-        // If the speech engine returns words like "five", convert them.
-        // If it returns digits like "5", keep the digits.
+        finalValue = spokenToNumber(heard);
         const numberMatch = String(finalValue || '').match(/\d+(?:\.\d+)?/);
         finalValue = numberMatch ? numberMatch[0] : String(finalValue || '').trim();
       }
 
+      // Write directly to the visible input, exactly like Yard Check does.
       targetInput.value = finalValue;
       targetInput.defaultValue = finalValue;
-      targetInput.setAttribute('value', finalValue);
 
-      ['input', 'change', 'keyup'].forEach(function(eventName) {
-        targetInput.dispatchEvent(new Event(eventName, { bubbles: true }));
-      });
+      // Also update the backing rows array so render/generate/autosave cannot overwrite it.
+      const type = row.dataset.type;
+      const index = Array.from(row.parentElement.children).indexOf(row);
+      const labelInput = row.querySelector('input.wa-label');
+      if (type && rows[type] && rows[type][index]) {
+        rows[type][index].label = labelInput ? (labelInput.value || '').trim() : (rows[type][index].label || '');
+        rows[type][index].value = finalValue;
+      }
 
-      collectRows();
+      rowsJson.value = JSON.stringify(rows);
       generateMessage();
       autosaveLocal();
       targetInput.focus();
-      btn.textContent = oldText || '🎙️';
     };
 
-    rec.onerror = function() {
-      btn.textContent = oldText || '🎙️';
+    rec.onerror = function(event) {
+      draftStatus.textContent = 'Voice error: ' + (event && event.error ? event.error : 'try again');
       targetInput.focus();
     };
 
     rec.onend = function() {
+      btn.dataset.listening = '0';
+      btn.classList.remove('recording');
       btn.textContent = oldText || '🎙️';
     };
 
     try {
       rec.start();
+      draftStatus.textContent = 'Listening...';
     } catch (err) {
+      btn.dataset.listening = '0';
+      btn.classList.remove('recording');
       btn.textContent = oldText || '🎙️';
+      draftStatus.textContent = 'Voice could not start. Try again.';
       targetInput.focus();
     }
+    return false;
   };
 
   document.addEventListener('click', function (e) {
+    const voiceBtn = e.target.closest('.wa-voice');
+    if (voiceBtn) {
+      startWhatsAppRowVoice(voiceBtn, e);
+      return;
+    }
+
     const add = e.target.closest('[data-add-row]');
     if (add) {
       collectRows();
@@ -395,9 +414,6 @@
       scheduleAutosave();
       return;
     }
-
-    // Voice buttons use pointer events below so short tap appends and long press overwrites.
-    if (e.target.closest('.wa-voice')) { return; }
 
     const rowEl = e.target.closest('.whatsapp-row');
     if (!rowEl) return;
