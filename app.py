@@ -5738,45 +5738,139 @@ def notifications_page():
 
 @app.route("/manifest.json")
 def manifest_json():
+    """Installable PWA manifest for the offline trial version."""
     manifest = {
-        "name": "WHS",
+        "name": "WHS - Warehouse Support",
         "short_name": "WHS",
-        "description": "Free logistics support app for warehouse teams.",
-        "start_url": "/",
+        "description": "Offline-ready warehouse support app for shifts, handovers, yard checks and daily updates.",
+        "start_url": "/?source=pwa",
+        "scope": "/",
         "display": "standalone",
+        "display_override": ["standalone", "minimal-ui", "browser"],
         "background_color": "#0f172a",
-        "theme_color": "#16a34a",
+        "theme_color": "#0891b2",
         "orientation": "portrait-primary",
         "icons": [
+            {"src": "/static/icons/whs-logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
             {"src": "/static/icons/whs-logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
         ]
     }
     return app.response_class(json.dumps(manifest), mimetype="application/manifest+json")
 
 
+@app.route("/offline")
+def offline_page():
+    return render_template("offline.html", page="offline", user=current_user())
+
+
 @app.route("/service-worker.js")
 def service_worker():
-    js = """
-const CACHE_NAME = 'whs-ai-v25-whatsapp';
-const urlsToCache = [
+    js = r"""
+const CACHE_VERSION = 'whs-offline-trial-v47';
+const STATIC_CACHE = CACHE_VERSION + '-static';
+const PAGE_CACHE = CACHE_VERSION + '-pages';
+
+const STATIC_ASSETS = [
   '/',
-  '/static/css/style.css'
+  '/offline',
+  '/manifest.json',
+  '/static/css/style.css',
+  '/static/js/voice.js',
+  '/static/icons/whs-logo.svg',
+  '/static/icons/whs-logo.png',
+  '/static/icons/icon-192.png',
+  '/static/icons/icon-512.png',
+  '/static/images/whs-share.png'
 ];
+
+const PAGE_URLS = [
+  '/',
+  '/shift-calendar',
+  '/handover',
+  '/yard-check',
+  '/more',
+  '/morning-brief',
+  '/whatsapp-message',
+  '/shift-closure',
+  '/holiday-tracker',
+  '/team',
+  '/settings'
+];
+
+function isSameOrigin(request) {
+  try { return new URL(request.url).origin === self.location.origin; }
+  catch (e) { return false; }
+}
+
+function isStaticRequest(request) {
+  const url = new URL(request.url);
+  return url.pathname.startsWith('/static/') || url.pathname === '/manifest.json';
+}
+
+function isNavigationRequest(request) {
+  return request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html');
+}
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)).catch(() => null)
+    caches.open(STATIC_CACHE)
+      .then(cache => cache.addAll(STATIC_ASSETS.concat(PAGE_URLS)).catch(() => null))
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key.startsWith('whs-') && !key.startsWith(CACHE_VERSION))
+          .map(key => caches.delete(key))
+    )).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET' || !isSameOrigin(request)) return;
+
+  if (isStaticRequest(request)) {
+    event.respondWith(
+      caches.match(request).then(cached => cached || fetch(request).then(response => {
+        const copy = response.clone();
+        caches.open(STATIC_CACHE).then(cache => cache.put(request, copy));
+        return response;
+      }).catch(() => cached))
+    );
+    return;
+  }
+
+  if (isNavigationRequest(request)) {
+    event.respondWith(
+      fetch(request).then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(PAGE_CACHE).then(cache => cache.put(request, copy));
+        }
+        return response;
+      }).catch(() => caches.match(request)
+        .then(cached => cached || caches.match('/') || caches.match('/offline')))
+    );
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(request).then(response => {
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(PAGE_CACHE).then(cache => cache.put(request, copy));
+      }
+      return response;
+    }).catch(() => caches.match(request))
   );
 });
 """
-    return app.response_class(js, mimetype="application/javascript")
-
+    return app.response_class(js, mimetype="application/javascript", headers={"Cache-Control": "no-cache"})
 
 
 init_db()
