@@ -3869,3 +3869,36 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   .public-transport-motion .public-plane,
   .public-warehouse-scene .public-plane { bottom: 56px !important; font-size: 28px !important; }
 }
+
+
+.transport-img{display:block;width:56px;height:auto;}
+.ship-img{width:70px;}
+.plane-img{width:68px;}
+
+.public-transport-motion .public-ship,
+.public-warehouse-scene .public-ship{
+ bottom:52px!important;
+ animation:whsVehicleShipForward 18s linear infinite!important;
+ animation-delay:6s!important;
+}
+
+.public-transport-motion .public-plane,
+.public-warehouse-scene .public-plane{
+ bottom:88px!important;
+ animation:whsVehiclePlaneForward 18s linear infinite!important;
+ animation-delay:12s!important;
+}
+
+@keyframes whsVehicleShipForward{
+ 0%{transform:translateX(-180px) scaleX(-1);opacity:0;}
+ 5%{opacity:1;}
+ 90%{opacity:1;}
+ 100%{transform:translateX(calc(100vw + 220px)) scaleX(-1);opacity:0;}
+}
+
+@keyframes whsVehiclePlaneForward{
+ 0%{transform:translateX(-180px);opacity:0;}
+ 5%{opacity:1;}
+ 90%{opacity:1;}
+ 100%{transform:translateX(calc(100vw + 220px));opacity:0;}
+}
