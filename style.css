@@ -3648,9 +3648,9 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   opacity:0;
   animation:whsPublicVehicleFlow 8s linear infinite;
 }
-.public-truck-one{animation-delay:0s;transform:scaleX(-1);}
-.public-ship{bottom:31px;font-size:36px;animation-delay:2.6s;transform:scaleX(-1);}
-.public-plane{bottom:70px;font-size:34px;animation-delay:5.2s;transform:scaleX(-1);}
+.public-truck-one{animation-delay:0s;}
+.public-ship{bottom:31px;font-size:36px;animation-delay:2.6s;}
+.public-plane{bottom:70px;font-size:34px;animation-delay:5.2s;}
 .public-forklift{
   position:absolute;
   right:18px;
@@ -3664,10 +3664,10 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   bottom:24px;
 }
 @keyframes whsPublicVehicleFlow{
-  0%{transform:translateX(0) scaleX(-1) scale(.95);opacity:0;}
+  0%{transform:translateX(0) scale(.95);opacity:0;}
   8%{opacity:1;}
   82%{opacity:1;}
-  100%{transform:translateX(calc(100vw + 220px)) scaleX(-1) scale(.95);opacity:0;}
+  100%{transform:translateX(calc(100vw + 220px)) scale(.95);opacity:0;}
 }
 @keyframes whsCraneGentleMove{
   0%,100%{transform:translateX(0) rotate(0deg);}
@@ -3703,4 +3703,53 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   .public-plane{bottom:64px;font-size:29px;}
   .public-forklift{font-size:28px;}
   .public-whs-spin-logo{width:38px;height:38px;border-radius:14px;font-size:11px;}
+}
+
+/* WHS v52: FIX logged-out landing transport direction and flow only */
+.public-transport-motion .warehouse-scene.public-warehouse-scene{
+  position: relative !important;
+  overflow: hidden !important;
+}
+.public-transport-motion .public-vehicle,
+.public-transport-motion .public-truck,
+.public-transport-motion .public-truck-one,
+.public-transport-motion .public-ship,
+.public-transport-motion .public-plane{
+  position: absolute !important;
+  left: -90px !important;
+  right: auto !important;
+  opacity: 0;
+  animation-name: whsPublicTransportFlowForward !important;
+  animation-duration: 9s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  filter: drop-shadow(0 10px 12px rgba(0,0,0,.25));
+  transform-origin: center center;
+  z-index: 3;
+}
+.public-transport-motion .public-truck-one{
+  bottom: 30px !important;
+  font-size: 38px !important;
+  animation-delay: 0s !important;
+}
+.public-transport-motion .public-ship{
+  bottom: 30px !important;
+  font-size: 36px !important;
+  animation-delay: 3s !important;
+}
+.public-transport-motion .public-plane{
+  bottom: 70px !important;
+  font-size: 34px !important;
+  animation-delay: 6s !important;
+}
+@keyframes whsPublicTransportFlowForward{
+  0%{ transform: translateX(-20px) scaleX(-1); opacity: 0; }
+  8%{ opacity: 1; }
+  82%{ opacity: 1; }
+  100%{ transform: translateX(calc(100vw + 260px)) scaleX(-1); opacity: 0; }
+}
+@media(max-width:760px){
+  .public-transport-motion .public-truck-one{font-size:32px!important;bottom:29px!important;}
+  .public-transport-motion .public-ship{font-size:31px!important;bottom:29px!important;}
+  .public-transport-motion .public-plane{font-size:29px!important;bottom:64px!important;}
 }
