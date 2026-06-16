@@ -3753,3 +3753,109 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   .public-transport-motion .public-ship{font-size:31px!important;bottom:29px!important;}
   .public-transport-motion .public-plane{font-size:29px!important;bottom:64px!important;}
 }
+
+
+
+/* WHS v53 REAL transport landing animation fix
+   - Vehicles travel left to right slowly.
+   - Truck emoji is flipped so it appears to drive forward.
+   - Ship and plane are moving, not fixed.
+   - Crane stays in place. */
+.public-transport-motion .public-warehouse-scene,
+.public-warehouse-scene {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 132px !important;
+}
+
+.public-transport-motion .public-vehicle,
+.public-warehouse-scene .public-vehicle {
+  position: absolute !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  left: -120px !important;
+  right: auto !important;
+  opacity: 1 !important;
+  z-index: 4 !important;
+  will-change: transform !important;
+  filter: drop-shadow(0 10px 12px rgba(0,0,0,.25)) !important;
+  pointer-events: none !important;
+}
+
+.public-transport-motion .public-truck,
+.public-warehouse-scene .public-truck {
+  bottom: 30px !important;
+  font-size: 36px !important;
+  animation: whsVehicleTruckForward 20s linear infinite !important;
+  animation-delay: 0s !important;
+}
+
+.public-transport-motion .public-ship,
+.public-warehouse-scene .public-ship {
+  bottom: 58px !important;
+  font-size: 34px !important;
+  animation: whsVehicleShipForward 20s linear infinite !important;
+  animation-delay: 6.7s !important;
+}
+
+.public-transport-motion .public-plane,
+.public-warehouse-scene .public-plane {
+  bottom: 90px !important;
+  font-size: 32px !important;
+  animation: whsVehiclePlaneForward 20s linear infinite !important;
+  animation-delay: 13.4s !important;
+}
+
+.public-transport-motion .public-forklift,
+.public-warehouse-scene .public-forklift {
+  position: absolute !important;
+  right: 18px !important;
+  left: auto !important;
+  bottom: 28px !important;
+  font-size: 34px !important;
+  animation: whsCraneIdle 5.5s ease-in-out infinite !important;
+  opacity: .95 !important;
+  z-index: 3 !important;
+}
+
+/* Truck emoji usually faces left on phones, so flip it while it travels right. */
+@keyframes whsVehicleTruckForward {
+  0%   { transform: translateX(-140px) scaleX(-1); opacity: 0; }
+  6%   { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 180px)) scaleX(-1); opacity: 0; }
+}
+
+/* Ship and plane travel with the truck direction, after it. */
+@keyframes whsVehicleShipForward {
+  0%   { transform: translateX(-150px); opacity: 0; }
+  6%   { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 180px)); opacity: 0; }
+}
+
+@keyframes whsVehiclePlaneForward {
+  0%   { transform: translateX(-150px) translateY(0) rotate(6deg); opacity: 0; }
+  6%   { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 180px)) translateY(-18px) rotate(6deg); opacity: 0; }
+}
+
+@keyframes whsCraneIdle {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  50% { transform: translateX(-8px) rotate(-1deg); }
+}
+
+@media(max-width:760px){
+  .public-transport-motion .public-warehouse-scene,
+  .public-warehouse-scene { min-height: 118px !important; }
+  .public-transport-motion .public-truck,
+  .public-warehouse-scene .public-truck { font-size: 32px !important; bottom: 28px !important; }
+  .public-transport-motion .public-ship,
+  .public-warehouse-scene .public-ship { font-size: 31px !important; bottom: 55px !important; }
+  .public-transport-motion .public-plane,
+  .public-warehouse-scene .public-plane { font-size: 29px !important; bottom: 86px !important; }
+  .public-transport-motion .public-forklift,
+  .public-warehouse-scene .public-forklift { font-size: 28px !important; bottom: 28px !important; }
+}
