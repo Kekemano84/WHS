@@ -172,31 +172,41 @@ window.addEventListener('pageshow', function(){ setTimeout(fixYardLocationAutofi
     </div>
 </section>
 
-<section class="stats-grid">
-    <div class="stat-card">
-        <span>Door Capacity</span>
-        <strong>{{ door_start }}–{{ door_end }}</strong>
-        <small>{{ door_used }} door records</small>
-    </div>
-    <div class="stat-card">
-        <span>Fence Capacity</span>
-        <strong>{{ fence_start }}–{{ fence_end }}</strong>
-        <small>{{ fence_used }} fence records</small>
-    </div>
-    <div class="stat-card">
-        <span>Today</span>
-        <strong>{{ today_count }}</strong>
-        <small>Trailer records</small>
-    </div>
-    <div class="stat-card highlight">
-        <span>Search Results</span>
-        <strong>{{ rows|length }}</strong>
-        <small>Showing latest 500 max</small>
-    </div>
-</section>
+<details class="panel yard-collapsible-panel yard-summary-collapse">
+    <summary>
+        <span>Yard Summary</span>
+        <small>Door/Fence capacity, today and search count</small>
+    </summary>
+    <section class="stats-grid yard-stats-compact">
+        <div class="stat-card">
+            <span>Door Capacity</span>
+            <strong>{{ door_start }}–{{ door_end }}</strong>
+            <small>{{ door_used }} door records</small>
+        </div>
+        <div class="stat-card">
+            <span>Fence Capacity</span>
+            <strong>{{ fence_start }}–{{ fence_end }}</strong>
+            <small>{{ fence_used }} fence records</small>
+        </div>
+        <div class="stat-card">
+            <span>Today</span>
+            <strong>{{ today_count }}</strong>
+            <small>Trailer records</small>
+        </div>
+        <div class="stat-card highlight">
+            <span>Search Results</span>
+            <strong>{{ rows|length }}</strong>
+            <small>Showing latest 500 max</small>
+        </div>
+    </section>
+</details>
 
-<section class="panel">
-    <div class="panel-head">
+<details class="panel yard-collapsible-panel yard-search-collapse">
+    <summary>
+        <span>Search Yard</span>
+        <small>Find trailer, Door, Fence, status or notes</small>
+    </summary>
+    <div class="panel-head compact-panel-head">
         <div>
             <h3>Search Yard</h3>
             <p class="muted">Search by trailer ID, Door, Fence, status, note or source.</p>
@@ -204,7 +214,7 @@ window.addEventListener('pageshow', function(){ setTimeout(fixYardLocationAutofi
         <a class="small-btn ghost-small" href="{{ url_for('yard_check') }}">Clear</a>
     </div>
 
-    <form method="GET" class="form-grid">
+    <form method="GET" class="form-grid yard-search-compact">
         <div>
             <label>Search</label>
             <input name="search" value="{{ search }}" placeholder="LG072, Door 12, Fence 80, loaded, damage">
@@ -222,7 +232,7 @@ window.addEventListener('pageshow', function(){ setTimeout(fixYardLocationAutofi
             <button class="btn primary" type="submit">Search Yard</button>
         </div>
     </form>
-</section>
+</details>
 
 <section class="panel">
     <div class="panel-head yard-matrix-head">

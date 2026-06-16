@@ -3963,3 +3963,144 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     font-size: 32px !important;
   }
 }
+
+/* v58 - Holiday Tracker compact summary cards only */
+.holiday-summary-grid.holiday-balance-grid {
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card {
+    padding: 14px 16px !important;
+    border-radius: 18px !important;
+    min-height: 92px !important;
+    box-shadow: 0 10px 24px rgba(15,23,42,.06) !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card span {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+    letter-spacing: .07em !important;
+    margin-bottom: 4px !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card strong {
+    font-size: clamp(24px, 3.2vw, 32px) !important;
+    line-height: 1.05 !important;
+    margin: 6px 0 !important;
+    letter-spacing: -0.045em !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card small {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+}
+@media (max-width: 760px) {
+    .holiday-summary-grid.holiday-balance-grid {
+        gap: 8px !important;
+        margin-bottom: 10px !important;
+    }
+    .holiday-summary-grid.holiday-balance-grid .holiday-summary-card {
+        padding: 12px 14px !important;
+        border-radius: 16px !important;
+        min-height: 74px !important;
+    }
+    .holiday-summary-grid.holiday-balance-grid .holiday-summary-card strong {
+        font-size: 28px !important;
+        margin: 4px 0 !important;
+    }
+    .holiday-summary-grid.holiday-balance-grid .holiday-summary-card small {
+        font-size: 12px !important;
+    }
+}
+
+/* v59 Yard Check compact collapsible summary/search panels */
+.yard-collapsible-panel {
+    padding: 0 !important;
+    overflow: hidden;
+}
+.yard-collapsible-panel > summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    font-weight: 900;
+    color: #0f172a;
+}
+.yard-collapsible-panel > summary::-webkit-details-marker { display: none; }
+.yard-collapsible-panel > summary::after {
+    content: "⌄";
+    font-size: 24px;
+    line-height: 1;
+    color: #0f9aad;
+    transition: transform .2s ease;
+}
+.yard-collapsible-panel[open] > summary::after { transform: rotate(180deg); }
+.yard-collapsible-panel > summary span { font-size: 1.25rem; }
+.yard-collapsible-panel > summary small {
+    color: #64748b;
+    font-size: .9rem;
+    font-weight: 700;
+    text-align: right;
+}
+.yard-stats-compact {
+    padding: 0 18px 18px;
+    margin: 0;
+    gap: 12px;
+}
+.yard-stats-compact .stat-card {
+    min-height: 92px;
+    padding: 18px 20px;
+    border-radius: 22px;
+}
+.yard-stats-compact .stat-card span { font-size: .95rem; }
+.yard-stats-compact .stat-card strong { font-size: 1.7rem; }
+.yard-stats-compact .stat-card small { font-size: .9rem; }
+.compact-panel-head { padding: 0 22px 8px; }
+.yard-search-compact { padding: 0 22px 22px; }
+.yard-search-compact input,
+.yard-search-compact select {
+    min-height: 48px;
+    padding: 10px 14px;
+}
+.yard-search-compact .btn { min-height: 48px; }
+
+@media (max-width: 760px) {
+    .yard-collapsible-panel { border-radius: 24px; }
+    .yard-collapsible-panel > summary {
+        padding: 14px 16px;
+        gap: 10px;
+    }
+    .yard-collapsible-panel > summary span { font-size: 1.05rem; }
+    .yard-collapsible-panel > summary small {
+        font-size: .75rem;
+        max-width: 180px;
+    }
+    .yard-stats-compact {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0 12px 12px;
+        gap: 10px;
+    }
+    .yard-stats-compact .stat-card {
+        min-height: 78px;
+        padding: 12px 14px;
+        border-radius: 18px;
+    }
+    .yard-stats-compact .stat-card span { font-size: .78rem; }
+    .yard-stats-compact .stat-card strong { font-size: 1.25rem; }
+    .yard-stats-compact .stat-card small { font-size: .72rem; }
+    .compact-panel-head { padding: 0 16px 6px; }
+    .compact-panel-head h3 { font-size: 1.2rem; }
+    .compact-panel-head .muted { font-size: .9rem; }
+    .yard-search-compact {
+        padding: 0 16px 16px;
+        gap: 10px;
+    }
+    .yard-search-compact label { font-size: .9rem; }
+    .yard-search-compact input,
+    .yard-search-compact select {
+        min-height: 44px;
+        padding: 9px 12px;
+        font-size: .95rem;
+    }
+    .yard-search-compact .btn { min-height: 44px; padding: 10px 14px; }
+}

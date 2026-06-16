@@ -192,14 +192,30 @@
 </section>
 
 
+<style>
+    .handover-template-details > summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+    .handover-template-details > summary::-webkit-details-marker { display: none; }
+    .handover-template-details .template-toggle-text::after { content: "Show settings"; }
+    .handover-template-details[open] .template-toggle-text::after { content: "Hide settings"; }
+    .handover-template-details .template-builder { margin-top: 22px; }
+</style>
+
 <section class="panel compact-panel">
-    <div class="panel-head">
-        <div>
-            <h3>Handover Template Settings</h3>
-            <p class="muted">Rename, hide, add or delete handover sections. Save once and the form/export will use your template next time.</p>
-        </div>
-        <span class="pill">Template</span>
-    </div>
+    <details class="handover-template-details" id="handoverTemplateDetails">
+        <summary class="panel-head">
+            <div>
+                <h3>Handover Template Settings</h3>
+                <p class="muted">Rename, hide, add or delete handover sections. Save once and the form/export will use your template next time.</p>
+            </div>
+            <span class="pill template-toggle-text"></span>
+        </summary>
     <form method="POST" action="{{ url_for('save_handover_template') }}" class="template-builder">
         <div class="form-grid">
             <div><label>Template Name</label><input name="template_name" value="{{ template.name if template else 'Default Handover' }}"></div>
@@ -249,7 +265,20 @@
             <button class="btn primary" type="submit">Save Template</button>
         </div>
     </form>
+    </details>
 </section>
+
+<script>
+(function(){
+    const details = document.getElementById('handoverTemplateDetails');
+    if (!details) return;
+    const saved = localStorage.getItem('whs_handover_template_open');
+    if (saved === '1') details.open = true;
+    details.addEventListener('toggle', function(){
+        localStorage.setItem('whs_handover_template_open', details.open ? '1' : '0');
+    });
+})();
+</script>
 
 <section class="panel compact-panel">
     <div class="panel-head handover-draft-head">
