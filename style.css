@@ -4598,3 +4598,30 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
 .whs-hero-moving-logo{
   animation: whsLogoRotateLeft 16s linear infinite, whsLogoFloat 5.5s ease-in-out infinite !important;
 }
+
+
+/* WHS v69: remove top hero WHS text and make centre logo rotate on its own Y-axis only */
+.auth-hero-card.whs-hero-card > h1,
+.whs-hero-card > h1 {
+  display: none !important;
+}
+.whs-hero-card .auth-hero-subtitle {
+  margin-top: 20px !important;
+}
+.whs-hero-pulse-stage {
+  perspective: 900px !important;
+}
+.whs-hero-moving-logo {
+  transform-style: preserve-3d !important;
+  transform-origin: center center !important;
+  animation: whsLogoRotateOwnAxis 14s linear infinite !important;
+}
+@keyframes whsLogoRotateOwnAxis {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(-360deg); }
+}
+.public-feature-grid .public-whs-spin-logo,
+.auth-feature-grid .public-whs-spin-logo {
+  animation: none !important;
+  transform: none !important;
+}
