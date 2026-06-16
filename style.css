@@ -4205,3 +4205,82 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     animation-duration: 10.5s !important;
   }
 }
+
+
+/* WHS v63: transport emojis move one-by-one with larger spacing, slower speed */
+.public-transport-motion .public-convoy,
+.public-warehouse-scene .public-convoy {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 24px !important;
+  width: 100% !important;
+  height: 46px !important;
+  display: block !important;
+  animation: none !important;
+  z-index: 25 !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+}
+.public-transport-motion .public-convoy .convoy-item,
+.public-warehouse-scene .public-convoy .convoy-item {
+  position: absolute !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  display: block !important;
+  font-size: 34px !important;
+  line-height: 1 !important;
+  width: 42px !important;
+  height: 42px !important;
+  opacity: 0;
+  visibility: visible !important;
+  filter: drop-shadow(0 10px 12px rgba(0,0,0,.25)) !important;
+  animation-duration: 18s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-fill-mode: both !important;
+}
+.public-transport-motion .public-convoy .convoy-truck,
+.public-warehouse-scene .public-convoy .convoy-truck {
+  animation-name: whsV63MoveRightFlip !important;
+  animation-delay: 0s !important;
+}
+.public-transport-motion .public-convoy .convoy-ship,
+.public-warehouse-scene .public-convoy .convoy-ship {
+  animation-name: whsV63MoveRightFlip !important;
+  animation-delay: 6s !important;
+}
+.public-transport-motion .public-convoy .convoy-plane,
+.public-warehouse-scene .public-convoy .convoy-plane {
+  animation-name: whsV63MoveRightNormal !important;
+  animation-delay: 12s !important;
+}
+@keyframes whsV63MoveRightFlip {
+  0% { transform: translateX(-60px) scaleX(-1); opacity: 0; }
+  4% { opacity: 1; }
+  27% { transform: translateX(calc(100% + 60px)) scaleX(-1); opacity: 1; }
+  31% { transform: translateX(calc(100% + 60px)) scaleX(-1); opacity: 0; }
+  100% { transform: translateX(calc(100% + 60px)) scaleX(-1); opacity: 0; }
+}
+@keyframes whsV63MoveRightNormal {
+  0% { transform: translateX(-60px); opacity: 0; }
+  4% { opacity: 1; }
+  27% { transform: translateX(calc(100% + 60px)); opacity: 1; }
+  31% { transform: translateX(calc(100% + 60px)); opacity: 0; }
+  100% { transform: translateX(calc(100% + 60px)); opacity: 0; }
+}
+@media(max-width:760px){
+  .public-transport-motion .public-convoy,
+  .public-warehouse-scene .public-convoy {
+    bottom: 24px !important;
+    height: 42px !important;
+  }
+  .public-transport-motion .public-convoy .convoy-item,
+  .public-warehouse-scene .public-convoy .convoy-item {
+    font-size: 31px !important;
+    width: 38px !important;
+    height: 38px !important;
+    animation-duration: 18s !important;
+  }
+}

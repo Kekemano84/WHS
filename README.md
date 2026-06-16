@@ -490,3 +490,8 @@ V33 fixes:
 - Yard Check save/export hardened.
 - Yard Check locations rebuild from Yard Setup and avoid browser autofill duplicate locations.
 - Brief label updated.
+
+
+## v63 update
+- Landing transport emojis now move one-by-one with bigger spacing.
+- Animation is slower and keeps truck/ship facing movement direction.
