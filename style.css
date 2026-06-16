@@ -3932,3 +3932,34 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   .public-transport-motion .public-plane,
   .public-warehouse-scene .public-plane { bottom: 56px !important; font-size: 28px !important; }
 }
+
+
+/* WHS v56: logged-out landing animation - truck only */
+.public-transport-motion .public-ship,
+.public-warehouse-scene .public-ship,
+.public-transport-motion .public-plane,
+.public-warehouse-scene .public-plane {
+  display: none !important;
+  animation: none !important;
+}
+.public-transport-motion .public-truck,
+.public-warehouse-scene .public-truck {
+  bottom: 24px !important;
+  font-size: 34px !important;
+  animation: whsV56TruckOnlyMove 13.5s linear infinite !important;
+  animation-delay: 0s !important;
+  transform-origin: center center !important;
+}
+@keyframes whsV56TruckOnlyMove {
+  0% { transform: translateX(-150px) scaleX(-1); opacity: 0; }
+  8% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 190px)) scaleX(-1); opacity: 0; }
+}
+@media(max-width:760px){
+  .public-transport-motion .public-truck,
+  .public-warehouse-scene .public-truck {
+    bottom: 24px !important;
+    font-size: 32px !important;
+  }
+}
