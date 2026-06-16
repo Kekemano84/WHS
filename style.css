@@ -4700,3 +4700,52 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     font-size: 40px !important;
   }
 }
+
+/* v72 - Holiday Tracker mobile 2x2 compact summary cards only */
+.holiday-summary-grid.holiday-balance-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card {
+    min-height: 86px !important;
+    padding: 12px 14px !important;
+    border-radius: 18px !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card span {
+    font-size: 9px !important;
+    letter-spacing: .06em !important;
+    line-height: 1.1 !important;
+    margin-bottom: 4px !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card strong {
+    font-size: clamp(20px, 3vw, 26px) !important;
+    line-height: 1.05 !important;
+    margin: 4px 0 !important;
+}
+.holiday-summary-grid.holiday-balance-grid .holiday-summary-card small {
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+}
+@media (max-width: 760px) {
+    .holiday-summary-grid.holiday-balance-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+    .holiday-summary-grid.holiday-balance-grid .holiday-summary-card {
+        min-height: 72px !important;
+        padding: 10px 10px !important;
+        border-radius: 16px !important;
+    }
+    .holiday-summary-grid.holiday-balance-grid .holiday-summary-card span {
+        font-size: 8px !important;
+    }
+    .holiday-summary-grid.holiday-balance-grid .holiday-summary-card strong {
+        font-size: 20px !important;
+        margin: 3px 0 !important;
+    }
+    .holiday-summary-grid.holiday-balance-grid .holiday-summary-card small {
+        font-size: 10px !important;
+    }
+}
