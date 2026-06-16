@@ -3619,3 +3619,18 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     font-size: 14px;
   }
 }
+
+/* WHS v49: logged-out landing page shows generic animation only, no operational data */
+.public-transport-motion .live-metrics{display:none!important;}
+.public-warehouse-scene{overflow:hidden;align-items:center;min-height:128px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));}
+.public-warehouse-box{z-index:2;height:74px;align-self:center;font-size:24px;}
+.public-road-line{position:absolute;left:18px;right:18px;bottom:24px;height:4px;border-radius:999px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.45) 0 34px,transparent 34px 58px);opacity:.65;}
+.public-truck{position:absolute;bottom:30px;font-size:38px;filter:drop-shadow(0 10px 12px rgba(0,0,0,.25));}
+.public-truck-one{left:-70px;animation:whsPublicTruckOne 5.5s linear infinite;}
+.public-truck-two{left:-110px;animation:whsPublicTruckTwo 7.2s linear infinite;animation-delay:1.6s;opacity:.9;}
+.public-forklift{position:absolute;right:18px;bottom:28px;font-size:34px;animation:whsForkliftMove 4.2s ease-in-out infinite;opacity:.9;}
+.public-motion-caption{margin:12px 4px 0;color:#dbeafe;font-weight:850;font-size:13px;}
+@keyframes whsPublicTruckOne{0%{transform:translateX(0)}100%{transform:translateX(calc(100vw + 220px))}}
+@keyframes whsPublicTruckTwo{0%{transform:translateX(0)}100%{transform:translateX(calc(100vw + 260px))}}
+@keyframes whsForkliftMove{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(-18px) rotate(-2deg)}}
+@media(max-width:760px){.public-warehouse-scene{min-height:112px}.public-truck{font-size:32px}.public-forklift{font-size:28px}.public-motion-caption{font-size:12px}}
