@@ -3859,3 +3859,76 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   .public-transport-motion .public-forklift,
   .public-warehouse-scene .public-forklift { font-size: 28px !important; bottom: 28px !important; }
 }
+
+
+/* WHS v54: transport animation speed + lower visible airplane ONLY */
+.public-transport-motion .public-warehouse-scene,
+.public-warehouse-scene {
+  min-height: 132px !important;
+  overflow: hidden !important;
+}
+.public-transport-motion .public-vehicle,
+.public-warehouse-scene .public-vehicle {
+  left: -130px !important;
+  position: absolute !important;
+  z-index: 5 !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  will-change: transform !important;
+}
+.public-transport-motion .public-truck,
+.public-warehouse-scene .public-truck {
+  bottom: 26px !important;
+  font-size: 34px !important;
+  animation: whsV54TruckMove 16s linear infinite !important;
+  animation-delay: 0s !important;
+}
+.public-transport-motion .public-ship,
+.public-warehouse-scene .public-ship {
+  bottom: 42px !important;
+  font-size: 32px !important;
+  animation: whsV54ShipMove 16s linear infinite !important;
+  animation-delay: 5.3s !important;
+}
+.public-transport-motion .public-plane,
+.public-warehouse-scene .public-plane {
+  bottom: 58px !important;
+  top: auto !important;
+  font-size: 30px !important;
+  animation: whsV54PlaneMove 16s linear infinite !important;
+  animation-delay: 10.6s !important;
+}
+.public-transport-motion .public-forklift,
+.public-warehouse-scene .public-forklift {
+  right: 18px !important;
+  bottom: 28px !important;
+  z-index: 4 !important;
+}
+@keyframes whsV54TruckMove {
+  0% { transform: translateX(-150px) scaleX(-1); opacity: 0; }
+  7% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 190px)) scaleX(-1); opacity: 0; }
+}
+@keyframes whsV54ShipMove {
+  0% { transform: translateX(-150px); opacity: 0; }
+  7% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 190px)); opacity: 0; }
+}
+@keyframes whsV54PlaneMove {
+  0% { transform: translateX(-150px) rotate(6deg); opacity: 0; }
+  7% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 190px)) rotate(6deg); opacity: 0; }
+}
+@media(max-width:760px){
+  .public-transport-motion .public-warehouse-scene,
+  .public-warehouse-scene { min-height: 120px !important; }
+  .public-transport-motion .public-truck,
+  .public-warehouse-scene .public-truck { bottom: 24px !important; font-size: 32px !important; }
+  .public-transport-motion .public-ship,
+  .public-warehouse-scene .public-ship { bottom: 40px !important; font-size: 30px !important; }
+  .public-transport-motion .public-plane,
+  .public-warehouse-scene .public-plane { bottom: 56px !important; font-size: 28px !important; }
+}
