@@ -398,6 +398,15 @@
     return false;
   };
 
+  
+  document.addEventListener('touchstart', function(e){
+    const voiceBtn = e.target.closest('.wa-voice');
+    if(voiceBtn){
+      e.preventDefault();
+      startWhatsAppRowVoice(voiceBtn,e);
+    }
+  }, {passive:false});
+
   document.addEventListener('click', function (e) {
     const voiceBtn = e.target.closest('.wa-voice');
     if (voiceBtn) {
