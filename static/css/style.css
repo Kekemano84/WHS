@@ -4034,3 +4034,24 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     animation-duration: 18s !important;
   }
 }
+
+
+/* WHS spinning logo */
+.public-whs-spin-logo{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ width:34px;
+ height:34px;
+ border-radius:50%;
+ background:linear-gradient(135deg,#10c3e8,#08214a);
+ color:#fff;
+ font-size:11px;
+ font-weight:800;
+ margin-right:6px;
+ animation:whsLogoSpin 12s linear infinite;
+}
+@keyframes whsLogoSpin{
+ from{transform:rotate(0deg);}
+ to{transform:rotate(360deg);}
+}
