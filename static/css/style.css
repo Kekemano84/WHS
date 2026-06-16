@@ -4299,3 +4299,9 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     font-size: 40px !important;
   }
 }
+
+/* v73 requested cleanup: smaller weather temperature */
+.weather-main-row>strong{font-size:clamp(2.2rem,5vw,3.8rem)!important;letter-spacing:-.05em!important;}
+.weather-main-row b{font-size:clamp(1rem,2vw,1.45rem)!important;}
+.weather-hero-card{padding:16px!important;}
+@media(max-width:520px){.weather-main-row>strong{font-size:2.8rem!important;}.weather-main-row{gap:10px!important;}.weather-rain-pill{padding:10px 16px!important;}}

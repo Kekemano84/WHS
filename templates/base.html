@@ -71,13 +71,11 @@
         <div class="brand">
             <div class="brand-icon whs-brand-icon">WHS</div>
             <div>
-                <h1>WHS{% if user and user.company_name %} · {{ user.company_name }}{% endif %}</h1>
+                <h1>{{ user.company_name if user and user.company_name else 'WHS' }}</h1>
                 <p>Warehouse Support{% if user and user.business_name %} · {{ user.business_name }}{% endif %}</p>
                 {% if user.show_theme_label is not defined or user.show_theme_label %}<span class="theme-pill" id="activeThemePill">{{ company_theme_meta.label if company_theme_meta else 'WHS' }} theme</span>{% endif %}
             </div>
         </div>
-
-        <div class="plan-chip">Free access</div>
 
         <nav class="nav grouped-nav tidy-sidebar final-sidebar whs-simple-nav">
             <a class="{{ 'active' if page == 'dashboard' else '' }} nav-link nav-primary" href="{{ url_for('index') }}">

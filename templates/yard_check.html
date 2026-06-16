@@ -166,10 +166,6 @@ window.addEventListener('pageshow', function(){ setTimeout(fixYardLocationAutofi
         <p class="eyebrow">Fast trailer logging</p>
         <h3>Door {{ door_start }}–{{ door_end }} and Fence {{ fence_start }}–{{ fence_end }} are active.{% if yard_config_editable %} You can change these in Yard Setup.{% else %} Yard setup controls these numbers.{% endif %}</h3>
     </div>
-    <div class="hero-actions">
-        <span class="btn light">Today: {{ today_count }}</span>
-        <a class="btn light" href="{{ url_for('export_yard_check') }}">Export Excel</a>
-    </div>
 </section>
 
 <details class="panel yard-collapsible-panel yard-summary-collapse">
