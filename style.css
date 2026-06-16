@@ -4129,13 +4129,11 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   width: auto !important;
   height: auto !important;
 }
-/* Android/Chrome emoji truck and ship need mirroring to face the travel direction. */
+/* WHS v61: keep all convoy emojis facing normal forward direction. */
 .public-transport-motion .convoy-truck,
 .public-warehouse-scene .convoy-truck,
 .public-transport-motion .convoy-ship,
-.public-warehouse-scene .convoy-ship {
-  transform: scaleX(-1) !important;
-}
+.public-warehouse-scene .convoy-ship,
 .public-transport-motion .convoy-plane,
 .public-warehouse-scene .convoy-plane {
   transform: none !important;
