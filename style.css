@@ -3648,9 +3648,9 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   opacity:0;
   animation:whsPublicVehicleFlow 8s linear infinite;
 }
-.public-truck-one{animation-delay:0s;}
-.public-ship{bottom:31px;font-size:36px;animation-delay:2.6s;}
-.public-plane{bottom:70px;font-size:34px;animation-delay:5.2s;}
+.public-truck-one{animation-delay:0s;transform:scaleX(-1);}
+.public-ship{bottom:31px;font-size:36px;animation-delay:2.6s;transform:scaleX(-1);}
+.public-plane{bottom:70px;font-size:34px;animation-delay:5.2s;transform:scaleX(-1);}
 .public-forklift{
   position:absolute;
   right:18px;
@@ -3664,10 +3664,10 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
   bottom:24px;
 }
 @keyframes whsPublicVehicleFlow{
-  0%{transform:translateX(0) scale(.95);opacity:0;}
+  0%{transform:translateX(0) scaleX(-1) scale(.95);opacity:0;}
   8%{opacity:1;}
   82%{opacity:1;}
-  100%{transform:translateX(calc(100vw + 220px)) scale(.95);opacity:0;}
+  100%{transform:translateX(calc(100vw + 220px)) scaleX(-1) scale(.95);opacity:0;}
 }
 @keyframes whsCraneGentleMove{
   0%,100%{transform:translateX(0) rotate(0deg);}
