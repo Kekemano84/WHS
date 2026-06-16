@@ -4589,3 +4589,12 @@ body[class*="theme-"] .op-splash-title { color: var(--whs-theme-accent) !importa
     height: 132px;
   }
 }
+
+
+/* v68 requested changes */
+.whs-hero-card > h1{
+  display:none !important;
+}
+.whs-hero-moving-logo{
+  animation: whsLogoRotateLeft 16s linear infinite, whsLogoFloat 5.5s ease-in-out infinite !important;
+}
